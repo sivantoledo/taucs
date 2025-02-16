@@ -1,30 +1,30 @@
-#!/bin/sh
+#!/bin/bash
 #
 # TAUCS: this makes the test script for windows and unix
 #
 
 /bin/rm -f testscript.bat
-echo -e "REM This is an automatically-generated script\r" > testscript.bat
-echo -e "del testscript.log\r" >> testscript.bat
-echo -e "echo TAUCS TEST LOG >  testscript.log\r" >> testscript.bat
-echo -e "echo ============== >> testscript.log\r" >> testscript.bat
-echo -e "echo Win32          >> testscript.log\r" >> testscript.bat
-echo -e "echo ============== >> testscript.log\r" >> testscript.bat
+printf "REM This is an automatically-generated script\r\n" > testscript.bat
+printf "del testscript.log\r\n" >> testscript.bat
+printf "echo TAUCS TEST LOG >  testscript.log\r\n" >> testscript.bat
+printf "echo ============== >> testscript.log\r\n" >> testscript.bat
+printf "echo Win32          >> testscript.log\r\n" >> testscript.bat
+printf "echo ============== >> testscript.log\r\n" >> testscript.bat
 
 /bin/rm -f testscript
-echo -e "#!/bin/sh" > testscript
-echo -e "### This is an automatically-generated script" >> testscript
-echo -e "/bin/rm testscript.log" >> testscript
-echo -e "echo 'TAUCS TEST LOG' > testscript.log" >> testscript
-echo -e "hostname >> testscript.log" >> testscript
-echo -e "uname    >> testscript.log" >> testscript
-echo -e "date     >> testscript.log" >> testscript
-echo -e "echo '==============' >> testscript.log" >> testscript
-echo -e "echo 'trying to maximize stack size:' >> testscript.log" >> testscript
-echo -e "ulimit -s >> testscript.log" >> testscript
-echo -e "ulimit -s unlimited >> testscript.log" >> testscript
-echo -e "ulimit -s >> testscript.log" >> testscript
-echo -e "echo '==============' >> testscript.log" >> testscript
+printf "#!/bin/bash\n" > testscript
+printf "### This is an automatically-generated script\n" >> testscript
+printf "/bin/rm testscript.log\n" >> testscript
+printf "echo 'TAUCS TEST LOG' > testscript.log\n" >> testscript
+printf "hostname >> testscript.log\n" >> testscript
+printf "uname    >> testscript.log\n" >> testscript
+printf "date     >> testscript.log\n" >> testscript
+printf "echo '==============' >> testscript.log\n" >> testscript
+printf "echo 'trying to maximize stack size:' >> testscript.log\n" >> testscript
+printf "ulimit -s >> testscript.log\n" >> testscript
+printf "ulimit -s unlimited >> testscript.log\n" >> testscript
+printf "ulimit -s >> testscript.log\n" >> testscript
+printf "echo '==============' >> testscript.log\n" >> testscript
 
 chmod 755 testscript
 
@@ -34,30 +34,30 @@ for f in progs/test_*.c ; do
   name=`basename $f .c`
   bs='\\'
   fs='/'
-  echo -e "echo =============== >> testscript.log\r" >> testscript.bat
-  echo -e "echo = $name = >> testscript.log\r"       >> testscript.bat
-  echo -e "call configure in=progs${bs}$name.c %*\r" >> testscript.bat
-#  echo -e "nmake /F build${bs}%TAUCS_LASTCONF%${bs}makefile clean\r" >> testscript.bat
-  echo -e "nmake /F build${bs}%TAUCS_LASTCONF%${bs}makefile \r"      >> testscript.bat
-  echo -e "bin${bs}%TAUCS_LASTCONF%${bs}$name >> testscript.log\r" >> testscript.bat
-  echo -e "if errorlevel 1 goto :error_$name\r"   >> testscript.bat
-  echo -e "echo = TEST PASSED ($name) >> testscript.log\r" >> testscript.bat
-  echo -e "goto :next_$name\r"                    >> testscript.bat
-  echo -e ":error_$name\r"                        >> testscript.bat
-  echo -e "echo = TEST FAILED ($name) >> testscript.log\r" >> testscript.bat
-  echo -e ":next_$name\r"                         >> testscript.bat
-  echo -e "echo =============== >> testscript.log\r" >> testscript.bat
+  printf "echo =============== >> testscript.log\r\n" >> testscript.bat
+  printf "echo = $name = >> testscript.log\r\n"       >> testscript.bat
+  printf "call configure in=progs${bs}$name.c %%*\r\n" >> testscript.bat
+#  printf "nmake /F build${bs}%%TAUCS_LASTCONF%${bs}makefile clean\r\n" >> testscript.bat
+  printf "nmake /F build${bs}%%TAUCS_LASTCONF%%${bs}makefile \r\n"      >> testscript.bat
+  printf "bin${bs}%%TAUCS_LASTCONF%%${bs}$name >> testscript.log\r\n" >> testscript.bat
+  printf "if errorlevel 1 goto :error_$name\r\n"   >> testscript.bat
+  printf "echo = TEST PASSED ($name) >> testscript.log\r\n" >> testscript.bat
+  printf "goto :next_$name\r\n"                    >> testscript.bat
+  printf ":error_$name\r\n"                        >> testscript.bat
+  printf "echo = TEST FAILED ($name) >> testscript.log\r\n" >> testscript.bat
+  printf ":next_$name\r\n"                         >> testscript.bat
+  printf "echo =============== >> testscript.log\r\n" >> testscript.bat
 
-  echo -e "echo =============== >> testscript.log" >> testscript
-  echo -e "echo = $name = >> testscript.log"       >> testscript
-  echo -e ". ./configure in=progs${fs}$name.c \$*" >> testscript
-  echo -e "echo last conf is \$TAUCS_LASTCONF >> testscript.log" >> testscript
-#  echo -e "make -f build${fs}\${TAUCS_LASTCONF}${fs}makefile clean"  >> testscript
-  echo -e "make -f build${fs}\${TAUCS_LASTCONF}${fs}makefile"        >> testscript
-  echo -e "if bin${fs}\${TAUCS_LASTCONF}${fs}$name >> testscript.log ; then" >> testscript
-  echo -e "echo = TEST PASSED $name >> testscript.log" >> testscript
-  echo -e "else"                    >> testscript
-  echo -e "echo = TEST FAILED $name >> testscript.log" >> testscript
-  echo -e "fi"                         >> testscript
-  echo -e "echo =============== >> testscript.log" >> testscript
+  printf "echo =============== >> testscript.log\n" >> testscript
+  printf "echo = $name = >> testscript.log\n"       >> testscript
+  printf ". ./configure in=progs${fs}$name.c \$*\n" >> testscript
+  printf "echo last conf is \$TAUCS_LASTCONF >> testscript.log\n" >> testscript
+#  printf "make -f build${fs}\${TAUCS_LASTCONF}${fs}makefile clean\n"  >> testscript
+  printf "make -f build${fs}\${TAUCS_LASTCONF}${fs}makefile\n"        >> testscript
+  printf "if bin${fs}\${TAUCS_LASTCONF}${fs}$name >> testscript.log ; then\n" >> testscript
+  printf "echo = TEST PASSED $name >> testscript.log\n" >> testscript
+  printf "else\n"                    >> testscript
+  printf "echo = TEST FAILED $name >> testscript.log\n" >> testscript
+  printf "fi\n"                         >> testscript
+  printf "echo =============== >> testscript.log\n" >> testscript
 done

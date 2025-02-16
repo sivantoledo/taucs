@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ### This is an automatically-generated script
 /bin/rm testscript.log
 echo 'TAUCS TEST LOG' > testscript.log
