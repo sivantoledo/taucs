@@ -9,7 +9,7 @@ PATHSEP=/
 DEFFLG=-D
 
 FC        = f77
-FFLAGS    = -O3 -g -fno-second-underscore -Wall 
+FFLAGS    = -O3 -g -fno-second-underscore -Wall -std=legacy -ffixed-form
 FOUTFLG   =-o 
 
 COUTFLG   = -o
