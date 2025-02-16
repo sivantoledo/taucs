@@ -8,7 +8,7 @@ F2CEXT=.f
 PATHSEP=/
 DEFFLG=-D
 
-FC        = g77
+FC        = f77
 FFLAGS    = -O3 -g -fno-second-underscore -Wall 
 FOUTFLG   =-o 
 
@@ -19,7 +19,9 @@ CFLAGS    = -g -O3 -Wall -Werror -pedantic -ansi
 # with the error message "imaginary constants are a GCC extension"
 # (seems to be a gcc bug, gcc 3.3.1)
 CFLAGS    = -O3 -Wall -Werror -std=c89 -pedantic
-CFLAGS    = -O3 -Wall -Werror -std=c99 
+CFLAGS    = -O3 -Wall -Werror -std=c99
+# Sivan Feb 2025
+CFLAGS    = -O3 -Wall -std=c99 
 
 LD        = $(CC) 
 LDFLAGS   = 
@@ -42,6 +44,14 @@ LIBLAPACK = -L external/lib/linux -llapack
 LIBMETIS  = -L external/lib/linux -lmetis 
 
 LIBF77 = -lg2c  
+
+# Sivan Feb 2025 trying to get it to compile and link again
+LIBBLAS   = -lblas
+LIBLAPACK = -llapack
+# install on Ubuntu with apt install libmetis-dev
+LIBMETIS  = -lmetis 
+LIBF77    = -lgfortran
+
 LIBC   = -lm 
 
 #########################################################
