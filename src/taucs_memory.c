@@ -111,6 +111,7 @@ double taucs_system_memory_size()
   f = fopen("/proc/meminfo","r");
   if (f==NULL) return m_sc;
   if (fscanf(f,"%*[a-zA-Z :\n\r]%lf",&m) != 1) return m_sc;
+  m *= 1024; /* Sivan Feb 2025, /proc/meminfo now returns values in kB, not in bytes */
 
   if (m != m_sc) {
     taucs_printf("Warning: /proc/meminfo reports %lfMB of memory while\n",
