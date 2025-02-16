@@ -62,9 +62,13 @@ int test_spd_orderings(taucs_ccs_matrix* A,
   int   test = 200;
   
   printf("TEST %d\n",test++);
+#ifdef TAUCS_CONFIG_METIS
   rc = taucs_linsolve(A,NULL,1, y,b,metis,opt_arg);
   if (rc != TAUCS_SUCCESS) return rc;
   if (rnorm(A,y,b,z)) return TAUCS_ERROR;
+#else
+  printf("WARNING: testing a build without the METIS ordering library\n");
+#endif
 
   printf("TEST %d\n",test++);
   rc = taucs_linsolve(A,NULL,1, y,b,genmmd,opt_arg);
