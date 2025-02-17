@@ -26,8 +26,10 @@ AOUTFLG   =
 RANLIB    = echo
 RM        = /bin/rm -rf
 
-LIBBLAS   = -lcomplib.sgimath
+# Here we use SGIMATH with multiprocessing
+# For using the new SCSL see the variant _scsl
 LIBBLAS   = -lcomplib.sgimath_mp
+
 LIBLAPACK = 
 LIBMETIS  = -L external/lib/irix -lmetis64
 

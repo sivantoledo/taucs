@@ -382,22 +382,51 @@ taucs_ccs_read_ijv(char* ijvfilename,int flags)
 
 #ifdef TAUCS_DOUBLE_IN_BUILD
   if (flags & TAUCS_DOUBLE)
-    return taucs_dccs_read_ijv(ijvfilename,flags);
+    return taucs_dccs_read_ijv(ijvfilename,flags,0);
 #endif
 
 #ifdef TAUCS_SINGLE_IN_BUILD
   if (flags & TAUCS_SINGLE)
-    return taucs_sccs_read_ijv(ijvfilename,flags);
+    return taucs_sccs_read_ijv(ijvfilename,flags,0);
 #endif
 
 #ifdef TAUCS_DCOMPLEX_IN_BUILD
   if (flags & TAUCS_DCOMPLEX)
-    return taucs_zccs_read_ijv(ijvfilename,flags);
+    return taucs_zccs_read_ijv(ijvfilename,flags,0);
 #endif
 
 #ifdef TAUCS_SCOMPLEX_IN_BUILD
   if (flags & TAUCS_SCOMPLEX)
-    return taucs_cccs_read_ijv(ijvfilename,flags);
+    return taucs_cccs_read_ijv(ijvfilename,flags,0);
+#endif
+  
+  assert(0);
+  /*added omer*/
+  return NULL;
+}
+
+taucs_ccs_matrix* 
+taucs_ccs_read_ijv_zero_based(char* ijvfilename,int flags)
+{
+
+#ifdef TAUCS_DOUBLE_IN_BUILD
+  if (flags & TAUCS_DOUBLE)
+    return taucs_dccs_read_ijv(ijvfilename,flags,1);
+#endif
+
+#ifdef TAUCS_SINGLE_IN_BUILD
+  if (flags & TAUCS_SINGLE)
+    return taucs_sccs_read_ijv(ijvfilename,flags,1);
+#endif
+
+#ifdef TAUCS_DCOMPLEX_IN_BUILD
+  if (flags & TAUCS_DCOMPLEX)
+    return taucs_zccs_read_ijv(ijvfilename,flags,1);
+#endif
+
+#ifdef TAUCS_SCOMPLEX_IN_BUILD
+  if (flags & TAUCS_SCOMPLEX)
+    return taucs_cccs_read_ijv(ijvfilename,flags,1);
 #endif
   
   assert(0);
@@ -410,8 +439,10 @@ taucs_ccs_read_ijv(char* ijvfilename,int flags)
 #ifndef TAUCS_CORE_GENERAL
 
 taucs_ccs_matrix* 
-taucs_dtl(ccs_read_ijv)(char* ijvfilename,int flags)
+taucs_dtl(ccs_read_ijv)(char* ijvfilename,int flags,int base)
 {
+	/* omer - base is 0 when the ijv file is 1-based and 0 when the ijv file
+	is 0-based. we add base to the i's and j's found.*/
   FILE* f;
   taucs_ccs_matrix*  m;
   int*    clen; 
@@ -479,7 +510,7 @@ taucs_dtl(ccs_read_ijv)(char* ijvfilename,int flags)
     }
 #endif
 
-    is[nnz] = (int)di; js[nnz] = (int)dj; vs[nnz] = dv;/*omer*/
+    is[nnz] = (int)di+base; js[nnz] = (int)dj+base; vs[nnz] = dv;/*omer*/
     /* we read the lower part */
     if ((flags & TAUCS_SYMMETRIC) && is[nnz] < js[nnz]) continue; 
     if ((flags & TAUCS_HERMITIAN) && is[nnz] < js[nnz]) continue; 
@@ -536,12 +567,14 @@ taucs_dtl(ccs_read_ijv)(char* ijvfilename,int flags)
   for (k=0; k<nnz; k++) {
     i = is[k] - 1; /* make it 1-based */
     j = js[k] - 1; /* make it 1-based */
+		if ( j<0 || j>ncols ) taucs_printf("j=%d k=%d\n",j,k);
     ( clen[j] )++;
   }
   /* just check */
   k = 0;
   for (j=0; j<ncols; j++) 
     k += clen[j];
+	if (k!=nnz) taucs_printf("k=%d, nnz=%d\n",k,nnz);
   assert(k == nnz);
 
   /* now compute column pointers */

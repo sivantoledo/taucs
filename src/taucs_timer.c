@@ -6,9 +6,51 @@
 #include "taucs.h"
 
 #ifndef TAUCS_CONFIG_TIMING
+void taucs_profile_report() {}
 double taucs_wtime() { return 0.0; }
 double taucs_ctime() { return 0.0; }
 #else
+
+#ifdef TAUCS_CONFIG_PROFILING
+
+struct taucs_profile_st 
+taucs_profile[] = {
+  { "multilu dense factor",   taucs_profile_multilu_dense_fctr   , 0, 0, 0, -1, -1 },
+  { "multilu dense solve",    taucs_profile_multilu_dense_solve  , 0, 0, 0, -1, -1 },
+  { "assemble factor",        taucs_profile_multilu_cnv_lu       , 0, 0, 0, -1, -1 },
+  { "compress",               taucs_profile_multilu_compress     , 0, 0, 0, -1, -1 },
+  { "focus rows",             taucs_profile_multilu_focus_rows   , 0, 0, 0, -1, -1 },
+  { "focus columns",          taucs_profile_multilu_focus_cols   , 0, 0, 0, -1, -1 },
+  { "align add",              taucs_profile_multilu_align_add    , 0, 0, 0, -1, -1 },
+  { "degrees",                taucs_profile_multilu_degrees      , 0, 0, 0, -1, -1 },
+  { "preorder columns",       taucs_profile_multilu_preorder     , 0, 0, 0, -1, -1 },
+  { "symbolic analysis",      taucs_profile_multilu_sym_anlz     , 0, 0, 0, -1, -1 },
+  { "compress factor",        taucs_profile_multilu_compress_fctr, 0, 0, 0, -1, -1 },
+  { 0, -1, 0, 0, 0, -1, -1 }
+};
+
+void taucs_profile_report()
+{
+  int i;
+  
+  taucs_printf("Profile information for profiled tasks:\n");
+  taucs_printf("=======================================\n");
+  for(i = 0; taucs_profile[i].label ; i++) {
+    /*taucs_printf("%-35s   %.3f (%.3f) sec (%.3f%% [%.3f%%])\n", */
+    if (taucs_profile[i].n)
+      taucs_printf("%-35s   %.3f (%.3f) sec %6d times\n",
+		   taucs_profile[i].label,
+		   taucs_profile[i].wtime,
+		   taucs_profile[i].ctime,
+		   taucs_profile[i].n);
+    taucs_profile[i].n = 0;
+    taucs_profile[i].wtime = 0;
+    taucs_profile[i].ctime = 0;
+  }
+}
+#else
+void taucs_profile_report() {}
+#endif /* TAUCS_CONFIG_PROFILING */
 
 #ifdef OSTYPE_win32
 #define TAUCS_TIMER

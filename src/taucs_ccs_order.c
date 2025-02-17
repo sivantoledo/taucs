@@ -16,6 +16,12 @@
 /* Interface to AMD                                      */
 /*********************************************************/
 
+/* 
+   Sivan: changed the interface from colamd 1.0 to
+   colamd 2.1, Oct 2003.
+   The only change is the addition of the stats argument.
+*/
+
 #include "../external/src/colamd.h"
 
 static void
@@ -30,6 +36,7 @@ taucs_ccs_colamd(taucs_ccs_matrix* m,
   return;
 #else
   double knobs[COLAMD_KNOBS];
+  int    stats[COLAMD_STATS];
   int    Alen;
   int*   A;
   int*   p;
@@ -63,7 +70,7 @@ taucs_ccs_colamd(taucs_ccs_matrix* m,
   
   taucs_printf("oocsp_ccs_colamd: calling colamd matrix is %dx%d, nnz=%d\n",
 	     m->m,m->n,nnz);
-  if (!colamd (m->m, m->n, Alen, A, p, knobs)) {
+  if (!colamd (m->m, m->n, Alen, A, p, knobs, stats)) {
     taucs_printf("oocsp_ccs_colamd: colamd failed\n");
     taucs_free(A);
     taucs_free(p);
@@ -84,17 +91,34 @@ taucs_ccs_colamd(taucs_ccs_matrix* m,
 /* Interface to AMD                                      */
 /*********************************************************/
 
+#ifndef TAUCS_CONFIG_AMD
 static void
 taucs_ccs_amd(taucs_ccs_matrix* m, 
 	      int** perm, int** invperm,
 	      char* which)
 {
-#ifndef TAUCS_CONFIG_AMD
   taucs_printf("taucs_ccs_amd: AMD routines not linked.\n");
   *perm    = NULL;
   *invperm = NULL;
   return;
+}
+
 #else
+
+extern int amdexa_(int*, int*, int*, int*, int*, int*, int*, int*, int*, 
+			int*, int*, int*, int*, int*, int*);
+extern int amdtru_(int*, int*, int*, int*, int*, int*, int*, int*, int*, 
+			int*, int*, int*, int*, int*, int*);
+extern int amdbar_(int*, int*, int*, int*, int*, int*, int*, int*, int*, 
+			int*, int*, int*, int*, int*, int*);
+extern int amd_   (int*, int*, int*, int*, int*, int*, int*, int*, int*, 
+			int*, int*, int*, int*, int*, int*);
+
+static void
+taucs_ccs_amd(taucs_ccs_matrix* m, 
+	      int** perm, int** invperm,
+	      char* which)
+{
   int  n, iwlen, pfree, ncmpa, iovflo;
   int* iw;
   int* pe;
@@ -211,15 +235,20 @@ taucs_ccs_amd(taucs_ccs_matrix* m,
   taucs_printf("taucs_ccs_amd: calling amd matrix is %dx%d, nnz=%d\n",
 	     n,n,nnz);
 
-  if (!strcmp(which,"mmd")) 
+  if (!strcmp(which,"amd")) 
+    amd_   (&n, pe, iw, len, &iwlen, &pfree, nv, next,
+	    last, head, elen, degree, &ncmpa, w, &iovflo);
+  else if (!strcmp(which,"amdbar")) 
+    amdbar_(&n, pe, iw, len, &iwlen, &pfree, nv, next,
+	    last, head, elen, degree, &ncmpa, w, &iovflo);
+  /*
+  else if (!strcmp(which,"mmd")) 
     amdexa_(&n, pe, iw, len, &iwlen, &pfree, nv, next,
 	    last, head, elen, degree, &ncmpa, w, &iovflo);
   else if (!strcmp(which,"md")) 
     amdtru_(&n, pe, iw, len, &iwlen, &pfree, nv, next,
 	  last, head, elen, degree, &ncmpa, w, &iovflo);
-  else if (!strcmp(which,"amd")) 
-    amdbar_(&n, pe, iw, len, &iwlen, &pfree, nv, next,
-	    last, head, elen, degree, &ncmpa, w, &iovflo);
+  */
   else {
     taucs_printf("taucs_ccs_amd: WARNING - invalid ordering requested (%s)\n",which);
     return;
@@ -252,12 +281,181 @@ taucs_ccs_amd(taucs_ccs_matrix* m,
 
   *perm    = last;
   *invperm = len;
+}
+
+#endif
+
+/*********************************************************/
+/* Interface to the C version of AMD                     */
+/*********************************************************/
+
+extern int amd_order(int n, int* Ap, int* Ai, int* P, double*, double*);
+
+static void
+taucs_ccs_camd(taucs_ccs_matrix* A, 
+	      int** perm, int** invperm,
+	      char* which)
+{
+#ifndef TAUCS_CONFIG_CAMD
+  taucs_printf("taucs_ccs_camd: AMD C routines not linked.\n");
+  *perm    = NULL;
+  *invperm = NULL;
+  return;
+#else
+  int  n,m,nnz,i,j,ip;
+  int  rc = 0; /* warning */
+  int* Ap;
+  int* Ai;
+  int* P;
+  int* iP;
+  int* tmp;
+  
+  taucs_printf("taucs_ccs_amd: starting (%s)\n",which);
+
+  if (!(A->flags & TAUCS_SYMMETRIC) && !(A->flags & TAUCS_HERMITIAN)) {
+    taucs_printf("taucs_ccs_amd: AMD ordering only works on symmetric matrices.\n");
+    *perm    = NULL;
+    *invperm = NULL;
+    return;
+  }
+  /* this routine may actually work on UPPER as well */
+  if (!(A->flags & TAUCS_LOWER)) {
+    taucs_printf("taucs_ccs_amd: the lower part of the matrix must be represented.\n");
+    *perm    = NULL;
+    *invperm = NULL;
+    return;
+  }
+    
+  *perm    = NULL;
+  *invperm = NULL;
+
+  n = m = A->n;
+  nnz = 2 * (A->colptr)[n] - n;
+
+  Ai = (int*) taucs_malloc(nnz * sizeof(int));
+  Ap = (int*) taucs_malloc((n+1)*sizeof(int));
+  P  = (int*) taucs_malloc(n*sizeof(int));
+  iP = (int*) taucs_malloc(n*sizeof(int));
+  tmp= (int*) taucs_calloc(n,sizeof(int));
+ 
+  /* count the number of nonzeros in each column */
+
+
+  for (j=0; j<n; j++) {
+    for (ip = (A->colptr)[j]; ip<(A->colptr)[j+1]; ip++) {
+      i = (A->rowind)[ip];
+      if (i==j) 
+	tmp[j]++;
+      else {
+	tmp[i]++;
+	tmp[j]++;
+      }
+    }
+  }
+  
+  /* now compute Ap */
+
+  Ap[0] = 0;
+  for (j=1; j<=n; j++) Ap[j] = Ap[j-1] + tmp[j-1];
+
+  /* fill the indices */
+
+  for (j=0; j< n; j++) tmp[j] = Ap[j];
+
+  /*  for (j=0; j<=n; j++) printf("><><> n=%d nnz=%d j=%d Ap[j]=%d\n",n,nnz,j,Ap[j]);*/
+
+  for (j=0; j< n; j++) assert(Ap[j] <= Ap[j+1]);
+  assert(Ap[n] <= nnz);
+
+  for (j=0; j<n; j++) {
+    for (ip = (A->colptr)[j]; ip<(A->colptr)[j+1]; ip++) {
+      i = (A->rowind)[ip];
+      if (i==j) {
+	assert(tmp[j] < Ap[j+1]); 
+	Ai[tmp[j]] = i;
+	tmp[j]++;
+      } else {
+	assert(tmp[j] < Ap[j+1]); 
+	Ai[tmp[j]] = i;
+	tmp[j]++;
+
+	assert(tmp[i] < Ap[i+1]); 
+	Ai[tmp[i]] = j;
+	tmp[i]++;
+      }
+    }
+  }
+
+  /* insertion sort on the row indices in each column */
+
+  for (j=0; j<=n-1; j++) {
+    int p,q,key;
+    for (p=Ap[j]+1; p<=Ap[j+1]-1; p++) {
+      key = Ai[p];
+      for (q=p-1; q >= Ap[j] && Ai[q] > key; q--) {
+	Ai[q+1] = Ai[q];
+      }
+      Ai[q+1] = key;
+    }
+  }
+
+  /*
+   * Restrictions:  n >= 0.  Ap [0] = 0.  Ap [j] <= Ap [j+1] for all j in the
+   *	range 0 to n-1.  nz = Ap [n] >= 0.  For all j in the range 0 to n-1,
+   *	and for all p in the range Ap [j] to Ap [j+1]-2, Ai [p] < Ai [p+1] must
+   *	hold.  Ai [0..nz-1] must be in the range 0 to n-1.  To avoid integer
+   *	overflow, (2.4*nz + 8*n) < INT_MAX / sizeof (int) for must hold for the
+   *	"int" version. (2.4*nz + 8*n) < LONG_MAX / sizeof (long) must hold
+   *	for the "long" version.  Finally, Ai, Ap, and P must not be NULL.  If
+   *	any of these restrictions are not met, AMD returns AMD_INVALID.
+   */
+
+  assert(n >= 0);
+  assert(Ap[0] == 0);
+  for (j=0; j<=n-1; j++) 
+    assert(Ap[j] <= Ap[j+1]);
+  assert(Ap[n] >= 0);
+  for (ip=0; ip<nnz; ip++)
+    assert(Ai[ip] >= 0 && Ai[ip] < n);
+  for (j=0; j<=n-1; j++) {
+    for (ip=Ap[j]; ip<=Ap[j+1]-2; ip++) {
+      /*if (!(Ai[ip] < Ai[ip+1])) {*/
+      /*
+      if (!(Ai[ip] != Ai[ip+1])) {
+	printf(">>> n=%d j=%d Ap[j]=%d Ap[j+1]=%d ip=%d Ai[ip]=%d Ai[ip+1]=%d\n",
+	       n,j,Ap[j],Ap[j+1],ip,Ai[ip],Ai[ip+1]);
+      }
+      */
+      assert(Ai[ip] < Ai[ip+1]);
+    }
+  }
+
+  taucs_printf("taucs_ccs_amd: calling amd_order matrix is %dx%d, nnz=%d\n",
+	     n,n,nnz);
+
+  if (!strcmp(which,"camd")) {
+    rc = amd_order(n, Ap, Ai, P, (double*) NULL, (double*) NULL);
+  }
+
+  taucs_printf("taucs_ccs_amd: amd_order returned, return code = %d.\n",rc);
+
+  taucs_free(tmp   );
+  taucs_free(Ai    );
+  taucs_free(Ap    );
+
+  for (i=0; i<n; i++) iP[ P[i] ] = i;
+
+  *invperm = iP;
+  *perm    = P;
 #endif
 }
 
 /*********************************************************/
 /* Interface to MMD                                      */
 /*********************************************************/
+
+extern int genmmd_(int*, int*, int*, int*, int*, int*, int*, int*, int*, 
+			int*, int*, int*);
 
 static void
 taucs_ccs_genmmd(taucs_ccs_matrix* m, 
@@ -632,25 +830,10 @@ taucs_ccs_treeorder(taucs_ccs_matrix* m,
 /* Interface to METIS                                    */
 /*********************************************************/
 
-#ifdef TAUCS_CONFIG_METIS
-#ifdef OSTYPE_linux
-#include <metis.h>
-#ifdef METIS_VER_MAJOR  // METIS 5.x
-    #if METIS_VER_MAJOR >= 5
-        #define USING_METIS_5
-        /* METIS_NodeND(idx_t *nvtxs, idx_t *xadj, idx_t *adjncy, idx_t *vwgt, idx_t *options, idx_t *perm, idx_t *iperm); */
-    #endif
-#else
-    #define USING_METIS_LEGACY
-#endif
-#else
-#define USING_METIS_LEGACY
 /* from stuct.h in metis */
 typedef int idxtype; 
 /* from metis.h */
 void METIS_NodeND(int *, idxtype *, idxtype *, int *, int *, idxtype *, idxtype *);
-#endif
-#endif
 
 static void 
 taucs_ccs_metis(taucs_ccs_matrix* m, 
@@ -663,27 +846,13 @@ taucs_ccs_metis(taucs_ccs_matrix* m,
   *invperm = NULL;
   return;
 #else
-
   int  n,nnz,i,j,ip;
-
-#ifdef USING_METIS_5
-  idx_t  nvtxs;
-  idx_t  options[METIS_NOPTIONS];
-  idx_t* xadj;
-  idx_t* adj;
-  // XXX TODO: idx_t might be different from int, need to copy permutation back to TAUCS int* arrays
-  //idx_t* metis_perm;
-  //idx_t* metis_iperm;
-  int* len;
-  int* ptr;
-#else
   int* xadj;
   int* adj;
   int  num_flag     = 0;
   int  options_flag = 0;
   int* len;
   int* ptr;
-#endif
 
   /* taucs_printf("taucs_ccs_metis: starting (%s)\n",which); */
 
@@ -704,16 +873,6 @@ taucs_ccs_metis(taucs_ccs_matrix* m,
   n   = m->n;
   nnz = (m->colptr)[n];
   
-#ifdef USING_METIS_5
-  *perm    = (int*) taucs_malloc(n * sizeof(idx_t));
-  *invperm = (int*) taucs_malloc(n * sizeof(idx_t));
-
-  xadj = (int*) taucs_malloc((n+1) * sizeof(idx_t));
-  /* Change suggested by Yifan Hu for diagonal matrices */
-  /* and for matrices with no diagonal */
-  /* adj  = (int*) taucs_malloc(2*(nnz-n) * sizeof(int));*/
-  adj  = (int*) taucs_malloc(2* nnz * sizeof(idx_t));
-#else
   *perm    = (int*) taucs_malloc(n * sizeof(int));
   *invperm = (int*) taucs_malloc(n * sizeof(int));
 
@@ -722,7 +881,7 @@ taucs_ccs_metis(taucs_ccs_matrix* m,
   /* and for matrices with no diagonal */
   /* adj  = (int*) taucs_malloc(2*(nnz-n) * sizeof(int));*/
   adj  = (int*) taucs_malloc(2* nnz * sizeof(int));
-#endif
+
   if (!(*perm) || !(*invperm) || !xadj || !adj) {
     taucs_free(*perm);
     taucs_free(*invperm);
@@ -770,20 +929,11 @@ taucs_ccs_metis(taucs_ccs_matrix* m,
   /* taucs_printf("taucs_ccs_metis: calling metis matrix is %dx%d, nnz=%d\n", */
 	     /* n,n,nnz); */
 
-#ifdef USING_METIS_5
-  METIS_SetDefaultOptions(options);
-  nvtxs = n;
-  METIS_NodeND(&nvtxs,
-	       xadj,adj,
-	       NULL,
-	       options,
-	       *perm,*invperm);
-#else
   METIS_NodeND(&n,
 	       xadj,adj,
 	       &num_flag, &options_flag,
 	       *perm,*invperm);
-#endif
+
   /* taucs_printf("taucs_ccs_metis: metis returned\n"); */
 
   /*
@@ -845,8 +995,10 @@ taucs_ccs_order(taucs_ccs_matrix* m,
 		int** perm, int** invperm,
 		char* which)
 {
-  if (!strcmp(which,"mmd") || !strcmp(which,"amd") || !strcmp(which,"md")) 
+  if (!strcmp(which,"amdbar") || !strcmp(which,"amd") || !strcmp(which,"md")) 
     taucs_ccs_amd(m,perm,invperm,which);
+  else if (!strcmp(which,"camd")) 
+    taucs_ccs_camd(m,perm,invperm,which);
   else if (!strcmp(which,"metis"))
     taucs_ccs_metis(m,perm,invperm,which);
   else if (!strcmp(which,"genmmd"))

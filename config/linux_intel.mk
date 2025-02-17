@@ -26,7 +26,7 @@ CC        = icc
 CFLAGS    = -O3 -D_POSIX_C_SOURCE=199506L -c99
 CFLAGS    = -O3 -D_POSIX_C_SOURCE=199506L -Xc -axW -ansi_alias -fno-fnalias -w1 -Werror
 CFLAGS    = -c99 -O3 -D_POSIX_C_SOURCE=199506L -Xc \
-            -xK \
+            -xW \
             -vec_report0 \
             -ansi_alias -fno-fnalias \
             -w1 -Werror 
@@ -44,8 +44,12 @@ RM        = rm -rf
 
 LIBBLAS   = external/lib/linux/blas_aux.o \
             -L external/lib/linux -lf77blas -lcblas -latlas
+LIBBLAS   = external/lib/linux/blas_aux.o \
+            -L $(HOME)/Public/Linux_P4SSE2/lib -llapack -lf77blas -lcblas -latlas
 LIBLAPACK = -L external/lib/linux -llapack
+LIBLAPACK = 
 LIBMETIS  = -L external/lib/linux -lmetis 
+LIBMETIS  = -L external/lib/linux -lmetisP4 -L $(HOME)/Tools/AMD/Lib -lamdf77
 
 LIBF77 = -lCEPCF90 -lIEPCF90 -lintrins -lF90 -limf -lpthread 
 LIBC   = 

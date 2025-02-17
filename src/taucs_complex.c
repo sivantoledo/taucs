@@ -14,10 +14,15 @@
 #include "taucs.h"
 
 #ifdef TAUCS_CORE_DOUBLE
+double taucs_get_inf()
+{
+	double zero = 0.0;
+	double inf = 1.0 / zero;
+	return inf;
+}
 double taucs_get_nan()
 {
-  double zero = 0.0;
-  double inf  = 1.0 / zero;
+  double inf  = taucs_get_inf();
   double nan  = inf - inf;
   return nan;
 }

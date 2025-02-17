@@ -25,7 +25,8 @@ CFLAGS    = -O3 -D_POSIX_C_SOURCE=199506L -Xc -axW -ansi_alias -fno-fnalias \
 COUTFLG   = -o ./
 
 LD        = $(CC) 
-LDFLAGS   = -static -Bstatic -z muldefs
+# was also -static -Bstatic
+LDFLAGS   = -z muldefs -Wl,-rpath /specific/a/home/cc/cs/stoledo/Public
 LOUTFLG   = $(COUTFLG)
 
 AR        = ar cr
@@ -36,13 +37,23 @@ RM        = rm -rf
 
 LIBBLAS   = -L$(HOME)/Tools/MUMPS_4.3/lib -ldmumps -lpord \
          -L$(HOME)/Tools/MUMPS_4.3/libseq -lmpiseq \
-         -L /home/stoledo/Public/Linux_P4SSE2/lib  -lf77blas -lcblas -latlas -L /usr/lib/gcc-lib/i386-redhat-linux7/2.96 -lg2c  
-LIBLAPACK = -L /home/stoledo/Public/Linux_P4SSE2/lib -llapack
-LIBMETIS  = -L external/lib/linux -lmetis 
+         -L /home/stoledo/Public -lgoto_p4_512-r0.9
+
+#         -L /home/stoledo/Public -lgoto_p3_256-r0.9
+
+#         -L /specific/a/home/cc/cs/stoledo/Public -lgoto_p4_512-r0.9
+#
+#         -L /home/stoledo/Public/Linux_P4SSE2/lib  -lf77blas -lcblas -latlas -L /usr/lib/gcc-lib/i386-redhat-linux7/2.96 -lg2c  
+#LIBLAPACK = -L /home/stoledo/Public/Linux_P4SSE2/lib -llapack
+
+LIBLAPACK = external/lib/linux/blas_aux.o /specific/a/home/cc/cs/stoledo/Public/lapack_linux.a
+LIBMETIS  = -Lexternal/lib/linux -lmetis 
 
 LIBF77 = -lCEPCF90 -lIEPCF90 -lintrins -lF90 -limf -lpthread 
 LIBC   = 
 
+#LIBBLAS   = -L /home/stoledo/Public -lgoto_p3_256-r0.9 \
+#            external/lib/linux/blas_aux.o
 #########################################################
 
 

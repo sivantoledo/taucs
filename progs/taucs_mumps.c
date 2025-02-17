@@ -9,12 +9,6 @@ TAUCS_CONFIG_DEFAULT OFF
 TAUCS_CONFIG TIMING
 TAUCS_CONFIG BASE
 TAUCS_CONFIG DREAL
-TAUCS_CONFIG FACTOR
-TAUCS_CONFIG INCOMPLETE_CHOL
-TAUCS_CONFIG VAIDYA
-TAUCS_CONFIG ITER
-TAUCS_CONFIG LLT
-TAUCS_CONFIG OOC_LLT
 TAUCS_CONFIG METIS
 TAUCS_CONFIG MALLOC_STUBS
 TAUCS_CONFIG MATRIX_GENERATORS
@@ -36,6 +30,121 @@ TAUCS_CONFIG_END
 #define TRUE  1
 #define FALSE 0
 
+/*********************************************************/
+/* argument parsing                                      */
+/*********************************************************/
+
+int taucs_getopt_boolean(char* cmd, void* args[], char* name, int* x) {
+  int lc = strlen(cmd);
+  int ln = strlen(name);
+  if (!strncmp(cmd,name,ln)) {
+    if (lc > ln && cmd[ln] == '.') return 0;
+    if (lc > ln && cmd[ln] == '=') {
+      if (cmd[ln+1] == '#') {
+	unsigned int p;
+	if (sscanf(cmd+ln+2,"%u",&p) == 1) {
+	  unsigned int i;
+	  for (i=0; args[i]; i++) {
+	    if (i==p) { *x = *( (int*) args[i] ); return 1; }
+	  }
+	  taucs_printf("taucs: WARNING, pointer argument out of range in [%s]\n",cmd);
+	}
+	taucs_printf("taucs: WARNING, illegal pointer argument in [%s]\n",cmd);
+	return 0;
+      }
+      if (!strcmp(cmd+ln+1,"true")) {
+	*x = TRUE;
+	return 1;
+      }
+      if (!strcmp(cmd+ln+1,"false")) {
+	*x = FALSE;
+	return 1;
+      }
+    }
+    taucs_printf("taucs: WARNING, illegal argument in [%s]\n",cmd);
+  }
+
+  return 0;
+}
+
+int taucs_getopt_double(char* cmd, void* args[], char* name, double* x) {
+  int lc = strlen(cmd);
+  int ln = strlen(name);
+  if (!strncmp(cmd,name,ln)) {
+    if (lc > ln && cmd[ln] == '.') return 0;
+    if (lc > ln && cmd[ln] == '=') {
+      if (cmd[ln+1] == '#') {
+	unsigned int p;
+	if (sscanf(cmd+ln+2,"%u",&p) == 1) {
+	  unsigned int i;
+	  for (i=0; args[i]; i++) {
+	    if (i==p) { *x = *( (double*) args[i] ); return 1; }
+	  }
+	  taucs_printf("taucs: WARNING, pointer argument out of range in [%s]\n",cmd);
+	}
+	taucs_printf("taucs: WARNING, illegal pointer argument in [%s]\n",cmd);
+	return 0;
+      }
+      if (sscanf(cmd+ln+1,"%le",x) == 1) {
+	return 1;
+      }
+    }
+    taucs_printf("taucs: WARNING, illegal argument in [%s]\n",cmd);
+  }
+
+  return 0;
+}
+
+
+int taucs_getopt_pointer(char* cmd, void* args[], char* name, void** x) {
+  int lc = strlen(cmd);
+  int ln = strlen(name);
+  if (!strncmp(cmd,name,ln)) {
+    if (lc > ln && cmd[ln] == '.') return 0;
+    if (lc > ln && cmd[ln] == '=') {
+      if (cmd[ln+1] == '#') {
+	unsigned int p;
+	if (sscanf(cmd+ln+2,"%u",&p) == 1) {
+	  unsigned int i;
+	  for (i=0; args[i]; i++)
+	    if (i==p) { *x = *( (void**) args[i] ); return 1; }
+	  taucs_printf("taucs: WARNING, pointer argument out of range in [%s]\n",cmd);
+	}
+	taucs_printf("taucs: WARNING, illegal pointer argument in [%s]\n",cmd);
+	return 0;
+      }
+    }
+    taucs_printf("taucs: WARNING, illegal argument in [%s]\n",cmd);
+  }
+
+  return 0;
+}
+
+int taucs_getopt_string(char* cmd, void* args[], char* name, char** x) {
+  int lc = strlen(cmd);
+  int ln = strlen(name);
+  if (!strncmp(cmd,name,ln)) {
+    if (lc > ln && cmd[ln] == '.') return 0;
+    if (lc > ln && cmd[ln] == '=') {
+      if (cmd[ln+1] == '#') {
+	unsigned int p;
+	if (sscanf(cmd+ln+2,"%u",&p) == 1) {
+	  unsigned int i;
+	  for (i=0; args[i]; i++)
+	    if (i==p) { *x = *( (char**) args[i] ); return 1; }
+	  taucs_printf("taucs: WARNING, pointer argument out of range in [%s]\n",cmd);
+	}
+	taucs_printf("taucs: WARNING, illegal pointer argument in [%s]\n",cmd);
+	return 0;
+      }
+      *x = cmd+ln+1;
+      return 1;
+    }
+    taucs_printf("taucs: WARNING, illegal argument in [%s]\n",cmd);
+  }
+
+  return 0;
+}
 void __ctype_b() {} /* just a hack to get it to link */
 void s_stop() {} /* just a hack to get it to link */
 
@@ -61,15 +170,23 @@ void rnorm(taucs_ccs_matrix* A, void* x, void* b, void* aux)
 #define RINFO(I) rinfo[(I)-1]
 #define INFO(I)  info[(I)-1] 
 
-void call_mumps(taucs_ccs_matrix* A, double* X, double* B)
+void call_mumps(taucs_ccs_matrix* A, double* X, double* B,
+		int spd, int ind)
 {
   DMUMPS_STRUC_C id;
   int i,j,nnz,nz,n,ip;
   double tw,tc;
 
+  if (spd && !ind) id.sym=1; /* symmetric positive definite */
+  else if (!spd && ind) id.sym=2; /* symmetric indefinite */
+  else {
+    taucs_printf("taucs_mumps: you must specify whether A is spd or ind (use taucs_run.mumps[spd/ind]\n");
+    exit(1);
+  }
+
   id.job = -1; /* init library */
   id.par = 1;  /* this processor participates */
-  id.sym = 1;  /* symmetric positive definite */
+  /*id.sym = 1;*/  /* symmetric positive definite */
   id.comm_fortran = -987654; /* use comm_world */
   dmumps_c(&id);
 
@@ -107,30 +224,30 @@ void call_mumps(taucs_ccs_matrix* A, double* X, double* B)
   tw = taucs_wtime();
   tc = taucs_ctime();
   dmumps_c(&id);
-  printf("mumps time: %.02e seconds (%.02e seconds CPU time)\n",taucs_wtime()-tw,taucs_ctime()-tc);
+  taucs_printf("mumps analyze time: %.02e seconds (%.02e seconds CPU time)\n",taucs_wtime()-tw,taucs_ctime()-tc);
   
 
-  printf("mumps info: analyze outcome = %s\n",id.INFO(1)==0?"success":"failure");
-  printf("mumps info: estimated     flops %.02e\n",id.RINFO(1));
+  taucs_printf("mumps analyze info: analyze outcome = %s\n",id.INFO(1)==0?"success":"failure");
+  taucs_printf("mumps analyze info: estimated     flops %.02e\n",id.RINFO(1));
 
   id.job = 2; /* factor */
 
   tw = taucs_wtime();
   tc = taucs_ctime();
   dmumps_c(&id);
-  printf("mumps time: %.02e seconds (%.02e seconds CPU time)\n",taucs_wtime()-tw,taucs_ctime()-tc);
+  taucs_printf("mumps factor time: %.02e seconds (%.02e seconds CPU time)\n",taucs_wtime()-tw,taucs_ctime()-tc);
 
-  printf("mumps info: factor outcome = %s\n",id.INFO(1)==0?"success":"failure");
-  printf("mumps info: assembly      flops %.02e\n",id.RINFO(2));
-  printf("mumps info: factorization flops %.02e\n",id.RINFO(3));
+  taucs_printf("mumps factor info: factor outcome = %s\n",id.INFO(1)==0?"success":"failure");
+  taucs_printf("mumps factor info: assembly      flops %.02e\n",id.RINFO(2));
+  taucs_printf("mumps factor info: factorization flops %.02e\n",id.RINFO(3));
 
   tw = taucs_wtime();
   tc = taucs_ctime();
   id.job = 3; /* solve */
   dmumps_c(&id);
-  printf("mumps time: %.02e seconds (%.02e seconds CPU time)\n",taucs_wtime()-tw,taucs_ctime()-tc);
+  taucs_printf("mumps solve time: %.02e seconds (%.02e seconds CPU time)\n",taucs_wtime()-tw,taucs_ctime()-tc);
 
-  printf("mumps info: solve outcome = %s\n",id.INFO(1)==0?"success":"failure");
+  taucs_printf("mumps solve info: solve outcome = %s\n",id.INFO(1)==0?"success":"failure");
 
   id.job = -2; /* release library */
   dmumps_c(&id);
@@ -153,7 +270,13 @@ int main(int argc, char* argv[])
   char* opt_log = "stdout";
   double opt_3d = -1.0;
   double opt_2d = -1.0;
+  double opt_dense = -1.0;
   char*  opt_2d_type = "dirichlet";
+  int opt_3d_rand = 0;/*not random*/
+  double opt_3d_small = -1.0;/*regular*/
+
+  int opt_mumps_spd = 0;
+  int opt_mumps_ind = 0;
 
   int opt_sreal    = 0;
   int opt_dreal    = 0;
@@ -161,9 +284,18 @@ int main(int argc, char* argv[])
   int opt_dcomplex = 0;
   int datatype     = TAUCS_DOUBLE;
 
+  /*
+  {
+    void ATL_buildinfo(void);
+    ATL_buildinfo();
+  }
+  */ 
+
   for (i=0; argv[i]; i++) {
     int understood = FALSE;
     
+    understood |= taucs_getopt_boolean(argv[i],opt_arg,"taucs_run.mumps.spd",&opt_mumps_spd);
+    understood |= taucs_getopt_boolean(argv[i],opt_arg,"taucs_run.mumps.ind",&opt_mumps_ind);
     understood |= taucs_getopt_boolean(argv[i],opt_arg,"taucs_run.sreal",&opt_sreal);
     understood |= taucs_getopt_boolean(argv[i],opt_arg,"taucs_run.dreal",&opt_dreal);
     understood |= taucs_getopt_boolean(argv[i],opt_arg,"taucs_run.scomplex",&opt_scomplex);
@@ -172,7 +304,10 @@ int main(int argc, char* argv[])
     understood |= taucs_getopt_string(argv[i],opt_arg,"taucs_run.ijv",&opt_ijv);
     understood |= taucs_getopt_string(argv[i],opt_arg,"taucs_run.hb", &opt_hb );
     understood |= taucs_getopt_string(argv[i],opt_arg,"taucs_run.log",&opt_log);
+    understood |= taucs_getopt_double(argv[i],opt_arg,"taucs_run.dense",&opt_dense);
     understood |= taucs_getopt_double(argv[i],opt_arg,"taucs_run.mesh3d",&opt_3d);
+    understood |= taucs_getopt_boolean(argv[i],opt_arg,"taucs_run.mesh3d.rand",&opt_3d_rand);
+    understood |= taucs_getopt_double(argv[i],opt_arg,"taucs_run.mesh3d.small",&opt_3d_small);
     understood |= taucs_getopt_double(argv[i],opt_arg,"taucs_run.mesh2d",&opt_2d);
     understood |= taucs_getopt_string(argv[i],opt_arg,"taucs_run.mesh2d.type",&opt_2d_type);
     
@@ -187,8 +322,20 @@ int main(int argc, char* argv[])
 
   taucs_logfile(opt_log);
 
+  if (opt_dense > 0) {
+    A = taucs_ccs_generate_dense((int)opt_dense,(int)opt_dense,TAUCS_SYMMETRIC);
+    if (!A) {
+      taucs_printf("Matrix generation failed\n");
+      return 1;
+    }
+    datatype = TAUCS_DOUBLE;
+  }
+
   if (opt_3d > 0) {
-    A = taucs_ccs_generate_mesh3d((int)opt_3d,(int)opt_3d,(int)opt_3d);
+    if ( opt_3d_small > 0 ) {
+        A = taucs_ccs_generate_mesh3d_random((int)opt_3d_small,(int)opt_3d,(int)opt_3d,opt_3d_rand);
+    }
+    A = taucs_ccs_generate_mesh3d_random((int)opt_3d,(int)opt_3d,(int)opt_3d,opt_3d_rand);
     if (!A) {
       taucs_printf("Matrix generation failed\n");
       return 1;
@@ -254,6 +401,9 @@ int main(int argc, char* argv[])
     return 1;
   }
 
+  taucs_printf("taucs_run: matrix dimentions %d by %d with %d nonzeros\n",
+	       A->m, A->n, (A->colptr)[ A->n ]);
+
   X = taucs_vec_create(A->n,A->flags);
   B = taucs_vec_create(A->n,A->flags);
   Y = taucs_vec_create(A->n,A->flags);
@@ -268,6 +418,7 @@ int main(int argc, char* argv[])
       ((taucs_single*)X)[i]=(taucs_single) ((double)random()/(double)RAND_MAX);
     if (datatype & TAUCS_DOUBLE) 
       ((taucs_double*)X)[i]=(taucs_double) ((double)random()/(double)RAND_MAX);
+#if 0
     if (datatype & TAUCS_SCOMPLEX) {
       taucs_re(((taucs_scomplex*)X)[i])=(taucs_single) ((double)random()/(double)RAND_MAX);
       taucs_im(((taucs_scomplex*)X)[i])=(taucs_single) ((double)random()/(double)RAND_MAX);
@@ -276,13 +427,14 @@ int main(int argc, char* argv[])
       taucs_re(((taucs_dcomplex*)X)[i])=(taucs_double) ((double)random()/(double)RAND_MAX);
       taucs_im(((taucs_dcomplex*)X)[i])=(taucs_double) ((double)random()/(double)RAND_MAX);
     }
+#endif
   }
 
   taucs_ccs_times_vec(A,X,B);
   
   /*rc = taucs_linsolve(A,NULL,1,Y,B,argv,opt_arg);*/
 
-  call_mumps(A,Y,B);
+  call_mumps(A,Y,B,opt_mumps_spd,opt_mumps_ind);
 
   rnorm(A,Y,B,Z);
 

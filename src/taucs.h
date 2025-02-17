@@ -93,6 +93,10 @@ typedef int perm_t;
 #define TAUCS_ERROR_BADARGS                -3
 #define TAUCS_ERROR_INDEFINITE             -4
 #define TAUCS_ERROR_MAXDEPTH               -5
+#define TAUCS_ERROR_SINGULAR               -6
+#define TAUCS_ERROR_BADPIVOT               -7
+#define TAUCS_ERROR_DATATYPE               -8
+#define TAUCS_ERROR_IO                     -9
 
 #define TAUCS_INT       1024
 #define TAUCS_DOUBLE    2048
@@ -470,8 +474,17 @@ extern taucs_scomplex taucs_cminusone_const;
 
 #define taucs_gemm  taucs_blas_name(sgemm)
 #define taucs_potrf taucs_blas_name(spotrf)
+#define taucs_getrf taucs_blas_name(sgetrf)
 #define taucs_herk  taucs_blas_name(ssyrk)
 #define taucs_trsm  taucs_blas_name(strsm)
+#define taucs_her		taucs_blas_name(ssyr)
+#define taucs_ger		taucs_blas_name(sger)
+#define taucs_scal	taucs_blas_name(sscal)
+#define taucs_sytrf taucs_blas_name(ssytrf)
+#define taucs_copy	taucs_blas_name(scopy)
+#define taucs_gemv	taucs_blas_name(sgemv)
+#define taucs_swap	taucs_blas_name(sswap)
+#define taucs_iamax	taucs_blas_name(isamax)
 #endif
 
 #ifdef TAUCS_CORE_DOUBLE
@@ -485,8 +498,17 @@ extern taucs_scomplex taucs_cminusone_const;
 
 #define taucs_gemm  taucs_blas_name(dgemm)
 #define taucs_potrf taucs_blas_name(dpotrf)
+#define taucs_getrf taucs_blas_name(dgetrf)
 #define taucs_herk  taucs_blas_name(dsyrk)
 #define taucs_trsm  taucs_blas_name(dtrsm)
+#define taucs_her		taucs_blas_name(dsyr)
+#define taucs_ger		taucs_blas_name(dger)
+#define taucs_scal	taucs_blas_name(dscal)
+#define taucs_sytrf taucs_blas_name(dsytrf)
+#define taucs_copy	taucs_blas_name(dcopy)
+#define taucs_gemv	taucs_blas_name(dgemv)
+#define taucs_swap	taucs_blas_name(dswap)
+#define taucs_iamax	taucs_blas_name(idamax)
 #endif
 
 /*
@@ -511,8 +533,17 @@ extern taucs_scomplex taucs_cminusone_const;
 
 #define taucs_gemm  taucs_blas_name(cgemm)
 #define taucs_potrf taucs_blas_name(cpotrf)
+#define taucs_getrf taucs_blas_name(cgetrf)
 #define taucs_herk  taucs_blas_name(cherk)
 #define taucs_trsm  taucs_blas_name(ctrsm)
+#define taucs_her		taucs_blas_name(cher)
+#define taucs_ger		taucs_blas_name(cgerc)
+#define taucs_scal	taucs_blas_name(cscal)
+#define taucs_sytrf taucs_blas_name(csytrf)
+#define taucs_copy	taucs_blas_name(ccopy)
+#define taucs_gemv	taucs_blas_name(cgemv)
+#define taucs_swap	taucs_blas_name(cswap)
+#define taucs_iamax	taucs_blas_name(icamax)
 #endif
 
 #ifdef TAUCS_CORE_DCOMPLEX
@@ -526,8 +557,17 @@ extern taucs_scomplex taucs_cminusone_const;
 
 #define taucs_gemm  taucs_blas_name(zgemm)
 #define taucs_potrf taucs_blas_name(zpotrf)
+#define taucs_getrf taucs_blas_name(zgetrf)
 #define taucs_herk  taucs_blas_name(zherk)
 #define taucs_trsm  taucs_blas_name(ztrsm)
+#define taucs_her		taucs_blas_name(zher)
+#define taucs_ger		taucs_blas_name(zgerc)
+#define taucs_scal	taucs_blas_name(zscal)
+#define taucs_sytrf taucs_blas_name(zsytrf)
+#define taucs_copy	taucs_blas_name(zcopy)
+#define taucs_gemv	taucs_blas_name(zgemv)
+#define taucs_swap	taucs_blas_name(zswap)
+#define taucs_iamax	taucs_blas_name(izamax)
 #endif
 
 /*********************************************************/
@@ -561,6 +601,22 @@ typedef struct {
   /* the following may change! do not rely on them. */
   double nreads, nwrites, bytes_read, bytes_written, read_time, write_time;
 } taucs_io_handle;
+
+/* forward type declarations for various structures */
+/*typedef struct multilu_blocked_factor_st multilu_blocked_factor;*/
+typedef struct taucs_multilu_factor_st   taucs_multilu_factor;
+typedef struct taucs_multilu_symbolic_st taucs_multilu_symbolic;
+typedef struct taucs_multilu_etree_st    taucs_multilu_etree;
+
+typedef struct
+{
+  int m, n;
+  
+  taucs_ccs_matrix *L;
+  taucs_ccs_matrix *U;
+  int *c;		  /* column order */
+  int *r;		  /* row order */
+} taucs_lu_factor;
 
 /* generate all the prototypes */
 
@@ -670,6 +726,7 @@ typedef double taucs_real_datatype;
 /*********************************************************/
 
 double taucs_get_nan(void);
+double taucs_get_inf(void);
 
 /* 
    routines for testing memory allocation.
@@ -758,6 +815,69 @@ void  taucs_free_stub(void *ptr);
 #endif
 
 /*********************************************************/
+/* profiling                                             */
+/*********************************************************/
+
+#if (defined(TAUCS_CONFIG_PROFILING) && defined(TAUCS_CONFIG_TIMING))
+
+#include <assert.h>
+
+typedef enum {
+  taucs_profile_multilu_dense_fctr    = 0,
+  taucs_profile_multilu_dense_solve   = 1,
+  taucs_profile_multilu_cnv_lu        = 2,
+  taucs_profile_multilu_compress      = 3,
+  taucs_profile_multilu_focus_rows    = 4,
+  taucs_profile_multilu_focus_cols    = 5,
+  taucs_profile_multilu_align_add     = 6,
+  taucs_profile_multilu_degrees       = 7,
+  taucs_profile_multilu_preorder      = 8,
+  taucs_profile_multilu_sym_anlz      = 9,
+  taucs_profile_multilu_compress_fctr = 10
+} taucs_profile_identifier;
+
+extern
+struct taucs_profile_st {
+  char*  label;
+  taucs_profile_identifier id;
+  int    n;     /* count     */
+  double wtime; /* total     */
+  double ctime; /* total     */
+  double w;     /* temporary */
+  double c;     /* temporary */
+} taucs_profile[];
+
+
+#define TAUCS_PROFILE_START(i) \
+assert( taucs_profile[(i)].id== i );\
+assert( taucs_profile[(i)].w == -1 );\
+assert( taucs_profile[(i)].c == -1 );\
+taucs_profile[(i)].w = taucs_wtime();\
+taucs_profile[(i)].c = taucs_ctime();
+    
+#define TAUCS_PROFILE_STOP(i) \
+assert( taucs_profile[(i)].id == i );\
+assert( taucs_profile[(i)].wtime != -1 );\
+assert( taucs_profile[(i)].ctime != -1 );\
+(taucs_profile[(i)].n)++;\
+taucs_profile[(i)].wtime += taucs_wtime() - taucs_profile[(i)].w;\
+taucs_profile[(i)].ctime += taucs_ctime() - taucs_profile[(i)].c;\
+taucs_profile[(i)].w = -1;\
+taucs_profile[(i)].c = -1;
+
+
+#else
+
+/* Empty functions */
+
+#define TAUCS_PROFILE_START(i)
+#define TAUCS_PROFILE_STOP(i)
+
+#endif
+
+void taucs_profile_report();
+
+/*********************************************************/
 /*                                                       */
 /*********************************************************/
 
@@ -767,15 +887,6 @@ extern int creadhb_(char*, int*, int*, int*, int*, int*, taucs_scomplex*);
 extern int dreadhb_(char*, int*, int*, int*, int*, int*, taucs_double*);
 extern int sreadhb_(char*, int*, int*, int*, int*, int*, taucs_single*);
 extern int zreadhb_(char*, int*, int*, int*, int*, int*, taucs_dcomplex*);
-
-extern int amdexa_(int*, int*, int*, int*, int*, int*, int*, int*, int*, 
-			int*, int*, int*, int*, int*, int*);
-extern int amdtru_(int*, int*, int*, int*, int*, int*, int*, int*, int*, 
-			int*, int*, int*, int*, int*, int*);
-extern int amdbar_(int*, int*, int*, int*, int*, int*, int*, int*, int*, 
-			int*, int*, int*, int*, int*, int*);
-extern int genmmd_(int*, int*, int*, int*, int*, int*, int*, int*, int*, 
-			int*, int*, int*);
 
 /*********************************************************/
 /*                                                       */
@@ -812,6 +923,7 @@ extern int isinf(double);
 #endif
 
 extern int taucs_potrf(char*, int*, taucs_datatype*, int*, int*);
+extern int taucs_getrf(int* m, int* n, taucs_datatype* A, int* lda, int* ipiv, int* info);
 extern int taucs_trsm(char *, char *, char *, char *, 
 			int*, int*, taucs_datatype*, taucs_datatype*, int *, 
 			taucs_datatype*, int *);
@@ -824,6 +936,18 @@ extern int taucs_herk(char *, char *,
 		      taucs_datatype*, int *, 
 		      taucs_real_datatype*, 
 		      taucs_datatype*, int *);
+extern int taucs_her(char*, int*, taucs_datatype*, taucs_datatype*, int*, 
+										 taucs_datatype*, int*);
+extern int taucs_ger(int*, int*, taucs_datatype*, taucs_datatype*, int*,
+										 taucs_datatype*, int*, taucs_datatype*, int* );
+extern int taucs_scal(int*, taucs_datatype*, taucs_datatype*, int*);
+extern int taucs_sytrf(char*, int*, taucs_datatype*, int*, int*, taucs_datatype*,
+											 int*, int*);
+extern int taucs_copy(int*, taucs_datatype*, int*, taucs_datatype*, int*);
+extern int taucs_gemv(char*, int*, int*, taucs_datatype*, taucs_datatype*, int*,
+											taucs_datatype*, int*, taucs_datatype*, taucs_datatype*, int* );
+extern int taucs_swap(int*, taucs_datatype*, int*, taucs_datatype*, int* );
+extern int taucs_iamax(int*, taucs_datatype*, int*);
 
 taucs_double taucs_blas_name(dnrm2)(int*, taucs_double*, int*);
 taucs_single taucs_blas_name(snrm2)(int*, taucs_single*, int*);

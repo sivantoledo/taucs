@@ -161,6 +161,9 @@ int taucs_getopt_string(char* cmd, void* args[], char* name, char** x) {
 #define TAUCS_FACTORTYPE_LDLT_CCS       3
 #define TAUCS_FACTORTYPE_LLT_OOC        4
 #define TAUCS_FACTORTYPE_LU_OOC         5
+#define TAUCS_FACTORTYPE_IND            6
+#define TAUCS_FACTORTYPE_IND_OOC        7
+#define TAUCS_FACTORTYPE_LU             8
 
 typedef struct {
   int   n;
@@ -181,6 +184,10 @@ static void taucs_linsolve_free(void* vF)
     taucs_supernodal_factor_free(F->L);
   if (F->type == TAUCS_FACTORTYPE_LLT_CCS)
     taucs_ccs_free(F->L);
+#ifdef TAUCS_CONFIG_MULTILU
+  if (F->type == TAUCS_FACTORTYPE_LU)
+    taucs_multilu_factor_free(F->L);
+#endif
   taucs_free(F->rowperm);
   taucs_free(F->colperm);
   taucs_free(F);
@@ -218,6 +225,7 @@ int taucs_linsolve(taucs_ccs_matrix* A,
 
   int    opt_llt       =  0;
   int    opt_lu        =  0;
+  int    opt_ind       =  0;
 
   int    opt_mf        =  0;
   int    opt_ll        =  0;
@@ -267,6 +275,7 @@ int taucs_linsolve(taucs_ccs_matrix* A,
       understood |= taucs_getopt_boolean(options[i],opt_arg,"taucs.factor.numeric",&opt_numeric); 
       understood |= taucs_getopt_boolean(options[i],opt_arg,"taucs.factor.LLT",&opt_llt); 
       understood |= taucs_getopt_boolean(options[i],opt_arg,"taucs.factor.LU",&opt_lu); 
+      understood |= taucs_getopt_boolean(options[i],opt_arg,"taucs.factor.indefinite", &opt_ind);
       understood |= taucs_getopt_boolean(options[i],opt_arg,"taucs.factor.mf",&opt_mf); 
       understood |= taucs_getopt_boolean(options[i],opt_arg,"taucs.factor.ll",&opt_ll); 
       understood |= taucs_getopt_string(options[i],opt_arg,"taucs.factor.ordering",&opt_ordering); 
@@ -325,11 +334,14 @@ int taucs_linsolve(taucs_ccs_matrix* A,
 	"genmmd"
 #elif defined(TAUCS_CONFIG_AMD)
 	"amd"
+#else
+	"none" /* no other ordering was given, so it will not work. but atleast it will compile... */
 #endif
 	;
   
     taucs_printf("taucs_linsolve: ordering (llt=%d, lu=%d, ordering=%s)\n",
-		 opt_llt,opt_lu,opt_ordering);
+		 opt_llt,opt_lu
+		 ,opt_ordering);
     tw = taucs_wtime();
     tc = taucs_ctime();
     taucs_ccs_order(M ? M : A,&rowperm,&colperm,opt_ordering);
@@ -342,9 +354,9 @@ int taucs_linsolve(taucs_ccs_matrix* A,
 
     f->rowperm = rowperm;
     f->colperm = colperm;
-
-    if (opt_llt) {
-      taucs_printf("taucs_linsolve: starting LLT factorization\n");
+    
+    if (opt_llt || opt_ind) {
+      taucs_printf("taucs_linsolve: starting LLT/LDLT factorization\n");
       if (M) {
 	taucs_printf("taucs_linsolve: pre-factorization permuting of M\n");
 	PMPT = taucs_ccs_permute_symmetrically(M,rowperm,colperm);
@@ -364,7 +376,7 @@ int taucs_linsolve(taucs_ccs_matrix* A,
       }
 
       if (opt_ooc) {
-	taucs_printf("taucs_linsolve: starting OOC LLT factorization\n");
+	taucs_printf("taucs_linsolve: starting OOC LLT/LDLT factorization\n");
 	if ((!opt_ooc_name && !opt_ooc_handle)
 	    || (opt_ooc_name && opt_ooc_handle)) {
 	  taucs_printf("taucs_linsolve: ERROR, you must specify either a basename or an iohandle for an out-of-core factorization\n");
@@ -391,108 +403,239 @@ int taucs_linsolve(taucs_ccs_matrix* A,
 	taucs_printf("taucs_linsolve: ooc file created?=%d opened?=%d\n",
 		     local_handle_create,local_handle_open);
 	if (opt_ooc_memory < 0.0) opt_ooc_memory = taucs_available_memory_size();
-	if (taucs_ooc_factor_llt(PMPT ? PMPT : PAPT, 
-				 opt_ooc_handle, opt_ooc_memory) == TAUCS_SUCCESS)
+	if (opt_ind) {
+	  if ( taucs_ooc_factor_ldlt(PMPT ? PMPT : PAPT,
+				     opt_ooc_handle, opt_ooc_memory) == TAUCS_SUCCESS)
+	    f->type = TAUCS_FACTORTYPE_IND_OOC;
+	  else {
+	    retcode = TAUCS_ERROR;
+	    goto release_and_return;
+	  }
+	}
+	else if (taucs_ooc_factor_llt(PMPT ? PMPT : PAPT, 
+				      opt_ooc_handle, opt_ooc_memory) == TAUCS_SUCCESS)
 	  f->type = TAUCS_FACTORTYPE_LLT_OOC;
 	else {
 	  retcode = TAUCS_ERROR;
 	  goto release_and_return;
 	}
+
+	if (opt_ind) {
+		int* inertia = taucs_calloc(3,sizeof(int));
+		taucs_inertia_calc_ooc(A->flags,opt_ooc_handle,inertia);
+		taucs_printf("\t\tInertia: #0: %d #+: %d #-: %d\n",inertia[0],inertia[1],inertia[2]);
+		taucs_free(inertia);
+	}
       } else { /* in-core */
-	taucs_printf("taucs_linsolve: starting IC LLT factorization\n");
-	if (opt_mf) {
-	  taucs_printf("taucs_linsolve: starting IC LLT MF factorization\n");
+	if (opt_ind) {
+	  taucs_printf("taucs_linsolve: starting IC indefinite factorization\n");
+	  if (opt_mf) {
+	    taucs_printf("taucs_linsolve: starting IC indefinite MF factorization\n");
+	    if (!opt_numeric && opt_symbolic)
+	      f->L = taucs_ccs_factor_ldlt_symbolic_maxdepth(PMPT ? PMPT : PAPT,(int) opt_maxdepth);
 
-#ifdef TAUCS_CILK
-	  if (!opt_context) {
-	    char* argv[16]  = {"program_name" };
-	    char  bufs[16][16];
-	    int   p = 0;
-	    int   argc;
-
-	    for (argc=1; argc<16; argc++) argv[argc] = 0;
-	    argc = 1;
+	    if (opt_numeric && !opt_symbolic) {
+	      int rc;
+	      if (!F 
+		  || !(*F) 
+		  || ((taucs_factorization*)*F)->type != TAUCS_FACTORTYPE_IND) {
+		taucs_printf("taucs_linsolve: ERROR, you need to provide a symbolic factorization for a numeric factorization\n");
+		retcode = TAUCS_ERROR_BADARGS;
+		goto release_and_return;
+	      }
+	      f->L = ((taucs_factorization*)*F)->L;
+	      taucs_supernodal_factor_free_numeric(f->L);
+	      rc = taucs_ccs_factor_ldlt_numeric(PMPT ? PMPT : PAPT, f->L);
+	    }
 	    
-	    argv[argc++] = "--pthread-stacksize";
-	    argv[argc++] = "2000000";
-	    argv[argc++] = "--stack";
-	    argv[argc++] = "2000000";
-
-	    if (opt_cilk_nproc > 0) {
-	      argv[argc++] = "--nproc";
-	      sprintf(bufs[p],"%d",(int) opt_cilk_nproc);
-	      argv[argc++] = bufs[p++];
+	    if (opt_numeric && opt_symbolic) {
+	      f->L = taucs_ccs_factor_ldlt_mf_maxdepth(PMPT ? PMPT : PAPT,(int) opt_maxdepth);
 	    }
-
-	    taucs_printf("taucs_ccs_linsolve:_cilk_init\n");
-	    opt_context = Cilk_init(&argc,argv);
-	    local_context = TRUE;
-	  }
-#endif
-
-	  if (!opt_numeric && opt_symbolic)
-	    f->L = taucs_ccs_factor_llt_symbolic_maxdepth(PMPT ? PMPT : PAPT,(int) opt_maxdepth);
-
-	  if (opt_numeric && !opt_symbolic) {
-	    int rc;
-	    if (!F 
-		|| !(*F) 
-		|| ((taucs_factorization*)*F)->type != TAUCS_FACTORTYPE_LLT_SUPERNODAL) {
-	      taucs_printf("taucs_linsolve: ERROR, you need to provide a symbolic factorization for a numeric factorization\n");
-	      retcode = TAUCS_ERROR_BADARGS;
+	    
+	    if (! (f->L) ) {
+	      taucs_printf("taucs_factor: factorization failed\n");
+	      retcode = TAUCS_ERROR;
 	      goto release_and_return;
+	    } else {
+	      f->type = TAUCS_FACTORTYPE_IND;
 	    }
-	    f->L = ((taucs_factorization*)*F)->L;
-	    taucs_supernodal_factor_free_numeric(f->L);
-
-#ifdef TAUCS_CILK	  
-	    rc = EXPORT(taucs_ccs_factor_llt_numeric)(opt_context, PMPT ? PMPT : PAPT, f->L);
-#else
-	    rc = taucs_ccs_factor_llt_numeric(PMPT ? PMPT : PAPT, f->L);
-#endif
+	  } else if (opt_ll || TRUE) {/* this is the default*/
+	    taucs_printf("taucs_linsolve: starting IC indefinite LL factorization\n");
+	    f->L = taucs_ccs_factor_ldlt_ll_maxdepth(PMPT ? PMPT : PAPT,(int) opt_maxdepth);
+	    if (! (f->L) ) {
+	      taucs_printf("taucs_factor: factorization failed\n");
+	      retcode = TAUCS_ERROR;
+	      goto release_and_return;
+	    } else {
+	      f->type = TAUCS_FACTORTYPE_IND;
+	    }
 	  }
-
-	  if (opt_numeric && opt_symbolic) {
-#ifdef TAUCS_CILK	  
-	    f->L = EXPORT(taucs_ccs_factor_llt_mf_maxdepth)(opt_context,
-							    PMPT ? PMPT : PAPT,
-							    (int) opt_maxdepth);
-#else
-	    f->L = taucs_ccs_factor_llt_mf_maxdepth(PMPT ? PMPT : PAPT,(int) opt_maxdepth);
-#endif
-	  }
-
-	  if (! (f->L) ) {
-	    taucs_printf("taucs_factor: factorization failed\n");
-	    retcode = TAUCS_ERROR;
-	    goto release_and_return;
-	  } else {
-	    f->type = TAUCS_FACTORTYPE_LLT_SUPERNODAL;
-	  }
+	} else { /* llt */
+	  taucs_printf("taucs_linsolve: starting IC LLT factorization\n");
+	  if (opt_mf) {
+	    taucs_printf("taucs_linsolve: starting IC LLT MF factorization\n");
 
 #ifdef TAUCS_CILK
-	  if (local_context) Cilk_terminate((CilkContext*) opt_context);
+	    if (!opt_context) {
+	      char* argv[16]  = {"program_name" };
+	      char  bufs[16][16];
+	      int   p = 0;
+	      int   argc;
+	      
+	      for (argc=1; argc<16; argc++) argv[argc] = 0;
+	      argc = 1;
+	      
+	      if (opt_cilk_nproc > 0) {
+		argv[argc++] = "--nproc";
+		sprintf(bufs[p],"%d",(int) opt_cilk_nproc);
+		argv[argc++] = bufs[p++];
+	      }
+	      
+	      taucs_printf("taucs_ccs_linsolve:_cilk_init\n");
+	      opt_context = Cilk_init(&argc,argv);
+	      local_context = TRUE;
+	    }
 #endif
-	} else if (opt_ll || TRUE) { /* this will be the default LLT */
-	  taucs_printf("taucs_linsolve: starting IC LLT LL factorization\n");
-	  f->L = taucs_ccs_factor_llt_ll_maxdepth(PMPT ? PMPT : PAPT,(int) opt_maxdepth);
-	  if (! (f->L) ) {
-	    taucs_printf("taucs_factor: factorization failed\n");
-	    retcode = TAUCS_ERROR;
-	    goto release_and_return;
-	  } else {
-	    f->type = TAUCS_FACTORTYPE_LLT_SUPERNODAL;
-	  }
-	} /* left-looking */
+
+	    if (!opt_numeric && opt_symbolic)
+	      f->L = taucs_ccs_factor_llt_symbolic_maxdepth(PMPT ? PMPT : PAPT,(int) opt_maxdepth);
+
+	    if (opt_numeric && !opt_symbolic) {
+	      int rc;
+	      if (!F 
+		  || !(*F) 
+		  || ((taucs_factorization*)*F)->type != TAUCS_FACTORTYPE_LLT_SUPERNODAL) {
+		taucs_printf("taucs_linsolve: ERROR, you need to provide a symbolic factorization for a numeric factorization\n");
+		retcode = TAUCS_ERROR_BADARGS;
+		goto release_and_return;
+	      }
+	      f->L = ((taucs_factorization*)*F)->L;
+	      taucs_supernodal_factor_free_numeric(f->L);
+
+#ifdef TAUCS_CILK	  
+	      rc = EXPORT(taucs_ccs_factor_llt_numeric)(opt_context, PMPT ? PMPT : PAPT, f->L);
+#else
+	      rc = taucs_ccs_factor_llt_numeric(PMPT ? PMPT : PAPT, f->L);
+#endif
+	    }
+
+	    if (opt_numeric && opt_symbolic) {
+#ifdef TAUCS_CILK	  
+	      f->L = EXPORT(taucs_ccs_factor_llt_mf_maxdepth)(opt_context,
+							      PMPT ? PMPT : PAPT,
+							      (int)opt_maxdepth);
+#else
+	      f->L = taucs_ccs_factor_llt_mf_maxdepth(PMPT ? PMPT : PAPT,(int)opt_maxdepth);
+#endif
+	    }
+
+	    if (! (f->L) ) {
+	      taucs_printf("taucs_factor: factorization failed\n");
+	      retcode = TAUCS_ERROR;
+	      goto release_and_return;
+	    } else {
+	      f->type = TAUCS_FACTORTYPE_LLT_SUPERNODAL;
+	    }
+
+#ifdef TAUCS_CILK
+	    if (local_context) Cilk_terminate((CilkContext*) opt_context);
+#endif
+	  } else if (opt_ll || TRUE) { /* this will be the default LLT */
+	    taucs_printf("taucs_linsolve: starting IC LLT LL factorization\n");
+	    f->L = taucs_ccs_factor_llt_ll_maxdepth(PMPT ? PMPT : PAPT,(int) opt_maxdepth);
+	    if (! (f->L) ) {
+	      taucs_printf("taucs_factor: factorization failed\n");
+	      retcode = TAUCS_ERROR;
+	      goto release_and_return;
+	    } else {
+	      f->type = TAUCS_FACTORTYPE_LLT_SUPERNODAL;
+	    }
+	  } /* left-looking */
+	} /* indefinite */
+
+	if (opt_ind) {
+		int* inertia = taucs_calloc(3,sizeof(int));
+		if ( f->L ) 
+			taucs_inertia_calc(f->L,inertia);
+		taucs_printf("\t\tInertia: #0: %d #+: %d #-: %d\n",inertia[0],inertia[1],inertia[2]);
+		taucs_free(inertia);
+	}
+
       } /* in-core */
-    } /* llt */
+    } /* llt/ldlt */
+    if (opt_lu) {
+      taucs_printf("taucs_linsolve: starting LU factorization\n");
+
+      if (opt_ooc) {
+	taucs_printf("taucs_linsolve: starting OOC LU factorization\n");
+	taucs_printf("taucs_linsolve: not yet implemented\n");
+	retcode = TAUCS_ERROR_BADARGS;
+	goto release_and_return;
+      } else { /* in-core */
+
+	if (opt_numeric && opt_symbolic) {
+#ifndef TAUCS_CONFIG_MULTILU
+	  taucs_printf("taucs_linsolve: MULTILU factorization not included in the configuration\n");
+	  retcode = TAUCS_ERROR; 
+	  goto release_and_return;
+
+#else
+	  taucs_printf("taucs_linsolve: starting MULTILU factorization\n");
+
+	  tw = taucs_wtime();
+	  tc = taucs_ctime();
+
+#ifdef TAUCS_CILK
+	    if (!opt_context) {
+	      char* argv[16]  = {"program_name" };
+	      char  bufs[16][16];
+	      int   p = 0;
+	      int   argc;
+	      
+	      for (argc=1; argc<16; argc++) argv[argc] = 0;
+	      argc = 1;
+	      
+	      if (opt_cilk_nproc > 0) {
+		argv[argc++] = "--nproc";
+		sprintf(bufs[p],"%d",(int) opt_cilk_nproc);
+		argv[argc++] = bufs[p++];
+	      }
+	      
+	      taucs_printf("taucs_ccs_linsolve:_cilk_init\n");
+	      opt_context = Cilk_init(&argc,argv);
+	      local_context = TRUE;
+	    }
+#endif
+
+#ifdef TAUCS_CILK
+	  f->L = EXPORT(taucs_ccs_factor_lu)(opt_context, A, f->rowperm, 1.0);
+#else
+	  f->L = taucs_ccs_factor_lu(A, f->rowperm, 1.0);
+#endif
+	  taucs_printf("taucs_linsolve: factor time %.02e seconds (%.02e seconds CPU time)\n",taucs_wtime()-tw,taucs_ctime()-tc);	  
+	}
+	    
+	if (! (f->L) ) {
+	  taucs_printf("taucs_linsolve: factorization failed\n");
+	  retcode = TAUCS_ERROR;
+	  goto release_and_return;
+	} else 
+	  f->type = TAUCS_FACTORTYPE_LU;
+      } /* in core */
+    } /* lu */
   }
+  #endif
 
-  if (nrhs > 0) {
-
+  /* Non LU solve */
+  if (nrhs > 0 && (f->type != TAUCS_FACTORTYPE_LU) ) {
+    
     int             (*precond_fn)(void*,void* x,void* b) = NULL;
+		int             (*precond_fn_many)(void*,int,void* X,int x,void* B,int b) = NULL;
     void*           precond_arg = NULL;
     int    j;
+
+    tw = taucs_wtime();
+    tc = taucs_ctime();
 
     if (!f) {
       if (!F || !(*F)) {
@@ -541,6 +684,14 @@ int taucs_linsolve(taucs_ccs_matrix* A,
       precond_fn  = taucs_ooc_solve_llt;
       precond_arg = opt_ooc_handle;
       break;
+    case TAUCS_FACTORTYPE_IND_OOC:
+      precond_fn_many  = taucs_ooc_solve_ldlt_many;
+      precond_arg = opt_ooc_handle;
+      break;
+    case TAUCS_FACTORTYPE_IND:
+      precond_fn_many  = taucs_supernodal_solve_ldlt_many;
+      precond_arg = f->L;
+      break;
     default:
       assert(0);
     }
@@ -553,38 +704,109 @@ int taucs_linsolve(taucs_ccs_matrix* A,
       goto release_and_return;
     }
 
-    for (j=0; j<nrhs; j++) {
-      int ld = (A->n) * element_size(A->flags);
-      
-      taucs_vec_permute (A->n,A->flags,(char*)B+j*ld,(char*)PB+j*ld,f->rowperm);
+		if ( f->type == TAUCS_FACTORTYPE_IND_OOC ||
+			f->type == TAUCS_FACTORTYPE_IND ) {
+			/* solve PB as a whole, and not 1 by 1 */
+							
+			int ld = (A->n) * element_size(A->flags);
+			for (j=0; j<nrhs; j++)
+			  taucs_vec_permute (A->n,A->flags,(char*)B+j*ld,(char*)PB+j*ld,f->rowperm);
 
-      if (opt_cg) {
-	taucs_conjugate_gradients (PAPT,
-				   precond_fn, precond_arg,
-				   (char*)PX+j*ld, (char*)PB+j*ld,
-				   (int) opt_maxits,
-				   opt_convergetol);
-	
-      } else if (opt_minres) {
-	taucs_minres              (PAPT,
-				   precond_fn, precond_arg,
-				   (char*)PX+j*ld, (char*)PB+j*ld,
-				   (int) opt_maxits,
-				   opt_convergetol);
-      } else if (precond_fn) {
-	(*precond_fn)(precond_arg,(char*)PX+j*ld,(char*)PB+j*ld);
-      } else {
-	taucs_printf("taucs_linsolve: I don't know how to solve!\n");
-	retcode = TAUCS_ERROR;
-	goto release_and_return;
-      }
-   
-      taucs_vec_ipermute(A->n,A->flags,(char*)PX+j*ld,(char*)X+j*ld,f->rowperm);
-    }
+			if (precond_fn_many) {
+				(*precond_fn_many)(precond_arg,nrhs,PX,ld,PB,ld);
+			} else {
+				taucs_printf("taucs_linsolve: I don't know how to solve!\n");
+				retcode = TAUCS_ERROR;
+				goto release_and_return;
+			}
+
+			for (j=0; j<nrhs; j++) {
+				taucs_vec_ipermute(A->n,A->flags,(char*)PX+j*ld,(char*)X+j*ld,f->rowperm);
+			}
+
+			
+		} else {
+
+			for (j=0; j<nrhs; j++) {
+				int ld = (A->n) * element_size(A->flags);
+	      
+				taucs_vec_permute (A->n,A->flags,(char*)B+j*ld,(char*)PB+j*ld,f->rowperm);
+
+				if (opt_cg) {
+		taucs_conjugate_gradients (PAPT,
+						precond_fn, precond_arg,
+						(char*)PX+j*ld, (char*)PB+j*ld,
+						(int) opt_maxits,
+						opt_convergetol);
+		
+				} else if (opt_minres) {
+		taucs_minres              (PAPT,
+						precond_fn, precond_arg,
+						(char*)PX+j*ld, (char*)PB+j*ld,
+						(int) opt_maxits,
+						opt_convergetol);
+				} else if (precond_fn) {
+		(*precond_fn)(precond_arg,(char*)PX+j*ld,(char*)PB+j*ld);
+				} else {
+		taucs_printf("taucs_linsolve: I don't know how to solve!\n");
+		retcode = TAUCS_ERROR;
+		goto release_and_return;
+				}
+	   
+				taucs_vec_ipermute(A->n,A->flags,(char*)PX+j*ld,(char*)X+j*ld,f->rowperm);
+			}
+		}
 
     taucs_free(PB);
     taucs_free(PX);
+
+    taucs_printf("taucs_linsolve: solve time %.02e seconds (%.02e seconds CPU time)\n",taucs_wtime()-tw,taucs_ctime()-tc);
+
   }
+
+  /* LU solve */
+  if (nrhs > 0 && (f->type == TAUCS_FACTORTYPE_LU) ) {
+
+    tw = taucs_wtime();
+    tc = taucs_ctime();
+    
+    if (!f) {
+      if (!F || !(*F)) {
+	taucs_printf("taucs_linsolve: can't solve, no factorization\n");
+	retcode = TAUCS_ERROR;
+	goto release_and_return;
+      } else {
+	if (F && *F)
+	  f = (taucs_factorization*) *F;
+	else {
+	  taucs_printf("taucs_linsolve: can't solve, no factorization\n");
+	  retcode = TAUCS_ERROR;
+	  goto release_and_return;
+	} 
+      }
+    }
+
+
+#ifndef TAUCS_CONFIG_MULTILU
+    taucs_printf("taucs_linsolve: MULTILU not included in the configuration\n");
+    retcode = TAUCS_ERROR; 
+    goto release_and_return;
+#else
+    taucs_printf("taucs_linsolve: doing an LU solve, n=%d, nrhs=%d\n",A->n,nrhs);
+
+#ifdef TAUCS_CILK
+    retcode = EXPORT(taucs_multilu_solve_many)(opt_context, f->L, nrhs, X, A->n, B, A->n);
+#else
+    retcode = taucs_multilu_solve_many(f->L, nrhs, X, A->n, B, A->n);
+#endif
+
+    if (retcode != TAUCS_SUCCESS) 
+      goto release_and_return;
+
+    taucs_printf("taucs_linsolve: solve time %.02e seconds (%.02e seconds CPU time)\n",taucs_wtime()-tw,taucs_ctime()-tc);
+#endif
+  }
+
 
   if (F) {
     if (local_handle_open)   taucs_io_close(opt_ooc_handle);
@@ -592,7 +814,8 @@ int taucs_linsolve(taucs_ccs_matrix* A,
     
     *F = f;
   } else {
-    if (f->type == TAUCS_FACTORTYPE_LLT_OOC) {
+    if (f->type == TAUCS_FACTORTYPE_LLT_OOC ||
+				f->type == TAUCS_FACTORTYPE_IND_OOC ) {
       if (local_handle_open)   taucs_io_close(opt_ooc_handle);
       if (local_handle_create) taucs_io_delete(opt_ooc_handle);
     }
@@ -602,6 +825,9 @@ int taucs_linsolve(taucs_ccs_matrix* A,
   taucs_ccs_free(PMPT);
   taucs_ccs_free(PAPT);
   taucs_ccs_free(M);
+
+  /* Finally report on the profiled tasks */
+  taucs_profile_report();
 
   return retcode;
 

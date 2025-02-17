@@ -90,6 +90,7 @@ FILES = \
 	configurator$(PATHSEP)taucs_*.* \
 	doc$(PATHSEP)taucs.pdf \
 	doc$(PATHSEP)cilk-mf.pdf \
+	$(DIREXTSRC)amd_License \
 	$(DIREXTSRC)*.h \
 	$(DIREXTSRC)*.c \
 	$(DIREXTSRC)*.f \

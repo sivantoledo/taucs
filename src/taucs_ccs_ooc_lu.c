@@ -10,6 +10,17 @@
 #include <math.h>
 #include <assert.h>
 
+
+/*
+  extern int EF_ALIGNMENT;
+  extern int EF_PROTECT_BELOW;
+  extern int EF_PROTECT_FREE;
+  extern int EF_ALLOW_MALLOC_0;
+  extern int EF_FILL;
+*/
+
+
+
 #include "taucs.h"
 
 #define HEADER_NROWS   0
@@ -62,69 +73,69 @@ static double remaining_memory;
   Uvalues[1]
   ...
 */
-  
+
 static
 int Lappendcol(taucs_io_handle* LU, int j, int nnz, int* ind, taucs_datatype* re)
 {
-  taucs_io_append(LU,
-		  0 + HEADER+j*4,
-		  nnz,1,
-		  TAUCS_INT,
-		  ind);
-  taucs_io_append(LU,
-		  1 + HEADER+j*4,
-		  nnz,1,
-		  TAUCS_CORE_DATATYPE,
-		  re);
-  return 0;
+  if (taucs_io_append(LU,
+		       0 + HEADER+j*4,
+		       nnz,1,
+		       TAUCS_INT,
+		       ind)) return TAUCS_ERROR_IO;
+  if (taucs_io_append(LU,
+		      1 + HEADER+j*4,
+		      nnz,1,
+		      TAUCS_CORE_DATATYPE,
+		      re)) return TAUCS_ERROR_IO;
+  return TAUCS_SUCCESS;
 }
 
 static
 int Uappendcol(taucs_io_handle* LU, int j, int nnz, int* ind, taucs_datatype* re)
 {
-  taucs_io_append(LU,
-		  2 + HEADER+j*4,
-		  nnz,1,
-		  TAUCS_INT,
-		  ind);
-  taucs_io_append(LU,
-		  3 + HEADER+j*4,
-		  nnz,1,
-		  TAUCS_CORE_DATATYPE,
-		  re);
-  return 0;
+  if (taucs_io_append(LU,
+		       2 + HEADER+j*4,
+		       nnz,1,
+		       TAUCS_INT,
+		       ind)) return TAUCS_ERROR_IO;
+  if (taucs_io_append(LU,
+		       3 + HEADER+j*4,
+		       nnz,1,
+		       TAUCS_CORE_DATATYPE,
+		       re)) return TAUCS_ERROR_IO;
+  return TAUCS_SUCCESS;
 }
 
 static
 int Lreadcol(taucs_io_handle* LU, int j, int nnz, int* ind, taucs_datatype* re)
 {
-  taucs_io_read(LU,
-		0 + HEADER+j*4,
-		nnz,1,
-		TAUCS_INT,
-		ind);
-  taucs_io_read(LU,
-		1 + HEADER+j*4,
-		nnz,1,
-		TAUCS_CORE_DATATYPE,
-		re);
-  return 0;
+  if (taucs_io_read(LU,
+		     0 + HEADER+j*4,
+		     nnz,1,
+		     TAUCS_INT,
+		     ind)) return TAUCS_ERROR_IO;
+  if (taucs_io_read(LU,
+		     1 + HEADER+j*4,
+		     nnz,1,
+		     TAUCS_CORE_DATATYPE,
+		     re)) return TAUCS_ERROR_IO;
+  return TAUCS_SUCCESS;
 }
 
 static
 int Ureadcol(taucs_io_handle* LU, int j, int nnz, int* ind, taucs_datatype* re)
 {
-  taucs_io_read(LU,
-		2 + HEADER+j*4,
-		nnz,1,
-		TAUCS_INT,
-		ind);
-  taucs_io_read(LU,
-		3 + HEADER+j*4,
-		nnz,1,
-		TAUCS_CORE_DATATYPE,
-		re);
-  return 0;
+  if (taucs_io_read(LU,
+		     2 + HEADER+j*4,
+		     nnz,1,
+		     TAUCS_INT,
+		     ind)) return TAUCS_ERROR_IO;
+  if (taucs_io_read(LU,
+		     3 + HEADER+j*4,
+		     nnz,1,
+		     TAUCS_CORE_DATATYPE,
+		     re)) return TAUCS_ERROR_IO;
+  return TAUCS_SUCCESS;
 }
 
 /*********************************************************/
@@ -279,18 +290,18 @@ static void heap_extract_min(int* heap, int* heapsize, int* i, int* j, int* k)
 /* SYMMETRIC SKELETON GRAPH OPERATIONS */
 
 static char skel_basename[256];
-static int* skel_buffer;
-static int  skel_buffer_size;
-static int  skel_buffer_ptr;
-static int  skel_outfiles;
-static int  skel_infiles;
-static int  skel_outfile;
+static int* skel_buffer = NULL;
+static int  skel_buffer_size = -1; /* counted in PAIRS of integers */
+static int  skel_buffer_ptr  = -1; /* index into PAIRS of integers */
+static int  skel_outfiles    = -1;
+static int  skel_infiles     = -1;
+static int  skel_outfile     = -1;
 
-static char skel_inphase;
-static char skel_outphase;
+static char skel_inphase     = 0;
+static char skel_outphase    = 0;
 
-static int skel_get_lastcol;
-static int skel_next;
+static int skel_get_lastcol  = -1;
+static int skel_next         = -1;
 
 static int skel_compare(const void* e1, const void* e2) 
 {
@@ -317,7 +328,7 @@ static int skel_compare(const void* e1, const void* e2)
   return 0;
 }
 
-static void skel_init(char* basename)
+static int skel_init(char* basename)
 {
   sprintf(skel_basename,"%s.ssort",basename);
 
@@ -330,9 +341,14 @@ static void skel_init(char* basename)
 
   remaining_memory -= (double) (3*get_iobufsize());
 
+  /* debugging */
   skel_buffer_size = (int)(remaining_memory) / (2*sizeof(int));
 
-  skel_buffer      = (int*)taucs_malloc(skel_buffer_size * 2 * sizeof(int));
+  /*EF_FILL=0x00;*/
+  skel_buffer      = (int*)taucs_malloc(skel_buffer_size * 2*sizeof(int));
+  if (!skel_buffer) return TAUCS_ERROR_NOMEM;
+
+
   skel_buffer_ptr  = 0;
   skel_outfiles    = 0;
 
@@ -342,46 +358,84 @@ static void skel_init(char* basename)
   skel_get_lastcol = -1;
   skel_next = 0;
   skel_outfile = -1;
+
+  return TAUCS_SUCCESS;
 }
 
 static void skel_finalize()
 {
-  taucs_free(skel_buffer);
+  int i;
+
+  /*
+     this is a bug! somehow, we are using this memory after it is
+     freed, so if we fill with ff we fail, if we fill with 0 we
+     succeed. But I was not able to detect where the problem is,
+     even with Electric Fence 
+  */
+  for (i=0; i<2*skel_buffer_size; i++) skel_buffer[i]=0xffffffff;
+  for (i=0; i<2*skel_buffer_size; i++) skel_buffer[i]=0x0;
+
+  taucs_free(skel_buffer); 
+  skel_buffer = NULL;
 
   remaining_memory += (double) (3*get_iobufsize());
 }
 
-static void skel_add(int i,int j) 
+static int skel_add(int i,int j) 
 {
   if (skel_buffer_ptr < skel_buffer_size) {
+    /*
+    assert(skel_buffer[2*skel_buffer_ptr  ]==0xcccccccc);
+    assert(skel_buffer[2*skel_buffer_ptr+1]==0xcccccccc);
+    */
     skel_buffer[2*skel_buffer_ptr]   = i;
     skel_buffer[2*skel_buffer_ptr+1] = j;
     skel_buffer_ptr++;
+
+    return TAUCS_SUCCESS;
   } else {
     int     file;
     ssize_t io_size;
     char    fname[256];
+    mode_t mode;
+    mode_t perm;
+
+    assert(0); /* for testing xxx */
 
     /* SORT THIS BUFFER */
 
     qsort(skel_buffer, skel_buffer_ptr, 2*sizeof(int), &skel_compare);
 
-
     /* WRITE OUT */
     sprintf(fname,"%s.%c.%d",skel_basename,skel_outphase,skel_outfiles);
     taucs_printf("oocsp_colanalyze: Writing out skel sort buffer <%s> (3)\n",fname);
-    file = open(fname,O_WRONLY | O_CREAT,0644);
-    if (file == -1)
+
+#ifdef OSTYPE_win32
+    mode = _O_WRONLY | _O_CREAT | _O_BINARY;
+    perm = _S_IREAD | _S_IWRITE | _S_IEXEC;
+#else
+    mode = O_WRONLY | O_CREAT;
+    perm = 0644;
+#endif
+
+    file = open(fname,mode,perm);
+    if (file == -1) {
       taucs_printf("oocsp_colanalyze: could not create skel sort file\n");
+      return TAUCS_ERROR_IO;
+    }
     io_size = write(file,skel_buffer,skel_buffer_ptr * 2 * sizeof(int));
-    if (io_size != skel_buffer_ptr * 2 * sizeof(int))
+    if (io_size != skel_buffer_ptr * 2 * sizeof(int)) {
       taucs_printf("oocsp_colanalyze: write to skel sort file failed\n");
+      unlink(fname);
+      return TAUCS_ERROR_IO;
+    }
     close(file);
 
     skel_outfiles++;
     skel_buffer_ptr = 0;
 
-    taucs_printf("oocsp_colanalyze: done (3)\n",fname);
+    taucs_printf("oocsp_colanalyze: done (using file %s)\n",fname);
+    return TAUCS_SUCCESS;
   }
 }
 
@@ -411,15 +465,16 @@ static void skel_sort_incore(int* postorder, int ncols, int* inv_postorder)
 	&skel_compare);
 }
 
-static void skel_sort_outofcore(int* postorder, int ncols, int* inv_postorder)
+static int skel_sort_outofcore(int* postorder, int ncols, int* inv_postorder)
 {
+  int  errorcode = TAUCS_SUCCESS;
   int  natural,i,j,k,e,f;
   int  heapsize, iobufsize, openruns, maxopenruns, runstart;
-  int* infiles;
+  int* infiles = NULL;
   int  outfile;
 
-  int *inbuf;
-  int *outbuf;
+  int *inbuf  = NULL;
+  int *outbuf = NULL;
   int outbuf_ptr;
 
   int     file;
@@ -428,6 +483,10 @@ static void skel_sort_outofcore(int* postorder, int ncols, int* inv_postorder)
   char    fname[256];
 
   int last_col, last_extracted;
+  mode_t mode;
+  mode_t perm;
+
+  assert(0); /* debugging xxx */
 
   /* FIRST, WRITE OUT THIS BUFFER */
   if (skel_buffer_ptr > 0) {
@@ -438,12 +497,26 @@ static void skel_sort_outofcore(int* postorder, int ncols, int* inv_postorder)
     /* WRITE OUT */
     sprintf(fname,"%s.%c.%d",skel_basename,skel_outphase,skel_outfiles);
     taucs_printf("oocsp_colanalyze: Writing out skel sort buffer <%s> (1)\n",fname);
-    file = open(fname,O_WRONLY | O_CREAT,0644);
-    if (file == -1)
+#ifdef OSTYPE_win32
+    mode = _O_WRONLY | _O_CREAT | _O_BINARY;
+    perm = _S_IREAD | _S_IWRITE | _S_IEXEC;
+#else
+    mode = O_WRONLY | O_CREAT;
+    perm = 0644;
+#endif
+    file = open(fname,mode,perm);
+    if (file == -1) {
       taucs_printf("oocsp_colanalyze: could not create skel sort file\n");
+      errorcode = TAUCS_ERROR_IO;
+      goto end;
+    }
     io_size = write(file,skel_buffer,skel_buffer_ptr * 2 * sizeof(int));
-    if (io_size != skel_buffer_ptr * 2 * sizeof(int))
+    if (io_size != skel_buffer_ptr * 2 * sizeof(int)) {
       taucs_printf("oocsp_colanalyze: write to skel sort file failed\n");
+      unlink(fname);
+      errorcode = TAUCS_ERROR_IO;
+      goto end;
+    }
     close(file);
 
     skel_outfiles++;
@@ -466,18 +539,30 @@ static void skel_sort_outofcore(int* postorder, int ncols, int* inv_postorder)
     for (f=0; f<skel_outfiles; f++) {
       sprintf(fname,"%s.%c.%d",skel_basename,skel_outphase,f);
       taucs_printf("oocsp_colanalyze: Resorting skel sort file <%s>\n",fname);
-      file = open(fname,O_RDWR);
-      if (file == -1)
+#ifdef OSTYPE_win32
+      mode = _O_RDWR | _O_BINARY;
+#else
+      mode = O_RDWR;
+#endif
+      file = open(fname,mode);
+      if (file == -1) {
 	taucs_printf("oocsp_colanalyze: could not open skel sort file\n");
+	errorcode = TAUCS_ERROR_IO;
+	goto end;
+      }
       /* read the run */
       io_size = read(file,skel_buffer,skel_buffer_size*2*sizeof(int));
-      if (io_size == -1)
+      if (io_size == -1) {
 	taucs_printf("oocsp_colanalyze: read from skel sort file failed\n");
+	errorcode = TAUCS_ERROR_IO;
+	goto end;
+      }
       io_count = io_size/(2*sizeof(int));
       close(file);
 
       /* sort again */
 
+      assert((int) io_count <= skel_buffer_size);
       for (i=0; i<(int)io_count; i++) {
 	j = skel_buffer[2*i+1];
 	skel_buffer[ 2*i+1 ] = inv_postorder[j];
@@ -487,13 +572,25 @@ static void skel_sort_outofcore(int* postorder, int ncols, int* inv_postorder)
 	    &skel_compare);
 
       /* rewind the file and write back */
-      file = open(fname,O_RDWR);
-      if (file == -1)
+#ifdef OSTYPE_win32
+      mode = _O_RDWR | _O_BINARY;
+#else
+      mode = O_RDWR;
+#endif
+      file = open(fname,mode);
+      if (file == -1) {
 	taucs_printf("oocsp_colanalyze: could not open skel sort file\n");
+	errorcode = TAUCS_ERROR_IO;
+	goto end;
+      }
       /*      lseek(file,0,SEEK_SET);*/
       io_size = write(file,skel_buffer,io_count * 2 * sizeof(int));
-      if (io_size != io_count * 2 * sizeof(int))
+      if (io_size != io_count * 2 * sizeof(int)) {
 	taucs_printf("oocsp_colanalyze: write to skel sort file failed\n");
+	unlink(fname);
+	errorcode = TAUCS_ERROR_IO;
+	goto end;
+      }
       close(file);
     }
   }
@@ -525,6 +622,12 @@ static void skel_sort_outofcore(int* postorder, int ncols, int* inv_postorder)
   outbuf = taucs_calloc(iobufsize,2*sizeof(int));
   infiles  = taucs_calloc(skel_outfiles,sizeof(int));
   */
+  
+  if (!inbuf || !outbuf || !infiles) {
+    errorcode = TAUCS_ERROR_NOMEM;
+    goto end;
+  }
+
   while (skel_outfiles > 1) {
     char phase;
     /*    int  i,j,k,runstart,openruns;*/
@@ -544,9 +647,19 @@ static void skel_sort_outofcore(int* postorder, int ncols, int* inv_postorder)
       sprintf(fname,"%s.%c.%d",
 	      skel_basename,skel_outphase,runstart/maxopenruns);
       taucs_printf("oocsp_colanalyze: Opening output run <%s>\n",fname);
-      outfile = open(fname,O_WRONLY | O_CREAT,0644);
-      if (outfile == -1)
+#ifdef OSTYPE_win32
+      mode = _O_WRONLY | _O_CREAT | _O_BINARY;
+      perm = _S_IREAD | _S_IWRITE | _S_IEXEC;
+#else
+      mode = O_WRONLY | O_CREAT;
+      perm = 0644;
+#endif
+      outfile = open(fname,mode,perm);
+      if (outfile == -1) {
 	taucs_printf("oocsp_colanalyze: could not open skel sort output file\n");
+	errorcode = TAUCS_ERROR_IO;
+	goto end;
+      }
       skel_outfiles++;
 
       for (openruns=0; 
@@ -554,13 +667,25 @@ static void skel_sort_outofcore(int* postorder, int ncols, int* inv_postorder)
 	   openruns++) {
 	
 	sprintf(fname,"%s.%c.%d",skel_basename,skel_inphase,runstart+openruns);
-	infiles[openruns] = open(fname,O_RDONLY);
+#ifdef OSTYPE_win32
+	mode = _O_RDONLY | _O_BINARY;
+#else
+	mode = O_RDONLY;
+#endif
+	infiles[openruns] = open(fname,mode);
 	taucs_printf("oocsp_colanalyze: Opening input run <%s> (%d)\n",fname,infiles[openruns]);
-	if (infiles[openruns] == -1)
+	if (infiles[openruns] == -1) {
 	  taucs_printf("oocsp_colanalyze: could not open skel sort input file\n");
+	  errorcode = TAUCS_ERROR_IO;
+	  goto end;
+	}
 	io_size = read(infiles[openruns],inbuf,iobufsize*2*sizeof(int));
-	if (io_size == -1)
+	if (io_size == -1) {
 	  taucs_printf("oocsp_colanalyze: read from skel sort file failed\n");
+	  errorcode = TAUCS_ERROR_IO;
+	  unlink(fname);
+	  goto end;
+	}
 	io_count = io_size/(2*sizeof(int));
 	if (io_count == 0) {
 	  close(infiles[openruns]);
@@ -619,6 +744,8 @@ static void skel_sort_outofcore(int* postorder, int ncols, int* inv_postorder)
 	  if (io_size == -1) {
 	    taucs_printf("oocsp_colanalyze: errno = %d (%d)\n",errno,infiles[run]);
 	    taucs_printf("oocsp_colanalyze: read from skel sort file failed\n");
+	    errorcode = TAUCS_ERROR_IO;
+	    goto end;
 	  }
 	  io_count = io_size/(2*sizeof(int));
 	  if (io_count == 0) {
@@ -672,8 +799,11 @@ static void skel_sort_outofcore(int* postorder, int ncols, int* inv_postorder)
 	  taucs_printf("oocsp_colanalyze: heapsize = %d\n",heapsize);
 	  io_count = iobufsize;
 	  io_size = write(outfile,outbuf,io_count * 2 * sizeof(int));
-	  if (io_size != io_count * 2 * sizeof(int))
+	  if (io_size != io_count * 2 * sizeof(int)) {
 	    taucs_printf("oocsp_colanalyze: write to skel sort file failed\n");
+	    errorcode = TAUCS_ERROR_IO;
+	    goto end;
+	  }
 	  outbuf_ptr = 0;
 	}
       }
@@ -683,8 +813,11 @@ static void skel_sort_outofcore(int* postorder, int ncols, int* inv_postorder)
 	taucs_printf("oocsp_colanalyze: Writing to output run and closing\n");
 	io_count = outbuf_ptr;
 	io_size = write(outfile,outbuf,io_count * 2 * sizeof(int));
-	if (io_size != io_count * 2 * sizeof(int))
+	if (io_size != io_count * 2 * sizeof(int)) {
 	  taucs_printf("oocsp_colanalyze: write to skel sort file failed\n");
+	  errorcode = TAUCS_ERROR_IO;
+	  goto end;
+	}
 	outbuf_ptr = 0;
       }
       close(outfile);
@@ -692,6 +825,7 @@ static void skel_sort_outofcore(int* postorder, int ncols, int* inv_postorder)
     }
   }
 
+ end:
 
   taucs_free(infiles);
   taucs_free(inbuf);
@@ -702,39 +836,64 @@ static void skel_sort_outofcore(int* postorder, int ncols, int* inv_postorder)
   taucs_free(inbuf);
   taucs_free(outbuf);
   */
+
+  return errorcode;
 }
 
-static int  stack_allocated;
-static int  stack_buffer_size;
-static int* stack_buffer;
+static int  stack_allocated = 0; /* maybe 1 would be better here, causing a fault
+                                    instead of a memory leak in case of a bug */
+static int  stack_buffer_size = -1;
+static int* stack_buffer      = NULL;
 
-static void skel_sort(int* postorder, int ncols,int* tmp)
+static int skel_sort(int* postorder, int ncols,int* tmp)
 {
+  int  errorcode = TAUCS_SUCCESS;
   int  file;
   char fname[256];
   ssize_t io_size;
   int iobufsize;
+  mode_t mode;
+  mode_t perm;
 
   iobufsize   = get_iobufsize() / (2*sizeof(int)); 
 
   if (skel_outfiles == 0) {
     skel_sort_incore(postorder,ncols,tmp);
 
+    /* xxxyyy */
     if (skel_buffer_ptr <= skel_buffer_size / 2) {
+      taucs_printf("final skel ptr=%d\n",skel_buffer_ptr);
       stack_buffer      = skel_buffer + (2*skel_buffer_ptr);
       stack_buffer_size = 2*(skel_buffer_size - skel_buffer_ptr);
+
+      stack_buffer      = taucs_malloc(stack_buffer_size * sizeof(int)); /* debugging */
+
       stack_allocated   = 0;
       taucs_printf("oocsp_colanalyze: Using remainder of skeleton buffer for stack,\n");
       taucs_printf("oocsp_colanalyze: size = %d ints\n",stack_buffer_size);
     } else {
+      assert(0); /* for debugging xxx */
       sprintf(fname,"%s.%c.%d",skel_basename,skel_outphase,0);
       taucs_printf("oocsp_colanalyze: Writing out skel sort buffer <%s> (2)\n",fname);
-      file = open(fname,O_WRONLY | O_CREAT,0644);
-      if (file == -1)
+#ifdef OSTYPE_win32
+      mode = _O_WRONLY | _O_CREAT | _O_BINARY;
+      perm = _S_IREAD | _S_IWRITE | _S_IEXEC;
+#else
+      mode = O_WRONLY | O_CREAT;
+      perm = 0644;
+#endif
+      file = open(fname,mode,perm);
+      if (file == -1) {
 	taucs_printf("oocsp_colanalyze: could not create skel sort file\n");
+	return TAUCS_ERROR_IO;
+      }
       io_size = write(file,skel_buffer,skel_buffer_ptr * 2 * sizeof(int));
-      if (io_size != skel_buffer_ptr * 2 * sizeof(int))
+      if (io_size != skel_buffer_ptr * 2 * sizeof(int)) {
 	taucs_printf("oocsp_colanalyze: write to skel sort file failed\n");
+	unlink(fname);
+	return TAUCS_ERROR_IO;
+      }
+
       close(file);
 
       skel_outfiles++;
@@ -744,22 +903,27 @@ static void skel_sort(int* postorder, int ncols,int* tmp)
       stack_buffer_size = 2*skel_buffer_size;
       stack_allocated   = 1; /* we need to free it */
 
-      skel_buffer       = (int*)taucs_malloc(iobufsize*2*sizeof(int));
       skel_buffer_size  = iobufsize;
+      skel_buffer       = (int*)taucs_malloc(iobufsize*2*sizeof(int));
+      if (!skel_buffer) return TAUCS_ERROR_NOMEM;
       taucs_printf("oocsp_colanalyze: Using skeleton buffer for stack, allocating \n");
       taucs_printf("oocsp_colanalyze: new skeleton buffer\n\n");
     }
-  }
-  else {
-    skel_sort_outofcore(postorder,ncols,tmp);
+  } else {
+    assert(0); /* debugging xxx */
+    if ((errorcode=skel_sort_outofcore(postorder,ncols,tmp)) != TAUCS_SUCCESS)
+      return errorcode;
 
     stack_buffer      = skel_buffer;
     stack_buffer_size = 2*skel_buffer_size;
-    skel_buffer       = (int*)taucs_malloc(iobufsize*2*sizeof(int));
     skel_buffer_size  = iobufsize;
+    skel_buffer       = (int*)taucs_malloc(iobufsize*2*sizeof(int));
+    if (!skel_buffer) return TAUCS_ERROR_NOMEM;
     taucs_printf("oocsp_colanalyze: Using skeleton buffer for stack, allocating \n");
     taucs_printf("oocsp_colanalyze: new skeleton buffer\n");
   }
+
+  return errorcode;
 }
 
 static int skel_get_next(int j)
@@ -767,20 +931,30 @@ static int skel_get_next(int j)
   int row, col;
   char fname[256];
   ssize_t io_size;
+  mode_t mode;
 
   if (skel_next >= skel_buffer_ptr) {
     if (skel_outfiles > 0) {
       if (skel_outfile == -1) {
 	sprintf(fname,"%s.%c.%d",skel_basename,skel_outphase,0);
 	taucs_printf("oocsp_colanalyze: Opening skel sort buffer <%s> (2)\n",fname);
-	skel_outfile = open(fname,O_RDONLY);
-	if (skel_outfile == -1)
+#ifdef OSTYPE_win32
+	mode = _O_RDONLY | _O_BINARY;
+#else
+	mode = O_RDONLY;
+#endif
+	skel_outfile = open(fname,mode);
+	if (skel_outfile == -1) {
 	  taucs_printf("oocsp_colanalyze: could not open skel sort file\n");
+	  return TAUCS_ERROR_IO;
+	}
       }
       io_size = read(skel_outfile,
 		     skel_buffer,skel_buffer_size * 2 * sizeof(int));
-      if (io_size == -1) 
+      if (io_size == -1) {
 	taucs_printf("oocsp_colanalyze: I/O error while trying to read skel sort file\n");
+	return TAUCS_ERROR_IO;
+      }
       if (io_size == 0) { /* end of file */
 	taucs_printf("oocsp_colanalyze: Closing and removing skel file, col=%d\n",j);
 	sprintf(fname,"%s.%c.%d",skel_basename,skel_outphase,0);
@@ -802,8 +976,12 @@ static int skel_get_next(int j)
   if (skel_next >= skel_buffer_ptr)
     return -1;
 
+  assert(skel_next >= 0);
+  assert(skel_next < skel_buffer_size);
+
   row = skel_buffer[2*skel_next];
   col = skel_buffer[2*skel_next+1];
+
   if (col == j) {
     skel_next++;
     return row;
@@ -813,20 +991,24 @@ static int skel_get_next(int j)
 }
     
 
-static void skel_get_postordercol(int* found, int flag,
+static int skel_get_postordercol(int* found, int flag,
 				  int j,
 				  int* nnz, int* rowind)
 {
   int row;
 
   *nnz = 0;
-  while ((row = skel_get_next(j)) != -1) {
+  while ((row = skel_get_next(j)) >= 0) {
     if (found[row] < flag) {
       found[row] = flag;
       rowind[ *nnz ] = row;
       (*nnz)++;
     }
   }
+  /* if skel_get_next TAUCS_ERROR==-1 it only means EOF; 
+     otherwise, there is an error */
+  if (row != TAUCS_ERROR) return row;
+  else                    return TAUCS_SUCCESS;
 }
 
 
@@ -854,6 +1036,7 @@ static void skel_get_postordercol(int* found, int flag,
        skel_buffer[2*i + 1] == j && i < skel_buffer_ptr;
        i++) {
     row = skel_buffer[2*i];
+
     if (found[row] < flag) {
       found[row] = flag;
       rowind[ *nnz ] = row;
@@ -876,19 +1059,19 @@ static int uf_find   (int* uf, int i)        { if (uf[i] != i)
 
 /* FILL STACK ROUTINES */
 
-static int  stack_files;
+static int  stack_files = -1;
 static char stack_basename[256];
 
 /*
 static int  stack_buffer_size;
 static int* stack_buffer;
 */
-static int  stack_buffer_ptr;
+static int  stack_buffer_ptr = -1;
 
-static int  stack_top;
+static int  stack_top = -1;
 
-static double stack_size;
-static double stack_max_size;
+static double stack_size = -1;
+static double stack_max_size = -1;
 
 static void stack_init(char* basename,
 		       int* colptr, int* colstack, 
@@ -923,8 +1106,11 @@ static void stack_finalize()
   taucs_printf("oocsp_colanalyze: max stack size = %.0lf\n",stack_max_size);
 }
 
-static void stack_push(int* colptr, int* colstack, int i, int j)
+static int stack_push(int* colptr, int* colstack, int i, int j)
 {
+  mode_t mode;
+  mode_t perm;
+
   if (stack_top < 0 || colstack[stack_top] != j) {
     if (colptr[j] != -1) {
       taucs_printf("oocsp_colanalyze: fill stack internal error (push)\n");
@@ -944,14 +1130,28 @@ static void stack_push(int* colptr, int* colstack, int i, int j)
     ssize_t io_size;
     char    fname[256];
 
+    assert(0); /* debugging xxx */
+
     sprintf(fname,"%s.%d",stack_basename,stack_files);
     taucs_printf("oocsp_colanalyze: Writing out fill stack buffer <%s>\n",fname);
-    file = open(fname,O_WRONLY | O_CREAT,0644);
-    if (file == -1)
+#ifdef OSTYPE_win32
+    mode = _O_WRONLY | _O_CREAT | _O_BINARY;
+    perm = _S_IREAD | _S_IWRITE | _S_IEXEC;
+#else
+    mode = O_WRONLY | O_CREAT;
+    perm = 0644;
+#endif
+    file = open(fname,mode,perm);
+    if (file == -1) {
       taucs_printf("oocsp_colanalyze: could not create stack file\n");
+      return TAUCS_ERROR_IO;
+    }
     io_size = write(file,stack_buffer,stack_buffer_size * sizeof(int));
-    if (io_size != stack_buffer_size * sizeof(int))
+    if (io_size != stack_buffer_size * sizeof(int)) {
       taucs_printf("oocsp_colanalyze: write to stack file failed\n");
+      unlink(fname);
+      return TAUCS_ERROR_IO;
+    }
     close(file);
 
     stack_files++;
@@ -962,19 +1162,23 @@ static void stack_push(int* colptr, int* colstack, int i, int j)
   stack_size++;
   if (stack_size > stack_max_size) stack_max_size = stack_size;
   */
+  return TAUCS_SUCCESS;
 }
 
-static void stack_pop(int* colptr, int* colstack, 
+static int stack_pop(int* colptr, int* colstack, 
 		      int* found, int flag,
 		      int j, int* nnz, int* rowind)
 {
   int row;
   int   i;
+  mode_t mode;
 
   if (stack_top < 0 || colstack[stack_top] != j) { /* empty fill column */
     for (i=0; i<=stack_top; i++)
-      if (colstack[i] == j)
+      if (colstack[i] == j) {
 	taucs_printf("oocsp_colanalyze: fill stack internal error (pop)\n");
+	return TAUCS_ERROR;
+      }
     
     *nnz    = 0;
   } else {
@@ -986,22 +1190,37 @@ static void stack_pop(int* colptr, int* colstack,
 	ssize_t io_size;
 	char    fname[256];
 	
+	assert(0); /* debugging xxx */
+
 	stack_files--;
 	stack_buffer_ptr = stack_buffer_size;
 	sprintf(fname,"%s.%d",stack_basename,stack_files);
 	taucs_printf("oocsp_colanalyze: Reading a fill stack buffer <%s>\n",fname);
-	file = open(fname,O_RDONLY);
-	if (file == -1)
+#ifdef OSTYPE_win32
+	mode = _O_RDONLY | _O_BINARY;
+#else
+	mode = O_RDONLY;
+#endif
+	file = open(fname,mode);
+	if (file == -1) {
 	  taucs_printf("oocsp_colanalyze: could not open stack file\n");
+	  return TAUCS_ERROR_IO;
+	}
 	io_size = read(file,stack_buffer,stack_buffer_size * sizeof(int));
-	if (io_size != stack_buffer_size * sizeof(int))
+	if (io_size != stack_buffer_size * sizeof(int)) {
 	  taucs_printf("oocsp_colanalyze: read from stack file failed\n");
+	  unlink(fname);
+	  return TAUCS_ERROR_IO;
+	}
 	close(file);
 	unlink(fname);
       }
 
       stack_buffer_ptr --;
+      assert(stack_buffer_ptr >= 0);
       row = stack_buffer[ stack_buffer_ptr ];
+
+      /*printf(">>> %08x \n",row);*/
 
       if (found[row] < flag) {
 	found[row] = flag;
@@ -1016,12 +1235,14 @@ static void stack_pop(int* colptr, int* colstack,
   /*
   stack_size -= (double) (*nnz);
   */
+
+  return TAUCS_SUCCESS;
 }
 
 /* MAIN ROUTINE */
 
 static
-void oocsp_colanalyze(taucs_ccs_matrix* matrix,
+int oocsp_colanalyze(taucs_ccs_matrix* matrix,
 		      char* basename,
 		      int*  colperm,
 		      int** ptrparent,
@@ -1029,6 +1250,8 @@ void oocsp_colanalyze(taucs_ccs_matrix* matrix,
 		      int** ptrlcolcount,
 		      int** ptrucolcount)
 {
+  int errorcode = TAUCS_SUCCESS;
+
   int i,j,ip,p,jp;
   int nnz,cset,rset,rroot,fcol;
   
@@ -1040,31 +1263,33 @@ void oocsp_colanalyze(taucs_ccs_matrix* matrix,
 
   /*int* colptr;*/
   int* rowind;
-  int* firstcol;
-  int* uf;
+  int* firstcol  = NULL;
+  int* uf        = NULL;
   int* found;
-  int* root;
+  int* root      = NULL;
   int* stack_colptr;
   int* stack_colstk;
-  int* tmp_col;
+  int* tmp_col   = NULL;
   
-  int* parent;
-  int* postorder;
-  int* lcolcount;
-  int* ucolcount;  
+  int* parent    = NULL;
+  int* postorder = NULL;
+  int* lcolcount = NULL;
+  int* ucolcount = NULL;  
   
   int*    nrows;
   int*    ncols;
 
   taucs_printf("oocsp_colanalyze: In colanalyze\n");
   taucs_printf("oocsp_colanalyze: using %.0lf MBytes of memory\n",(remaining_memory)/1048576.0);
+  /*EF_FILL=0x00;*/
   
   nrows     = &matrix->m;
   ncols     = &matrix->n;
 
   /* START THE ANALYSYS */
 
-  skel_init(basename);
+  if ((errorcode = skel_init(basename)) != TAUCS_SUCCESS)
+    goto end;
 
   (remaining_memory) -= (double) ( 4 * (*ncols) * 4 /* sizeof(int32) */);
 
@@ -1078,6 +1303,7 @@ void oocsp_colanalyze(taucs_ccs_matrix* matrix,
   postorder       = (int*)taucs_malloc((*ncols+1)*sizeof(int));
   *ptrpostorder = postorder;
 
+
   (remaining_memory) -= (double) ( 2 * ((*ncols)+1) * sizeof(int));
   (remaining_memory) -= (double) ( 2 * (*nrows) * sizeof(int));
 
@@ -1086,6 +1312,12 @@ void oocsp_colanalyze(taucs_ccs_matrix* matrix,
   firstcol  = (int*)taucs_malloc((*nrows)*sizeof(int));
 
   tmp_col   = (int*)taucs_malloc((*nrows)*sizeof(int));
+
+  if (!parent || !lcolcount || !ucolcount || !postorder || 
+      !uf || !root || !firstcol || !tmp_col) {
+    errorcode = TAUCS_ERROR_NOMEM;
+    goto end;
+  }
 
   /* we can reuse the same space */
   first_kid = uf;
@@ -1210,10 +1442,8 @@ void oocsp_colanalyze(taucs_ccs_matrix* matrix,
     
   /* SORT THE SKELETON MATRIX */
 
-  skel_sort(postorder, *ncols, 
-	    found /* temporary */);
-
-
+  if ((errorcode = skel_sort(postorder, *ncols, found /* temporary */)) != TAUCS_SUCCESS)
+    goto end;
   
   /* SECOND PHASE, COMPUTE COLCOUNTS */
 
@@ -1240,22 +1470,23 @@ void oocsp_colanalyze(taucs_ccs_matrix* matrix,
       ucolcount[p]++;
     }
 
-    stack_pop(stack_colptr,stack_colstk,
-	      found, jp,
-	      j,
-	      &nnz,tmp_col);
+    if ((errorcode=stack_pop(stack_colptr,stack_colstk,
+			     found, jp,
+			     j,
+			     &nnz,tmp_col)) != TAUCS_SUCCESS) goto end;
     rowind = tmp_col;
     for (ip=0; ip<nnz; ip++) {
       i = rowind[ip];
 
       lcolcount[j]++;
       ucolcount[i]++;
-      if (p < *ncols) stack_push(stack_colptr,stack_colstk,i,p);
+      if (p < *ncols) 
+	if ((errorcode=stack_push(stack_colptr,stack_colstk,i,p)) != TAUCS_SUCCESS) goto end;
     }
 
-    skel_get_postordercol(found,jp,
-			  jp, /* use postorder column index */
-			  &nnz,tmp_col);
+    if ((errorcode=skel_get_postordercol(found,jp,
+					 jp, /* use postorder column index */
+					 &nnz,tmp_col)) != TAUCS_SUCCESS) goto end;
     rowind = tmp_col;
     for (ip=0; ip<nnz; ip++) {
       i = rowind[ip];
@@ -1268,28 +1499,10 @@ void oocsp_colanalyze(taucs_ccs_matrix* matrix,
       if (ucolcount[i] > *(ncols))
 	taucs_printf("oocsp_colanalyze: Internal error while producing ucolcounts\n");
 
-      if (p < *ncols) stack_push(stack_colptr,stack_colstk,i,p);
+      if (p < *ncols) 
+	if ((errorcode=stack_push(stack_colptr,stack_colstk,i,p)) != TAUCS_SUCCESS) goto end;
     }
   }
-
-  stack_finalize();
-
-  /*
-  mxDestroyArray(tmp1_array);
-  mxDestroyArray(tmp2_array);
-  mxDestroyArray(tmp3_array);
-  mxDestroyArray(tmp4_array);
-  */
-
-  taucs_free(uf);
-  taucs_free(firstcol);
-  taucs_free(root);
-  taucs_free(tmp_col);
-
-  (remaining_memory) += (double) ( 2 * ((*ncols)+1) * sizeof(int));
-  (remaining_memory) += (double) ( 2 * (*nrows) * sizeof(int));
-
-  skel_finalize();
 
   /* MAKE AND POSTORDER PARENT 1-BASED AND MARK ROOTS WITH A ZERO */
 
@@ -1309,7 +1522,39 @@ void oocsp_colanalyze(taucs_ccs_matrix* matrix,
       ucolcount[i]--;*/
   }
 
+  stack_finalize();
+
+  /*
+  mxDestroyArray(tmp1_array);
+  mxDestroyArray(tmp2_array);
+  mxDestroyArray(tmp3_array);
+  mxDestroyArray(tmp4_array);
+  */
+
+end:
+
+  if (errorcode != TAUCS_SUCCESS) {
+    /* we must release arrays that were supposed to be returned */
+    taucs_free(parent);
+    taucs_free(lcolcount);
+    taucs_free(ucolcount);
+    taucs_free(postorder);
+    *ptrparent = *ptrlcolcount = *ptrucolcount = *ptrpostorder = NULL;
+  }
+
+  taucs_free(uf);
+  taucs_free(firstcol);
+  taucs_free(root);
+  taucs_free(tmp_col);
+
+  (remaining_memory) += (double) ( 2 * ((*ncols)+1) * sizeof(int));
+  (remaining_memory) += (double) ( 2 * (*nrows) * sizeof(int));
+
+  skel_finalize();
+
   taucs_printf("oocsp_colanalyze: done\n");
+  
+  return errorcode;
 }
 
 /*********************************************************/
@@ -1320,7 +1565,7 @@ void oocsp_colanalyze(taucs_ccs_matrix* matrix,
 /* There seems to be a confusion here between spawidth and remaining memory; sivan */
 
 static
-void oocsp_panelize_simple(
+int oocsp_panelize_simple(
 			   int  nrows,             /* input  */  
 			   int  ncols,             /* input  */
 			   int* postorder,         /* input  */
@@ -1401,7 +1646,22 @@ void oocsp_panelize_simple(
   schedend       = (int*)taucs_malloc(ncols*sizeof(int)); (*ptrschedend)   = schedend;
   fetchnext      = (int*)taucs_malloc(ncols*sizeof(int)); (*ptrfetchnext)  = fetchnext;
   ejectnext      = (int*)taucs_malloc(ncols*sizeof(int)); (*ptrejectnext)  = ejectnext;
+  if (!panels || !schedstart || !schedend || !fetchnext || !ejectnext) {
+    taucs_free(panels    );
+    taucs_free(schedstart);
+    taucs_free(schedend  );
+    taucs_free(fetchnext );
+    taucs_free(ejectnext );
 
+    (*ptrpanels)     = NULL;
+    (*ptrschedstart) = NULL; 
+    (*ptrschedend)   = NULL; 
+    (*ptrfetchnext)  = NULL; 
+    (*ptrejectnext)  = NULL; 
+    
+    return TAUCS_ERROR_NOMEM;
+  }
+  
   panelnumber = 1;
   j           = 0;
   eject = 0;
@@ -1451,7 +1711,7 @@ void oocsp_panelize_simple(
 	fetchnext[eject+i] = ejectnext[j-i];
     else {
       printf("j >= ncols???\n");
-      exit(1);
+      assert(0);
       for (i=0;i<j-eject;i++)
 	fetchnext[eject+i] = ejectnext[j-i-1];
     }
@@ -1463,6 +1723,8 @@ void oocsp_panelize_simple(
     eject = j;
      
   }
+
+  return TAUCS_SUCCESS;
 }
 
 
@@ -1470,7 +1732,8 @@ void oocsp_panelize_simple(
 /* NUMERICAL PHASE                                       */
 /*********************************************************/
 
-#define SNODES
+
+#define SNODES 
 #define SNODE_THRESHOLD 4
 #define SNODE_BLOCK 8
 #define SIMPLE_COL_COL_no
@@ -1682,12 +1945,12 @@ static int num_heap_extractmin(int* heap, int* heapsize, int* ipivots)
 /*                                                  */
 /****************************************************/
 
-static int* rowlists_head;   /* one head per row */
-static int* rowlists_colind; 
-static int* rowlists_next;
-static int* rowlists_prev;
-static int  rowlists_size;
-static int  rowlists_freehead;
+static int* rowlists_head     = NULL;   /* one head per row */
+static int* rowlists_colind   = NULL; 
+static int* rowlists_next     = NULL;
+static int* rowlists_prev     = NULL;
+static int  rowlists_size     = -1;
+static int  rowlists_freehead = -1;
 /*static int  rowlists_freenext;*/
 
 static void rowlists_finalize()
@@ -1696,9 +1959,14 @@ static void rowlists_finalize()
   taucs_free(rowlists_colind);
   taucs_free(rowlists_next);
   taucs_free(rowlists_prev);
+
+  rowlists_head   = NULL;
+  rowlists_colind = NULL;
+  rowlists_next   = NULL;
+  rowlists_prev   = NULL;
 }
 
-static void rowlists_init(int size, int nrows)
+static int rowlists_init(int size, int nrows)
 {
   int i;
 
@@ -1708,7 +1976,8 @@ static void rowlists_init(int size, int nrows)
   rowlists_colind = (int*)taucs_malloc(rowlists_size*sizeof(int));
   rowlists_next   = (int*)taucs_malloc(rowlists_size*sizeof(int));
   rowlists_prev   = (int*)taucs_malloc(rowlists_size*sizeof(int));
-  assert(rowlists_head && rowlists_colind && rowlists_next && rowlists_prev); 
+  if (!rowlists_head || !rowlists_colind || !rowlists_next || !rowlists_prev) 
+    return TAUCS_ERROR_NOMEM; 
 
   for (i=0; i<nrows; i++) rowlists_head[i] = -1;
 
@@ -1721,6 +1990,8 @@ static void rowlists_init(int size, int nrows)
     /* rowlists_prev[i] = i-1; */ 
   }
   rowlists_next[ rowlists_size - 1 ] = -1;
+
+  return TAUCS_SUCCESS; 
 }
 
 static int rowlists_insert(int row, int panelcol)
@@ -1809,24 +2080,30 @@ int intcmp(const void* v1, const void* v2)
 }
 #endif
 
-static taucs_datatype*  spa;
-static char*            spamap;
+static taucs_datatype*  spa    = NULL;
+static char*            spamap = NULL;
 
 static void spa_finalize()
 {
   taucs_free(spa);
   taucs_free(spamap);
+
+  spa    = NULL;
+  spamap = NULL;
 }
 
-static void spa_init(int nrows)
+static int spa_init(int nrows)
 {
   int i;
 
   spa    = (taucs_datatype*) taucs_malloc(nrows*sizeof(taucs_datatype));
   spamap = (char*)  taucs_malloc(nrows*sizeof(char));
-  assert(spa && spamap);
+
+  if (!spa || !spamap) return TAUCS_ERROR_NOMEM;
 
   for (i=0; i<nrows; i++) {spa[i] = taucs_zero; spamap[i] = 0;}
+  
+  return TAUCS_SUCCESS;
 }
 
 static void
@@ -2140,7 +2417,7 @@ int x_heap_extractmin( int* heap, int* heapsize, int* ipivots)
 /****************************************************/
 
 static
-void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
+int  oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 		    taucs_io_handle* LU,
 		    int* panels,
 		    int* schedstart,
@@ -2153,6 +2430,8 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 		    int maxsn
 		    )
 {
+  int errorcode = TAUCS_SUCCESS;
+
   int i,j,k,ip,p,q,qp,ii,ks;/* ip_next,jp_next,jp omer*/
 
   int nrows, ncols;
@@ -2181,20 +2460,20 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
   /*ssize_t io_size; omer*/
 
   int  heapsize;
-  int* heap;
+  int* heap = NULL;
 
-  char* nnzmap;   /* bit vector */
-  char* lindices; /* bit vector */
+  char* nnzmap = NULL;   /* bit vector */
+  char* lindices = NULL; /* bit vector */
   /* char* uindices; */ /* bit vector */
 
-  int* panel_id;
-  int* panel_nnz;
-  int**    panel_ind;
-  int**    panel_inrowlist;
-  taucs_datatype** panel_re;
+  int* panel_id = NULL;
+  int* panel_nnz = NULL;
+  int**    panel_ind = NULL;
+  int**    panel_inrowlist = NULL;
+  taucs_datatype** panel_re = NULL;
 
-  int* Lclen;
-  int* Uclen;
+  int* Lclen = NULL;
+  int* Uclen = NULL;
 
   /*
   taucs_datatype* update_tmp;
@@ -2206,28 +2485,28 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
   taucs_datatype*  panel_spa = NULL; /* warning */
   char*    panel_spamap = NULL; /* warning */
 #else
-  taucs_datatype**  panel_spa;
-  char**    panel_spamap;
+  taucs_datatype**  panel_spa = NULL;
+  char**    panel_spamap = NULL;
 #endif
 
   int     unext,lnext;
-  int*    lu_ind;
-  taucs_datatype* lu_re;
+  int*    lu_ind = NULL;
+  taucs_datatype* lu_re = NULL;
 
-  int* ipivots;
+  int* pivots = NULL;
+  int* ipivots = NULL;
 
   int    maxind;
   double maxval, absval;
   int    pivotindex;
 
 #ifdef SNODES
-  int*    snode_ind;
-  taucs_datatype* snode_re;
+  int*    snode_ind = NULL;
+  taucs_datatype* snode_re = NULL;
   /*char*   snode_map;*/ /* sivan changed to int to support m2 */
-  int*    snode_map;
-  int*    snode_pivrows;
-  int*    snode_index;
-  int*    pivots;
+  int*    snode_map = NULL;
+  int*    snode_pivrows = NULL;
+  int*    snode_index = NULL;
 
   int     snode_hash=0; /* warning */
   int     snode_size, snode_flag, snode_nnz, snode_lastcol;
@@ -2235,13 +2514,13 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
   int     hash;
   int     snode_id;
 
-  taucs_datatype* S;
-  taucs_datatype* P;
-  int*    spa_updcols;
+  taucs_datatype* S = NULL;
+  taucs_datatype* P = NULL;
+  int*    spa_updcols = NULL;
   int     spa_n;
-  int*    m2;
+  int*    m2 = NULL;
 
-  int*    srows;       /* indices of rows in the supernode */
+  int*    srows = NULL;/* indices of rows in the supernode */
   int     srows_n;     /* number of rows in the supernode  */
   int     srow_next;
 
@@ -2258,7 +2537,7 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
   taucs_printf("oocsp_numfact: Using %.0lf MBytes of memory\n",
 	     remaining_memory/1048576.0);
 
-    
+
   /* START THE FACTORIZATION */
   /*
   nrows = A->nrows;
@@ -2297,62 +2576,46 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
   maxcolcount = 0;
   for (j=0; j<ncols; j++)
     maxcolcount = max( maxcolcount, lcolcount[j]+ucolcount[j] );
-  taucs_printf("oocsp_numfact: maxcolcount = %d, nrows = %d, spawidth = %d, maxsn = %d\n",
-	     maxcolcount, nrows, spawidth, maxsn);
 
-  Lclen            = (int*) taucs_calloc(ncols,sizeof(int));
-  Uclen            = (int*) taucs_calloc(ncols,sizeof(int));
-  assert(Uclen && Lclen);
+  taucs_printf("oocsp_numfact: nrows = %d, ncols = %d\n",
+	     nrows,ncols);
+  taucs_printf("oocsp_numfact: maxcolcount = %d, spawidth = %d, maxsn = %d\n",
+	     maxcolcount, spawidth, maxsn);
 
-  ipivots          = (int*)taucs_malloc(ncols*sizeof(int));
-  assert(ipivots);
-  for (i=0; i<nrows; i++) ipivots[i] = INT_MAX;
+  /*** MEMORY ALLOCATION ***/
 
-  /* create row lists */
-
-  rowlists_init(maxcolcount * iabs(spawidth),nrows);
-  
   fn = 0;
   en = 0;
-  
-  lindices = (char*)taucs_malloc(nrows*sizeof(char));
+
+  pivots           = (int*)  taucs_malloc(ncols*sizeof(int));
+  Lclen            = (int*)  taucs_calloc(ncols,sizeof(int));
+  Uclen            = (int*)  taucs_calloc(ncols,sizeof(int));
+  ipivots          = (int*)  taucs_malloc(ncols*sizeof(int));
+  lindices         = (char*) taucs_malloc(nrows*sizeof(char));
   /* uindices = (char*)taucs_malloc(nrows*sizeof(char)); */
-
-  for (i=0; i<nrows; i++) {
-    lindices[i] = 1;
-    /*uindices[i] = 0;*/
-  }
-
-  nnzmap   = (char*)taucs_malloc(nrows*sizeof(char));
-  heap     = (int*) taucs_malloc(nrows*sizeof(int));
+  nnzmap           = (char*) taucs_malloc(nrows*sizeof(char));
+  heap             = (int*)  taucs_malloc(nrows*sizeof(int));
 
 #ifdef SNODES
   /* the supernodes consists of contiguous columns and we need to know */
   /* the corresponding pivot rows */
-  pivots           = (int*)taucs_malloc(ncols*sizeof(int));
-  assert(pivots);
-  for (i=0; i<ncols; i++) pivots[i] = INT_MAX;
-
   snode_lastcol = snode_nnz = snode_size = 0;
+  snode_id      = 0;
+  snode_last    = 0;
+
+  taucs_printf("sizeof datatype = %d\n",sizeof(taucs_datatype));
+
   snode_pivrows = (int*)   taucs_malloc(maxsn*sizeof(int)); /* size was ncols */
   snode_ind     = (int*)   taucs_malloc(nrows*sizeof(int));
   snode_re      = (taucs_datatype*)taucs_malloc(nrows*sizeof(taucs_datatype));
   snode_map     = (int*)   taucs_malloc(nrows*sizeof(int));
 
-  snode_id      = 0;
-  snode_last    = 0;
   snode_index   = (int*)taucs_malloc(ncols*sizeof(int));
-  for (i=0; i<ncols; i++) snode_index[i] = -1;
-  for (i=0; i<nrows; i++) snode_map[i]   = -1;
 
-  S = (taucs_datatype*) taucs_malloc( maxcolcount * maxsn  * sizeof(taucs_datatype) );
-  P = (taucs_datatype*) taucs_malloc( maxcolcount * spawidth   * sizeof(taucs_datatype) );
-  srows = (int*) taucs_malloc( maxcolcount * sizeof(int) );
-  spa_updcols = (int*) taucs_malloc( spawidth * sizeof(int) );
-  assert(spa_updcols);
-  assert(srows);
-  assert(S);
-  assert(P);
+  S = (taucs_datatype*) taucs_malloc(maxcolcount * maxsn  * sizeof(taucs_datatype) );
+  P = (taucs_datatype*) taucs_malloc(maxcolcount * spawidth   * sizeof(taucs_datatype) );
+  srows       = (int*) taucs_malloc(maxcolcount * sizeof(int) );
+  spa_updcols = (int*) taucs_malloc(spawidth * sizeof(int) );
 
   /*
   lu_re    = (taucs_datatype*)taucs_malloc(maxsn * nrows * sizeof(taucs_datatype) );
@@ -2360,16 +2623,18 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
   */
   lu_re    = (taucs_datatype*)taucs_malloc(maxsn * maxcolcount * sizeof(taucs_datatype) );
   lu_ind   = (int*)   taucs_malloc(maxsn * maxcolcount * sizeof(int)    );
+  /*
   taucs_printf("lu_re  = %08x -> %08x\n",lu_re,lu_re+(maxsn*maxcolcount));
   taucs_printf("lu_ind = %08x -> %08x\n",lu_ind,lu_ind+(maxsn*maxcolcount));
-#else
+  */
+#else /* SNODES */
   lu_re    = (taucs_datatype*)taucs_malloc(maxcolcount * sizeof(taucs_datatype));
   lu_ind   = (int*)   taucs_malloc(maxcolcount * sizeof(int));
   /*
   lu_re    = (taucs_datatype*)taucs_malloc(nrows*sizeof(taucs_datatype));
   lu_ind   = (int*)taucs_malloc(nrows*sizeof(int));
   */
-#endif
+#endif /* not SNODES */
 
   /* These two can be smaller */
 
@@ -2378,37 +2643,105 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
   update_tmp = (taucs_datatype*)taucs_malloc(ncols*sizeof(taucs_datatype));
   */
 
-  panel_id  = (int*)taucs_malloc(ncols*sizeof(int));
-  panel_nnz = (int*)taucs_malloc(ncols*sizeof(int));
-  panel_ind = (int**)taucs_malloc(ncols*sizeof(int*));
-  panel_inrowlist = (int**)taucs_malloc(ncols*sizeof(int*));
-  panel_re  = (taucs_datatype**)taucs_malloc(ncols*sizeof(taucs_datatype*));
-  for (i=0; i<ncols; i++) panel_id[i] = -1;
+  panel_id  = (int*)  taucs_malloc(ncols*sizeof(int));
+  panel_nnz = (int*)  taucs_malloc(ncols*sizeof(int));
+  panel_ind = (int**) taucs_calloc(ncols,sizeof(int*));
+  panel_inrowlist = (int**) taucs_calloc(ncols,sizeof(int*));
+  panel_re  = (taucs_datatype**)taucs_calloc(ncols,sizeof(taucs_datatype*));
 
   if (spawidth > 0) {
 #ifdef SPA_ONEARRAY
     panel_spa = (taucs_datatype*)taucs_malloc(spawidth*nrows*sizeof(taucs_datatype));
     panel_spamap = (char*)taucs_malloc(spawidth*nrows*sizeof(char) );
-    assert(panel_spa && panel_spamap);
 #else
-    panel_spa = (taucs_datatype**) taucs_malloc(spawidth*sizeof(taucs_datatype*));
-    panel_spamap = (char**) taucs_malloc(spawidth*sizeof(char*) );
-    assert(panel_spa && panel_spamap);
+    panel_spa = (taucs_datatype**) taucs_calloc(spawidth,sizeof(taucs_datatype*));
+    panel_spamap = (char**) taucs_calloc(spawidth,sizeof(char*) );
 #endif
   } 
+
+  if (!Lclen
+      || !Uclen
+      || !ipivots
+      || !lindices
+      || !nnzmap
+      || !heap
+      || !panel_id
+      || !panel_nnz
+      || !panel_ind
+      || !panel_re
+      || !panel_inrowlist
+      || ((spawidth>0) && (!panel_spa || !panel_spamap))
+      ) {
+
+    taucs_printf("taucs: ooc LU out of memory in numerical factorization (1)\n");
+    errorcode = TAUCS_ERROR_NOMEM;
+    goto end;
+  }
+
+#ifdef SNODES
+  if (!pivots
+      || !snode_pivrows
+      || !snode_ind
+      || !snode_re
+      || !snode_map
+      || !snode_index
+      || !S
+      || !P
+      || !srows
+      || !spa_updcols
+      || !lu_re
+      || !lu_ind
+      ) {
+    taucs_printf("taucs: ooc LU out of memory in numerical factorization (2)\n");
+    errorcode = TAUCS_ERROR_NOMEM;
+    goto end;
+  }
+#else
+  if (!pivots
+      || !lu_re
+      || !lu_ind
+      ) {
+    taucs_printf("taucs: ooc LU out of memory in numerical factorization (3)\n");
+    errorcode = TAUCS_ERROR_NOMEM;
+    goto end;
+  }
+#endif
+
+  /*** MEMORY ALLOCATION DONE, NOW OTHER INITIALIZATIONS ***/
     
-  spa_init( nrows );
+  heapsize = 0;
+  for (i=0; i<nrows; i++) nnzmap[i] = 0;
+
+  if ((errorcode=rowlists_init(maxcolcount * iabs(spawidth),nrows))!=TAUCS_SUCCESS) goto end; 
+  
+  for (i=0; i<ncols; i++) ipivots[i] = INT_MAX;
+
+  for (i=0; i<nrows; i++) {
+    lindices[i] = 1;
+    /*uindices[i] = 0;*/
+  }
+
+  for (i=0; i<ncols; i++) panel_id[i] = -1;
+
+#ifdef SNODES
+  for (i=0; i<ncols; i++) pivots[i] = INT_MAX;
+  for (i=0; i<ncols; i++) snode_index[i] = -1;
+  for (i=0; i<nrows; i++) snode_map[i]   = -1;
+#else
+#endif
+
+#ifdef SPA_ONEARRAY
+#else
+#endif
+
+  if ((errorcode = spa_init( nrows )) != TAUCS_SUCCESS) goto end;
 
   nsteps=0; 
   for (i=0; i<ncols; i++) {
     if ((int) (schedstart[i]) > nsteps) nsteps = (int) schedstart[i];
   }
 
-
-  /* INITIALIZE HEAP */
-
-  heapsize = 0;
-  for (i=0; i<nrows; i++) nnzmap[i] = 0;
+  /*** DONE INITIALIZING, NOW START THE FACTORZITION ***/
 
   taucs_printf("oocsp_numfact: Starting numerical factorization (%d steps)\n",nsteps);
 
@@ -2472,16 +2805,24 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 	fprintf(stderr,"out of memory for panel compressed vector\n");
 	fprintf(stderr,"j = %d lcolcount = %d ucolcount = %d\n",
 		j,lcolcount[j],ucolcount[j]);
-	exit(1);
+	errorcode = TAUCS_ERROR_NOMEM;
+	goto end;
       }
-      assert (panel_inrowlist[p] && panel_ind[p] && panel_re[p]);
+      /*taucs_printf("allocated panel_ind[%d] = %08x\n",p,panel_ind[p]);*/ /* xxx */
 
       if (spawidth > 0) {
 #ifdef SPA_ONEARRAY
 #else
 	panel_spa[p]     = (taucs_datatype*) taucs_malloc(nrows * sizeof(taucs_datatype));
 	panel_spamap[p]  = (char*)   taucs_malloc(nrows * sizeof(char));
-	assert(panel_spa[p] && panel_spamap[p]);
+	if (!panel_spa[p] || 
+	    !panel_spamap[p]) {
+	  fprintf(stderr,"out of memory for panel spa\n");
+	  fprintf(stderr,"j = %d lcolcount = %d ucolcount = %d\n",
+		  j,lcolcount[j],ucolcount[j]);
+	  errorcode = TAUCS_ERROR_NOMEM;
+	  goto end;
+	}
 #endif
       }
 
@@ -2499,6 +2840,7 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 	for (i=0, ip=(A->colptr)[jp]; ip<(A->colptr)[jp+1]; i++, ip++) {
 	  (panel_ind[p])[i] = (A->rowind)[ip];
 	  (panel_re [p])[i] = (A->taucs_values)[ip];
+	  assert( i < lcolcount[j] + ucolcount[j] );
 	  /*
 	  printf(">>> reading column number %d (index %d), row %d value %.2e\n",
 		 j,jp,(panel_ind[p])[i],(panel_re[p])[i]);
@@ -2510,6 +2852,7 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 	if (p >= spawidth) {
 	  taucs_printf("oocsp_numfact: p=%d spawidth=%lg\n",p,spawidth);
 	  taucs_printf("oocsp_numfact: Panel wider than spawidth\n");
+	  goto end;
 	} 
 	scatter(panel_nnz[p],panel_re[p],panel_ind[p],
 #ifdef SPA_ONEARRAY
@@ -2686,6 +3029,8 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
       if (k == INT_MAX) continue;
       
       /*printf("last supernode %d this column is %d its supernode %d\n",snode_last,k,snode_index[k]);*/
+      assert(k >= 0 && k < ncols); /* sivan oct 2003, chasing the win32 bug */
+
       if (snode_index[k] == snode_last) continue; /* skip rest of supernode */
       snode_last = snode_index[k]; /* mark for next time */
       
@@ -2865,7 +3210,7 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 #ifdef DETAILED_TIMING
 	time_snode_tmp = taucs_wtime();
 #endif
-#define OLD_1
+#define OLD_1_no
 #ifdef OLD_1
 	for (jjp=0; jjp<spa_n; jjp++) {
 	  jj = spa_updcols[jjp];
@@ -2905,7 +3250,7 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 	  time_snode_21 += (taucs_wtime()-x);
 #endif
         }
-#else
+#else /* OLD_1 */
 	for (jjp=0; jjp<spa_n; jjp++) {
 	  int iip_block, loop_bound, flag;
 	  
@@ -2943,14 +3288,14 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 #endif
 	  }
 	}
-#endif
+#endif /* OLD_1 */
 
 #ifdef DETAILED_TIMING
 	time_snode_2 += (taucs_wtime()-time_snode_tmp);
 #endif
 
 	/*printf("supernode update: col %d pivotrow %d updates col %d\n",jj,ii,panel_id[q]);*/
-
+ 
 #ifdef DETAILED_TIMING
 	time_snode_prepare += (taucs_wtime() - time_tmp);
 #endif
@@ -3036,7 +3381,10 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 	for (jj=0; jj<spa_n; jj++) {
 	  for (kk=k; kk<ks; kk++) {
 	    for (ii=kk-k+1; ii<(ks-k); ii++) {
-	      P[jj*srows_n + ii] -= (P[jj*srows_n + (kk-k)] * S[(kk-k)*srows_n + ii]);
+	      P[jj*srows_n + ii] =
+		taucs_sub(P[jj*srows_n + ii],
+			  taucs_mul(P[jj*srows_n + (kk-k)] , S[(kk-k)*srows_n + ii]));
+	      /*P[jj*srows_n + ii] -= (P[jj*srows_n + (kk-k)] * S[(kk-k)*srows_n + ii]);*/
 	    }
 	  }
 	}
@@ -3045,7 +3393,11 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 	for (jj=0; jj<spa_n; jj++) {
 	  for (kk=k; kk<ks; kk++) {
 	    for (ii=(ks-k); ii<srows_n; ii++) {
-	      P[jj*srows_n + ii] -= (P[jj*srows_n + (kk-k)] * S[(kk-k)*srows_n + ii]);
+	      P[jj*srows_n + ii] =
+		taucs_sub(P[jj*srows_n + ii],
+			  taucs_mul(P[jj*srows_n + (kk-k)] , S[(kk-k)*srows_n + ii]));
+
+	      /*P[jj*srows_n + ii] -= (P[jj*srows_n + (kk-k)] * S[(kk-k)*srows_n + ii]);*/
 	    }
 	  }
 	}
@@ -3168,11 +3520,15 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
       }
       
       if ( maxind == -1 ) {
-	taucs_printf("oocsp_numfact: Zero Column!\n");
+	taucs_printf("oocsp_numfact: Zero Column (1)\n");
+	errorcode = TAUCS_ERROR_SINGULAR;
+	goto end;
       }
       
       if ( taucs_iszero(panel_re[p][maxind]) ) {
-	taucs_printf("oocsp_numfact: Zero Pivot!\n");
+	taucs_printf("oocsp_numfact: Zero Pivot (2)\n");
+	errorcode = TAUCS_ERROR_SINGULAR;
+	goto end;
       }
       
       pivotindex = panel_ind[p][maxind];
@@ -3182,8 +3538,11 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 	     panel_re[p][maxind]);
 	     */
 
-      if ( ipivots[ pivotindex ] != INT_MAX ) 
+      if ( ipivots[ pivotindex ] != INT_MAX ) {
 	taucs_printf("oocsp_numfact: Pivoting twice on the same row\n");
+	errorcode = TAUCS_ERROR; /* internal error, this should not happen */
+	goto end;
+      }
       
       ipivots[ pivotindex ] = j;
 #ifdef SNODES
@@ -3248,9 +3607,7 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
       */
       assert(Uclen[j] == 0);
       Uclen[j] = maxcolcount - 1 - unext;
-      Uappendcol(LU,j,maxcolcount - 1 - unext,
-		 lu_ind + (unext+1),
-		 lu_re  + (unext+1));
+      if ((errorcode=Uappendcol(LU,j,maxcolcount - 1 - unext,lu_ind + (unext+1),lu_re  + (unext+1)))!=TAUCS_SUCCESS) goto end;
 #ifdef DETAILED_TIMING
       time_append += (taucs_wtime() - time_tmp);
 #endif
@@ -3287,11 +3644,14 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 
 	/* for (ii=0; ii<nrows; ii++) assert( snode_map[ii] == -1 ); */
 
-	                                snode_map[pivotindex       ] = 1;
-	for (ii=0; ii<lnext; ii++)      snode_map[lu_ind[ii]       ] = 1;
-	for (ii=0; ii<snode_size; ii++) snode_map[snode_pivrows[ii]] = 1;
-	for (ii=0; ii<snode_nnz; ii++)
+	assert(pivotindex < nrows);
+	snode_map[pivotindex       ] = 1;
+	for (ii=0; ii<lnext; ii++)      {snode_map[lu_ind[ii]       ] = 1; assert(lu_ind[ii] < nrows);}
+	for (ii=0; ii<snode_size; ii++) {snode_map[snode_pivrows[ii]] = 1; assert(snode_pivrows[ii] < nrows);}
+	for (ii=0; ii<snode_nnz; ii++) {
+	  assert(ii < nrows);
 	  if (snode_map[snode_ind[ii]] != 1) snode_flag = 0;
+	}
 
 	/* next, zero this column's structure in the snode_map     */
 	/* then make sure all the supernode's nonzeros are marked  */
@@ -3303,7 +3663,7 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 	
 	/* mark this supernodes nonzeros in the map                */
 	
-	for (ii=0; ii<snode_nnz; ii++) snode_map[snode_ind[ii]] = 1;
+	for (ii=0; ii<snode_nnz; ii++) {snode_map[snode_ind[ii]] = 1; assert(snode_ind[ii] < nrows);}
 
 	/* check that all the column's nonzeros are in the snode   */
 
@@ -3334,8 +3694,10 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 	for (ii=0; ii<lnext; ii++)
 	  spa[lu_ind[ii]] = lu_re[ii];
 
-	for (ii=0; ii<snode_nnz; ii++)
+	for (ii=0; ii<snode_nnz; ii++) {
+	  assert(ii < nrows);
 	  snode_re[ii] = spa[snode_ind[ii]];
+	}
 
 #ifdef DETAILED_TIMING
 	time_snode_detect += (taucs_wtime() - time_tmp);
@@ -3346,7 +3708,7 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 	/* oocsp_appendcol(L,j,snode_nnz,snode_ind,snode_re);*/
 	assert(Lclen[j] == 0);
 	Lclen[j] = snode_nnz;
-	Lappendcol(LU,j,snode_nnz,snode_ind,snode_re);
+	if ((errorcode=Lappendcol(LU,j,snode_nnz,snode_ind,snode_re))!=TAUCS_SUCCESS) goto end;
 
 #ifdef DETAILED_TIMING
 	time_append += (taucs_wtime() - time_tmp);
@@ -3370,7 +3732,7 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 	/*oocsp_appendcol(L,j,lnext,lu_ind,lu_re);*/
 	assert(Lclen[j] == 0);
 	Lclen[j] = lnext;
-	Lappendcol(LU,j,lnext,lu_ind,lu_re);
+	if ((errorcode=Lappendcol(LU,j,lnext,lu_ind,lu_re))!=TAUCS_SUCCESS) goto end;
 
 #ifdef DETAILED_TIMING
 	time_append += (taucs_wtime() - time_tmp);
@@ -3381,6 +3743,7 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 
 	snode_hash = pivotindex;
 	for (ii=0; ii<lnext; ii++) {
+	  assert(ii < nrows);
 	  snode_hash ^= lu_ind[ii];
 	  snode_ind[ii] = lu_ind[ii];
 	}
@@ -3405,7 +3768,7 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
       /*oocsp_appendcol(L,j,lnext,lu_ind,lu_re);*/
       assert(Lclen[j] == 0);
       Lclen[j] = lnext;
-      Lappendcol(LU,j,lnext,lu_ind,lu_re);
+      if ((errorcode=Lappendcol(LU,j,lnext,lu_ind,lu_re))!=TAUCS_SUCCESS) goto end;
 #ifdef DETAILED_TIMING
       time_append += (taucs_wtime() - time_tmp);
       bytes_appended += (double) (lnext 
@@ -3440,7 +3803,10 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 	int spa_n = 0;
 	for(qp = rowlists_head[pivotindex]; qp != -1; qp = rowlists_next[qp]) {
 	  q = rowlists_colind[qp];
+	  /* sivan 20 oct 2003: I am not sure the ifdef is right */
+#ifdef SNODES
 	  spa_updcols[spa_n] = q;
+#endif
 	  spa_n++;
 	}
 	/*
@@ -3479,13 +3845,15 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 	rowlists_delete(i,panel_inrowlist[p][ip]);
       }
 
+      /*taucs_printf("freeing panel_ind[%d] = %08x\n",p,panel_ind[p]);*/
+
       taucs_free(panel_inrowlist[p]); panel_inrowlist[p] = NULL;
-      taucs_free(panel_ind[p]); panel_ind[p] = NULL;
-      taucs_free(panel_re[p]);  panel_re[p]  = NULL;
+      taucs_free(panel_ind[p]);       panel_ind[p] = NULL;
+      taucs_free(panel_re[p]);        panel_re[p]  = NULL;
       if (spawidth > 0) {
 #ifndef SPA_ONEARRAY
-      taucs_free(panel_spa[p]); panel_spa[p] = NULL;
-      taucs_free(panel_spamap[p]);  panel_spamap[p]  = NULL;
+        taucs_free(panel_spa[p]);     anel_spa[p] = NULL;
+        taucs_free(panel_spamap[p]);  anel_spamap[p]  = NULL;
 #endif
       }
       panel_id[p] = -1;
@@ -3530,13 +3898,13 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
   }
 #endif
 
-  taucs_io_append(LU, HEADER_NROWS  , 1,      1, TAUCS_INT, &(A->m) );
-  taucs_io_append(LU, HEADER_NCOLS  , 1,      1, TAUCS_INT, &(A->n) );
-  taucs_io_append(LU, HEADER_FLAGS  , 1,      1, TAUCS_INT, &(A->flags));
-  taucs_io_append(LU, HEADER_COLPERM, (A->n), 1, TAUCS_INT, colperm    );
-  taucs_io_append(LU, HEADER_IPIVOTS, (A->n), 1, TAUCS_INT, ipivots    );
-  taucs_io_append(LU, HEADER_LCLEN  , (A->n), 1, TAUCS_INT, Lclen      );
-  taucs_io_append(LU, HEADER_UCLEN  , (A->n), 1, TAUCS_INT, Uclen      );
+  if (((errorcode=taucs_io_append(LU, HEADER_NROWS  , 1,      1, TAUCS_INT, &(A->m)    ))) != TAUCS_SUCCESS) goto end;
+  if (((errorcode=taucs_io_append(LU, HEADER_NCOLS  , 1,      1, TAUCS_INT, &(A->n)    ))) != TAUCS_SUCCESS) goto end;
+  if (((errorcode=taucs_io_append(LU, HEADER_FLAGS  , 1,      1, TAUCS_INT, &(A->flags)))) != TAUCS_SUCCESS) goto end;
+  if (((errorcode=taucs_io_append(LU, HEADER_COLPERM, (A->n), 1, TAUCS_INT, colperm    ))) != TAUCS_SUCCESS) goto end;
+  if (((errorcode=taucs_io_append(LU, HEADER_IPIVOTS, (A->n), 1, TAUCS_INT, ipivots    ))) != TAUCS_SUCCESS) goto end;
+  if (((errorcode=taucs_io_append(LU, HEADER_LCLEN  , (A->n), 1, TAUCS_INT, Lclen      ))) != TAUCS_SUCCESS) goto end;
+  if (((errorcode=taucs_io_append(LU, HEADER_UCLEN  , (A->n), 1, TAUCS_INT, Uclen      ))) != TAUCS_SUCCESS) goto end;
 
   (remaining_memory) += (double) ( 2 * (ncols+1) * sizeof(int));
 
@@ -3549,7 +3917,17 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 	       nnzL,nnzU,(nnzL+nnzU)/1e6);
   }
   
+end:
+
   if (spawidth > 0) {
+#ifdef SPA_ONEARRAY
+
+#else
+    for (p=0; p<spawidth; p++) {
+      taucs_free(panel_spa[p]);
+      taucs_free(panel_spamap[p]);
+    }
+#endif
     taucs_free(panel_spa);
     taucs_free(panel_spamap);
   }
@@ -3562,6 +3940,12 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 
   taucs_free(Uclen);
   taucs_free(Lclen);
+
+  for (p=0; p<ncols; p++) {
+    taucs_free(panel_re[p]);
+    taucs_free(panel_ind[p]);
+    taucs_free(panel_inrowlist[p]);
+  }
 
   taucs_free(panel_re);
   taucs_free(panel_ind);
@@ -3649,6 +4033,8 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
     taucs_printf("oocsp_numfact: spcol counts %d %d\n",oocsp_spcol_n1,oocsp_spcol_n2);
   }
 #endif
+
+  return errorcode;
 }
 
 
@@ -3659,11 +4045,12 @@ void oocsp_numfact (taucs_ccs_matrix* A, int* colperm,
 static 
 int
 oocsp_factor(taucs_ccs_matrix* A_in,
-	     taucs_io_handle* LU,
-             int*  colperm)
+      taucs_io_handle* LU,
+      int*  colperm)
 {
   /*int i,j; omer*/
-  
+  int  rc;
+
   int* etree=NULL;
   int* postorder=NULL;
   int* l_colcounts=NULL;
@@ -3676,39 +4063,55 @@ oocsp_factor(taucs_ccs_matrix* A_in,
   int  spawidth;
   int  maxsn;
 
+/*
+  EF_PROTECT_BELOW=0;
+  EF_PROTECT_FREE=0;
+  EF_FILL=0x0;
+  EF_ALIGNMENT=1;
+  taucs_printf("EF align=%d below=%d fill=%d free=%d\n malloc0=%d\n",
+	       EF_ALIGNMENT,EF_PROTECT_BELOW,EF_FILL,EF_PROTECT_FREE,EF_ALLOW_MALLOC_0);
+*/
+
   taucs_printf("taucs_ooc_lu: starting\n");
 
   taucs_printf("taucs_ooc_lu: calling colanalyze\n");
-  oocsp_colanalyze(A_in,
-		taucs_io_get_basename(LU),
-		colperm,&etree,&postorder,&l_colcounts,&u_colcounts);
-  
+  rc = oocsp_colanalyze(A_in,
+	   	        taucs_io_get_basename(LU),
+		        colperm,&etree,&postorder,&l_colcounts,&u_colcounts);
+  if (rc != TAUCS_SUCCESS) return rc;
+
   taucs_printf("taucs_ooc_lu: calling panelize\n");
-  oocsp_panelize_simple(A_in->m,A_in->n,
-		        postorder,
-			l_colcounts,u_colcounts,etree,
-			&spawidth,&maxsn,
-			&panels,&schedstart,&schedend,&fetchnext,&ejectnext);
+  rc = oocsp_panelize_simple(A_in->m,A_in->n,
+	  	             postorder,
+                             l_colcounts,u_colcounts,etree,
+			     &spawidth,&maxsn,
+			     &panels,&schedstart,&schedend,&fetchnext,&ejectnext);
+  /* we don't need these any more */
+  taucs_free(postorder);
+  taucs_free(etree);
+  if (rc != TAUCS_SUCCESS) return rc;
 
   taucs_printf("taucs_ooc_lu: calling numfact\n");
-  oocsp_numfact(A_in,colperm,
-		/*L,U,*/
-		LU,
-		panels,
-		schedstart,
-		schedend,
-		fetchnext,
-		ejectnext,
-		l_colcounts,
-		u_colcounts,
-		spawidth,maxsn);
+  rc = oocsp_numfact(A_in,colperm,
+	  	     /*L,U,*/
+		     LU,
+		     panels,schedstart,schedend,fetchnext,ejectnext,
+		     l_colcounts,
+		     u_colcounts,
+                     spawidth,maxsn);
+  taucs_free(panels);
+  taucs_free(schedstart);
+  taucs_free(schedend);
+  taucs_free(fetchnext);
+  taucs_free(ejectnext);
+  if (rc != TAUCS_SUCCESS) return rc;
 
   taucs_printf("taucs_ooc_lu: done, returning\n");
 
-  return 0;
+  return TAUCS_SUCCESS;
 }
 
-void
+int
 taucs_dtl(ooc_factor_lu)(taucs_ccs_matrix* A_in,
 		         int    colperm[],
                          taucs_io_handle* LU,
@@ -3717,7 +4120,7 @@ taucs_dtl(ooc_factor_lu)(taucs_ccs_matrix* A_in,
   remaining_memory = memory;
   taucs_printf("taucs_ooc_factor_lu: using %.0lf MBytes of in-core memory\n",
 	     (remaining_memory)/1048576.0);
-  oocsp_factor(A_in,LU,colperm);
+  return oocsp_factor(A_in,LU,colperm);
 }
 
 /*********************************************************/
@@ -3729,16 +4132,18 @@ oocsp_solve(taucs_io_handle* LU,
 	    taucs_datatype* X,
 	    taucs_datatype* B)
 {
+  int errorcode = TAUCS_SUCCESS;
+
   int i,ip,j,n;
-  taucs_datatype* Y;
+  taucs_datatype* Y      = NULL;
   taucs_datatype  Aij;
-  taucs_datatype* values;
-  int*    indices;
-  int*    irowperm;
-  int*    Lclen;
-  int*    Uclen;
-  int*    colperm;
-  int*    ipivots;
+  taucs_datatype* values = NULL;
+  int*    indices        = NULL;
+  int*    irowperm       = NULL;
+  int*    Lclen          = NULL;
+  int*    Uclen          = NULL;
+  int*    colperm        = NULL;
+  int*    ipivots        = NULL;
 
   int     found;
   
@@ -3748,7 +4153,8 @@ oocsp_solve(taucs_io_handle* LU,
   taucs_printf("oocsp_solve: starting\n");
 
   /* n = L->nrows; */
-  taucs_io_read(LU, HEADER_NROWS, 1, 1, TAUCS_INT, &n);
+  if ((errorcode=taucs_io_read(LU, HEADER_NROWS, 1, 1, TAUCS_INT, &n)) != TAUCS_SUCCESS) 
+    goto end;
 
   Y       = (taucs_datatype*) taucs_malloc(n * sizeof(taucs_datatype));
   values  = (taucs_datatype*) taucs_malloc(n * sizeof(taucs_datatype));
@@ -3760,13 +4166,19 @@ oocsp_solve(taucs_io_handle* LU,
 
   colperm = (int*)    taucs_malloc(n * sizeof(int));
   ipivots = (int*)    taucs_malloc(n * sizeof(int));
-  assert(Y && values && indices && irowperm && Lclen && Uclen && colperm && ipivots);
 
-  taucs_io_read(LU, HEADER_LCLEN, n, 1, TAUCS_INT, Lclen);
-  taucs_io_read(LU, HEADER_UCLEN, n, 1, TAUCS_INT, Uclen);
+  if ( !(Y && values && indices && irowperm 
+	 && Lclen && Uclen && colperm && ipivots) ) {
+    taucs_printf("taucs: Out-of-Core LU solve failed due to lack of memory\n");
+    errorcode = TAUCS_ERROR_NOMEM;
+    goto end;
+  }
 
-  taucs_io_read(LU, HEADER_COLPERM, n, 1, TAUCS_INT, colperm);
-  taucs_io_read(LU, HEADER_IPIVOTS, n, 1, TAUCS_INT, ipivots);
+  if ((errorcode=taucs_io_read(LU, HEADER_LCLEN, n, 1, TAUCS_INT, Lclen)) != TAUCS_SUCCESS) goto end;
+  if ((errorcode=taucs_io_read(LU, HEADER_UCLEN, n, 1, TAUCS_INT, Uclen)) != TAUCS_SUCCESS) goto end;
+
+  if ((errorcode=taucs_io_read(LU, HEADER_COLPERM, n, 1, TAUCS_INT, colperm)) != TAUCS_SUCCESS) goto end;
+  if ((errorcode=taucs_io_read(LU, HEADER_IPIVOTS, n, 1, TAUCS_INT, ipivots)) != TAUCS_SUCCESS) goto end;
 
   for(i=0; i<n; i++)
      irowperm[ipivots[i]]=i;
@@ -3796,7 +4208,7 @@ oocsp_solve(taucs_io_handle* LU,
 
   for (j=0; j<n; j++) {
     /*oocsp_readcol(L,j,indices,values);*/
-    Lreadcol(LU,j,Lclen[j],indices,values);
+    if ((errorcode=Lreadcol(LU,j,Lclen[j],indices,values)) != TAUCS_SUCCESS) goto end;
     bytes_read += Lclen[j] * (sizeof(int) + sizeof(taucs_datatype));
     for (ip=0; ip < Lclen[j]; ip++) {
       i = indices[ip];
@@ -3810,7 +4222,7 @@ oocsp_solve(taucs_io_handle* LU,
 
   for (j=n-1; j>=0; j--) {
     /*oocsp_readcol(U,j,indices,values);*/
-    Ureadcol(LU,j,Uclen[j],indices,values);
+    if ( (errorcode=Ureadcol(LU,j,Uclen[j],indices,values)) != TAUCS_SUCCESS) goto end;
     bytes_read += Uclen[j] * (sizeof(int) + sizeof(taucs_datatype));
 
     found = 0;
@@ -3860,6 +4272,12 @@ oocsp_solve(taucs_io_handle* LU,
   printf("rowperm[1]=%d irowperm[1]=%d colperm[1]=%d icp[1]=%d\n",ipivots[1], irowperm[1], colperm[1],j);
   */
 
+  time_solve = (taucs_wtime() - time_solve);
+  taucs_printf("oocsp_solve: done in %.0lf seconds, read %.0lf bytes (%.0lf MBytes)\n",
+	     time_solve,bytes_read,bytes_read/1048576.0);
+
+end:
+
   taucs_free(Y);
   taucs_free(values);
   taucs_free(indices);
@@ -3869,19 +4287,13 @@ oocsp_solve(taucs_io_handle* LU,
   taucs_free(ipivots);
   taucs_free(colperm);
 
-  time_solve = (taucs_wtime() - time_solve);
-  taucs_printf("oocsp_solve: done in %.0lf seconds, read %.0lf bytes (%.0lf MBytes)\n",
-	     time_solve,bytes_read,bytes_read/1048576.0);
-
-  return 0; /* success */
-  
+  return errorcode; /* success */
 } /* main */
 
 int taucs_dtl(ooc_solve_lu)(taucs_io_handle*   LU,
 			    taucs_datatype* x, taucs_datatype* b)
 {
-  /*oocsp_solve(LU,x,b); omer*/
-	return oocsp_solve(LU,x,b);
+  return oocsp_solve(LU,x,b);
 }
 
 #endif /*#ifndef TAUCS_CORE_GENERAL*/
@@ -3899,42 +4311,40 @@ int taucs_ooc_factor_lu(taucs_ccs_matrix* A,
 {
 #ifdef TAUCS_CONFIG_DREAL
   if (A->flags & TAUCS_DOUBLE) {
-    taucs_dooc_factor_lu(A,colperm,LU,memory);
-    return 0;
+    return taucs_dooc_factor_lu(A,colperm,LU,memory);
   }
 #endif
 
 #ifdef TAUCS_CONFIG_DCOMPLEX
   if (A->flags & TAUCS_DCOMPLEX) {
-    taucs_zooc_factor_lu(A,colperm,LU,memory);
-    return 0;
+    return taucs_zooc_factor_lu(A,colperm,LU,memory);
   }
 #endif
 
 #ifdef TAUCS_CONFIG_SREAL
   if (A->flags & TAUCS_SINGLE) {
-    taucs_sooc_factor_lu(A,colperm,LU,memory);
-    return 0;
+    return taucs_sooc_factor_lu(A,colperm,LU,memory);
   }
 #endif
 
 #ifdef TAUCS_CONFIG_SCOMPLEX
   if (A->flags & TAUCS_SCOMPLEX) {
-    taucs_cooc_factor_lu(A,colperm,LU,memory);
-    return 0;
+    return taucs_cooc_factor_lu(A,colperm,LU,memory);
   }
 #endif
 
-  assert(0);
-  return -1;
+  return TAUCS_ERROR_DATATYPE;
 }
 
-int taucs_ooc_solve_lu (taucs_io_handle* LU,
+int taucs_ooc_solve_lu (void* vLU,
 			void* x, void* b)
 {
+  int errorcode;
+  taucs_io_handle* LU = (taucs_io_handle*) vLU;
   int flags;
 
-  taucs_io_read(LU, HEADER_FLAGS, 1, 1, TAUCS_INT, &flags);
+  if ((errorcode=taucs_io_read(LU, HEADER_FLAGS, 1, 1, TAUCS_INT, &flags)) != TAUCS_SUCCESS) 
+    return errorcode;
 
   printf("taucs_ooc_solve_lu: starting, DZSC=%d%d%d%d\n",
 	 (flags & TAUCS_DOUBLE  ) != 0,
@@ -3944,34 +4354,29 @@ int taucs_ooc_solve_lu (taucs_io_handle* LU,
   
 #ifdef TAUCS_CONFIG_DREAL
   if (flags & TAUCS_DOUBLE) {
-    taucs_dooc_solve_lu(LU,x,b);
-    return 0;
+    return taucs_dooc_solve_lu(LU,x,b);
   }
 #endif
 
 #ifdef TAUCS_CONFIG_DCOMPLEX
   if (flags & TAUCS_DCOMPLEX) {
-    taucs_zooc_solve_lu(LU,x,b);
-    return 0;
+    return taucs_zooc_solve_lu(LU,x,b);
   }
 #endif
 
 #ifdef TAUCS_CONFIG_SREAL
   if (flags & TAUCS_SINGLE) {
-    taucs_sooc_solve_lu(LU,x,b);
-    return 0;
+    return taucs_sooc_solve_lu(LU,x,b);
   }
 #endif
 
 #ifdef TAUCS_CONFIG_SCOMPLEX
   if (flags & TAUCS_SCOMPLEX) {
-    taucs_cooc_solve_lu(LU,x,b);
-    return 0;
+    return taucs_cooc_solve_lu(LU,x,b);
   }
 #endif
 
-  assert(0);
-  return -1;
+  return TAUCS_ERROR_DATATYPE;
 }
 
 #endif /*#ifdef TAUCS_CORE_GENERAL*/
@@ -3979,5 +4384,3 @@ int taucs_ooc_solve_lu (taucs_io_handle* LU,
 /*********************************************************/
 /* END OF FILE                                           */
 /*********************************************************/
-
-

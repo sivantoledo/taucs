@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include <math.h>
 #include "taucs.h"
@@ -292,6 +293,36 @@ taucs_ccs_times_vec(taucs_ccs_matrix* m,
   
   
 }
+
+void 
+taucs_ccs_times_vec_many(taucs_ccs_matrix* m, 
+		    void* X,
+		    void* B,
+				int nrhs)
+{
+
+#ifdef TAUCS_DOUBLE_IN_BUILD
+  if (m->flags & TAUCS_DOUBLE)
+    taucs_dccs_times_vec_many(m, (taucs_double*) X, (taucs_double*) B,nrhs);
+#endif
+
+#ifdef TAUCS_SINGLE_IN_BUILD
+  if (m->flags & TAUCS_SINGLE)
+    taucs_sccs_times_vec_many(m, (taucs_single*) X, (taucs_single*) B,nrhs);
+#endif
+
+#ifdef TAUCS_DCOMPLEX_IN_BUILD
+  if (m->flags & TAUCS_DCOMPLEX)
+    taucs_zccs_times_vec_many(m, (taucs_dcomplex*) X, (taucs_dcomplex*) B,nrhs);
+#endif
+
+#ifdef TAUCS_SCOMPLEX_IN_BUILD
+  if (m->flags & TAUCS_SCOMPLEX)
+    taucs_cccs_times_vec_many(m, (taucs_scomplex*) X, (taucs_scomplex*) B,nrhs);
+#endif
+  
+  
+}
 #endif /*TAUCS_CORE_GENERAL*/
 
 #ifndef TAUCS_CORE_GENERAL
@@ -341,6 +372,62 @@ taucs_dtl(ccs_times_vec)(taucs_ccs_matrix* m,
       }
     }
   }
+} 
+
+void 
+taucs_dtl(ccs_times_vec_many)(taucs_ccs_matrix* m, 
+			 taucs_datatype* X,
+			 taucs_datatype* B,
+			 int nrhs)
+{
+  int i,ip,j,n,k;
+  taucs_datatype Aij;
+
+  n = m->n;
+  
+	for (k=0; k<nrhs; k++) 
+		for (i=0; i < n; i++) B[i+k*n] = taucs_zero;
+
+	if (m->flags & TAUCS_SYMMETRIC) {
+		for (j=0; j<n; j++) {
+			for (ip = (m->colptr)[j]; ip < (m->colptr[j+1]); ip++) {
+				i   = (m->rowind)[ip];
+				Aij = (m->taucs_values)[ip];
+	
+				for (k=0; k<nrhs; k++) {
+					B[i+k*n] = taucs_add(B[i+k*n],taucs_mul(X[j+k*n],Aij));
+					if (i != j) 
+						B[j+k*n] = taucs_add(B[j+k*n],taucs_mul(X[i+k*n],Aij));
+				}
+			}
+		}
+	} else if (m->flags & TAUCS_HERMITIAN) {
+		for (j=0; j<n; j++) {
+			for (ip = (m->colptr)[j]; ip < (m->colptr[j+1]); ip++) {
+				i   = (m->rowind)[ip];
+				Aij = (m->taucs_values)[ip];
+		
+				for (k=0; k<nrhs; k++) {
+					B[i+k*n] = taucs_add(B[i+k*n],taucs_mul(X[j+k*n],Aij));
+					if (i != j) 
+						B[j+k*n] = taucs_add(B[j+k*n],taucs_mul(X[i+k*n],
+							taucs_conj(Aij)));
+				}
+			}
+		}
+	} else {
+			for (j=0; j<n; j++) {
+				for (ip = (m->colptr)[j]; ip < (m->colptr[j+1]); ip++) {
+			
+				i   = (m->rowind)[ip];
+				Aij = (m->taucs_values)[ip];
+		
+				for (k=0; k<nrhs; k++) {
+					B[i+k*n] = taucs_add(B[i+k*n],taucs_mul(X[j+k*n],Aij));
+				}
+			}
+		}
+	}
 } 
 
 #endif /*#ifndef TAUCS_CORE_GENERAL*/
@@ -494,6 +581,145 @@ taucs_dtl(ccs_augment_nonpositive_offdiagonals)(taucs_ccs_matrix* A)
 }
 
 #endif /*#ifndef TAUCS_CORE_GENERAL*/
+
+/*************************************************************************************
+ * Function: multilu_transpose_sparse
+ *
+ * Description: Transpose a given sparse matrix A. If A->values is NULL then it assumed
+ *              that this a "structure-only" matrix and the tranpose is too.
+ *
+ *************************************************************************************/
+
+#ifdef TAUCS_CORE_GENERAL
+taucs_ccs_matrix*
+taucs_ccs_transpose(taucs_ccs_matrix *A)
+{
+
+#ifdef TAUCS_DOUBLE_IN_BUILD
+  if (A->flags & TAUCS_DOUBLE)
+    return taucs_dccs_transpose(A);
+#endif
+
+#ifdef TAUCS_SINGLE_IN_BUILD
+  if (A->flags & TAUCS_SINGLE)
+    return taucs_sccs_transpose(A);
+#endif
+
+#ifdef TAUCS_DCOMPLEX_IN_BUILD
+  if (A->flags & TAUCS_DCOMPLEX)
+    return taucs_zccs_transpose(A);
+#endif
+
+#ifdef TAUCS_SCOMPLEX_IN_BUILD
+  if (A->flags & TAUCS_SCOMPLEX)
+    return taucs_cccs_transpose(A);
+#endif
+      
+  assert(0);
+  return NULL;
+}
+#endif /*TAUCS_CORE_GENERAL*/
+
+#ifndef TAUCS_CORE_GENERAL
+
+taucs_ccs_matrix*
+taucs_dtl(ccs_transpose)(taucs_ccs_matrix *A)
+{
+  taucs_ccs_matrix *At;
+  int *row_size, *row_index;
+  int i, j;
+  int nnz;
+  
+  int do_values;
+
+  if ( A->flags & TAUCS_SYMMETRIC ) return NULL;
+  if ( A->flags & TAUCS_HERMITIAN ) return NULL;
+
+  do_values = ( (A->taucs_values) != NULL );
+  
+  /* Allocate space for At */
+  At = taucs_malloc(sizeof(taucs_ccs_matrix));
+
+  At->flags = A->flags;
+  if ( A->flags & TAUCS_TRIANGULAR ) {
+    if ( A->flags & TAUCS_LOWER ) {
+      At->flags |=  TAUCS_UPPER;
+      At->flags &= ~TAUCS_LOWER;
+    } else {
+      At->flags |=  TAUCS_LOWER;
+      At->flags &= ~TAUCS_UPPER;
+    }
+  }
+
+  At->m = A->n;
+  At->n = A->m;
+  /*At->nnz = A->nnz;*/
+  nnz = A->colptr[ A->n ];
+  At->colptr = taucs_calloc(At->n + 1, sizeof(int));
+  At->rowind = taucs_calloc( nnz /*At->nnz*/, sizeof(int));
+  if (do_values)
+    (At->taucs_values) = taucs_calloc(nnz, sizeof(taucs_datatype));
+  else
+    (At->taucs_values) = NULL;
+  
+  /* Find row sizes */
+  row_size = taucs_calloc(At->m, sizeof(int));
+  for(i = 0; i < nnz; i++)
+    row_size[A->rowind[i]]++;
+  
+  /* Initiate the colptr of At based on rowsizes */
+  At->colptr[0] = 0;
+  for(i = 1; i <= At->n; i++)
+    At->colptr[i] = At->colptr[i - 1] + row_size[i - 1];
+  
+  /* Now put values and indexs into the new matrix. For growing row_index use the */
+  /* same array as row_size (trick to make the names look good) */
+  row_index = row_size;
+  memset(row_index, 0, At->m * sizeof(int));
+  for(i = 0; i < A->n; i++)
+    for(j = A->colptr[i]; j < A->colptr[i + 1]; j++)
+      {
+	int row = A->rowind[j];
+	int index = At->colptr[row] + row_index[row];
+	
+	At->rowind[index] = i;
+	if (do_values)
+	  (At->taucs_values)[index] = (A->taucs_values)[j];
+	
+	row_size[row]++;
+      }
+  
+  
+  taucs_free(row_size);
+  
+  return At;
+}
+
+#endif /* not TAUCS_CORE_GENERAL*/
+
+/*************************************************************************************
+ * Function: multilu_reorder_rows
+ *
+ * Description: Reorders the rows of the given matrix, in place
+ *
+ *************************************************************************************/
+#ifdef TAUCS_CORE_GENERAL
+void taucs_ccs_permute_rows_inplace(taucs_ccs_matrix *A, int *row_order)
+{
+  int *inverse_r = taucs_malloc(A->m * sizeof(int));
+  int i;
+  
+  /* Find inverse of row order */
+  for (i = 0; i < A->m; i++)
+    inverse_r[row_order[i]] = i;
+  
+  /* Change row numbers */
+  for (i = 0; i < A->colptr[ A->n ]/*A->nnz*/; i++)
+    A->rowind[i] = inverse_r[A->rowind[i]];
+  
+  taucs_free(inverse_r);
+}
+#endif
 /*********************************************************/
 /*                                                       */
 /*********************************************************/

@@ -3,6 +3,7 @@
 # Sivan's comments, 4 Sep 2003:
 # This file is for use with the current branch of Cilk
 # on or.iucc.ac.il
+# Haim, 26 Dec 2003: Small correction to make it work
 #########################################################
 FC        = g77
 FFLAGS    = -O3 -fno-second-underscore -Wall
@@ -12,7 +13,7 @@ CC        = gcc
 COUTFLG   = -o ./
 CFLAGS    = -O3 -Wall -Werror -std=c89
 
-CILKC      = ../cilk-devel/current/support/cilkclocal
+CILKC      = /home/or/tau/sivan/Projects/cilk-devel/current/support/cilkclocal
 CILKOUTFLG = -o ./
 CILKFLAGS  = -O3 -x cilk
 
@@ -20,9 +21,12 @@ LD        = $(CILKC)
 LDFLAGS   = 
 LOUTFLG   = -o ./
 
-LIBBLAS   = -lcomplib.sgimath
-LIBMETIS  = -Lexternal/lib/irix -lmetis32
+# We use SCSL without it's multiprocessing ability
+# The multiprocessing can not be used with pthreads
+LIBBLAS   = -lscs
 
-LIBF77    = -L /usr/local/gcc3/lib/gcc-lib/mips-sgi-irix6.5/3.0.4/mabi=64 -lg2c -lgcc
-LIBF77    = 
-LIBC      = -lc -lm
+LIBLAPACK = 
+LIBMETIS  = -L external/lib/irix -lmetis32
+
+LIBF77 = -L /usr/local/gcc3/lib/gcc-lib/mips-sgi-irix6.5/3.0.4/ -lg2c -lgcc
+LIBC = -L /usr/lib32/mips3 -lc -lm 

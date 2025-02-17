@@ -10,7 +10,7 @@
 #include <string.h>
 #include "taucs.h"
 
-#define RNDM ((double)rand()/(double)RAND_MAX);
+#define RNDM ((double)rand()/(double)RAND_MAX)
 
 /*ifndef added omer*/
 #ifndef max
@@ -194,13 +194,15 @@ taucs_ccs_generate_mesh2d(int n,char *which)
   return m;
 }
 
+
 taucs_ccs_matrix* 
-taucs_ccs_generate_mesh3d(int X, int Y, int Z)
+taucs_ccs_generate_mesh3d_random(int X, int Y, int Z,int brand)
 {
   taucs_ccs_matrix* m;
   int         N;
   int         nnz;
   int         x,y,z,i,j,ip;
+	double			dNum = 1.0;
 
   taucs_printf("taucs_ccs_generate_mesh3d: starting\n");
 
@@ -234,19 +236,38 @@ taucs_ccs_generate_mesh3d(int X, int Y, int Z)
 	j = z*X*Y + y*X + x; 
 	/*printf("column %d xy %d,%d starts at %d\n",j,x,y,ip);*/
 	(m->colptr)[j] = ip;
-	if (x < X-1) { i=(z  )*X*Y+(y  )*X+(x+1); (m->rowind)[ip]=i; (m->values.d/*taucs_values*/)[ip]=-1.0; ip++; }
-	if (y < Y-1) { i=(z  )*X*Y+(y+1)*X+(x  ); (m->rowind)[ip]=i; (m->values.d/*taucs_values*/)[ip]=-1.0; ip++; }
-	if (z < Z-1) { i=(z+1)*X*Y+(y  )*X+(x  ); (m->rowind)[ip]=i; (m->values.d/*taucs_values*/)[ip]=-1.0; ip++; }
+	if (x < X-1) { 
+		i=(z  )*X*Y+(y  )*X+(x+1); 
+		(m->rowind)[ip]=i; 
+		dNum = brand ? RNDM : 1.0;
+		(m->values.d)[ip]=-dNum; 
+		ip++; 
+	}
+	if (y < Y-1) { 
+		i=(z  )*X*Y+(y+1)*X+(x  ); 
+		(m->rowind)[ip]=i; 
+		dNum = brand ? RNDM : 1.0;
+		(m->values.d)[ip]=-dNum; 
+		ip++; 
+	}
+	if (z < Z-1) { 
+		i=(z+1)*X*Y+(y  )*X+(x  ); 
+		(m->rowind)[ip]=i; 
+		dNum = brand ? RNDM : 1.0;
+		(m->values.d)[ip]=-dNum; 
+		ip++; 
+	}
 	             { 
 		       i=(z  )*X*Y+(y  )*X+(x  ); (m->rowind)[ip]=i; 
 		       (m->values.d/*taucs_values*/)[ip]= 0.0; 
-		       if (x < X-1) (m->values.d/*taucs_values*/)[ip] += 1.0;
-		       if (y < Y-1) (m->values.d/*taucs_values*/)[ip] += 1.0;
-		       if (z < Z-1) (m->values.d/*taucs_values*/)[ip] += 1.0;
-		       if (x > 0  ) (m->values.d/*taucs_values*/)[ip] += 1.0;
-		       if (y > 0  ) (m->values.d/*taucs_values*/)[ip] += 1.0;
-		       if (z > 0  ) (m->values.d/*taucs_values*/)[ip] += 1.0;
-		       if (x==0 && y==0 && z==0) (m->values.d/*taucs_values*/)[ip] += 1.0;
+						dNum = brand ? RNDM : 1.0;
+		       if (x < X-1) (m->values.d/*taucs_values*/)[ip] += dNum;
+		       if (y < Y-1) (m->values.d/*taucs_values*/)[ip] += dNum;
+		       if (z < Z-1) (m->values.d/*taucs_values*/)[ip] += dNum;
+		       if (x > 0  ) (m->values.d/*taucs_values*/)[ip] += dNum;
+		       if (y > 0  ) (m->values.d/*taucs_values*/)[ip] += dNum;
+		       if (z > 0  ) (m->values.d/*taucs_values*/)[ip] += dNum;
+		       if (x==0 && y==0 && z==0) (m->values.d/*taucs_values*/)[ip] += dNum;
 		       ip++; 
 		     }
 	/* { i=(z  )*X*Y+(y  )*X+(x  ); (m->rowind)[ip]=i; (m->taucs_values)[ip]= 6.0; ip++; } */
@@ -259,6 +280,13 @@ taucs_ccs_generate_mesh3d(int X, int Y, int Z)
 
   return m;
 }
+
+taucs_ccs_matrix* 
+taucs_ccs_generate_mesh3d(int X, int Y, int Z)
+{
+	return taucs_ccs_generate_mesh3d_random(X,Y,Z,0);
+}
+
 
 taucs_ccs_matrix* 
 taucs_ccs_generate_dense(int M, int N, int flags)

@@ -135,6 +135,11 @@ struct module {
     0, { 0 }
   },
 
+  { "PROFILING" , exclude,  0 , { "BASE", 0 },
+    { 0 },
+    0, { 0 }
+  },
+
   { "CILK" , exclude,  cilksource , { "BASE", 0 },
     { 0 },
     0, { 0 }
@@ -170,10 +175,24 @@ struct module {
     0, { "LIBMETIS", 0 }
   },
 
+
+  { "CAMD" , include, 0, { "ORDERING", 0 },
+    { "amd_1","amd_2","amd_aat","amd_order","amd_valid","amd_postorder","amd_post_tree",0 },
+    /*{ 0 },*/
+    "libtaucs", { 0 }
+  },
+
+  { "AMD" , include, 0, { "ORDERING", 0 },
+    { 0 },
+    "libtaucs", { 0 }
+  },
+
+  /*
   { "AMD" , include, 0, { "ORDERING", 0 },
     { "amdatr","amdbar","amdexa","amdhaf","amdhat","amdpre","amdtru", 0 },
     "libtaucs", { 0 }
   },
+  */
 
   { "COLAMD" , include, 0,  { "ORDERING", 0 },
     { "colamd", 0 },
@@ -194,7 +213,7 @@ struct module {
     { 0 }
   },
 
-  { "FACTOR",  include, 0 , { "BASE", "LLT", "ORDERING", 0 },
+  { "FACTOR",  include, 0 , { "BASE", "LLT", "LDLT", "MULTILU", "ORDERING", 0 },
     {
       "taucs_linsolve",
       0
@@ -212,8 +231,32 @@ struct module {
     { 0 }
   },
 
+  { "LDLT",  include, 0 , { "BASE", 0 },
+    {
+      "taucs_sn_ldlt",
+      0
+    },
+    "libtaucs", 
+    { 0 }
+  },
+  
+  { "MULTILU",  include, 0 , { "BASE", 0 },
+    {
+      "taucs_multilu",
+      "taucs_dense",
+      0
+    },
+    "libtaucs", 
+    { 0 }
+  },
+  
   { "OOC_LLT" , include, 0, { "BASE", "ADVANCED_MEMORY_OPS", 0 },
     { "taucs_ccs_ooc_llt", "taucs_ooc_io", 0 },
+    "libtaucs", { 0 }
+  },
+
+  { "OOC_LDLT" , include, 0, { "BASE", "ADVANCED_MEMORY_OPS", 0 },
+    { "taucs_ccs_ooc_ldlt", "taucs_ooc_io", 0 },
     "libtaucs", { 0 }
   },
 
@@ -269,7 +312,7 @@ struct module {
   { "TESTING_PROGRAMS" , include, 0, { "TEST_DIRECT", "TEST_ITER", "TEST_MEMORY", 0 },
     { 0 }, 0, { 0 }
   },
-
+  
   { "TEST_DIRECT" , include, 0, { "BASE", "MATRIX_GENERATORS", 0 },
     {"direct", 0 }, 
     "direct", { 0 }
@@ -324,6 +367,7 @@ struct file {
   { "taucs_config_tests",  "DIRBLD", hsource },
 
   { "taucs_sn_llt" ,       "DIRSRC", cilksource | generic | dreal | sreal | dcomplex | scomplex},
+  { "taucs_sn_ldlt" ,      "DIRSRC", csource		|	generic | dreal | sreal | dcomplex | scomplex},
   { "taucs_linsolve" ,     "DIRSRC", cilksource | generic },
 
   { "taucs_logging" ,      "DIRSRC", csource | generic },
@@ -338,6 +382,7 @@ struct file {
   { "taucs_ccs_solve_llt" ,"DIRSRC", csource | generic | dreal | sreal | dcomplex | scomplex},
   { "taucs_complex" ,      "DIRSRC", csource | generic | dreal | sreal | dcomplex | scomplex},
   { "taucs_ccs_ooc_llt" ,  "DIRSRC", csource | generic | dreal | sreal | dcomplex | scomplex},
+  { "taucs_ccs_ooc_ldlt",  "DIRSRC", csource | generic | dreal | sreal | dcomplex | scomplex},
   { "taucs_ccs_ooc_lu" ,   "DIRSRC", csource | generic | dreal | sreal | dcomplex | scomplex},
   { "taucs_ooc_io" ,       "DIRSRC", csource | generic },
   { "taucs_iter" ,         "DIRSRC", csource |           dreal                              },
@@ -345,6 +390,9 @@ struct file {
   { "taucs_recvaidya" ,    "DIRSRC", csource |           dreal                              },
   { "taucs_gremban" ,      "DIRSRC", csource |           dreal                              },
   { "taucs_ccs_xxt" ,      "DIRSRC", csource |           dreal                              },
+
+  { "taucs_dense",         "DIRSRC", cilksource |           dreal | sreal | dcomplex | scomplex},
+  { "taucs_multilu",       "DIRSRC", cilksource | generic | dreal | sreal | dcomplex | scomplex},
 
   { "taucs_ccs_generators","DIRSRC", csource |           dreal                              },
   { "taucs_malloc"     ,   "DIRSRC", csource | generic },
@@ -359,6 +407,14 @@ struct file {
   { "amdtru" , "DIREXTSRC", fcsource },
   { "genmmd" , "DIREXTSRC", fcsource },
   { "colamd" , "DIREXTSRC", csource  },
+
+  { "amd_1" , "DIREXTSRC", csource  },
+  { "amd_2" , "DIREXTSRC", csource  },
+  { "amd_aat" , "DIREXTSRC", csource  },
+  { "amd_order" , "DIREXTSRC", csource  },
+  { "amd_valid" , "DIREXTSRC", csource  },
+  { "amd_postorder" , "DIREXTSRC", csource  },
+  { "amd_post_tree" , "DIREXTSRC", csource  },
 
   { "direct"      , "DIRPROGS", csource },
   { "taucs_run"   , "DIRPROGS", csource },

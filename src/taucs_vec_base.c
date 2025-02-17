@@ -91,6 +91,45 @@ taucs_vec_axpby(int n, int flags,
 #endif
 }
 
+void
+taucs_vec_axpby_many(int n, int flags,
+		taucs_double a, void* x,
+		taucs_double b, void* y,
+		void* axpby, int nrhs)
+{
+#ifdef TAUCS_CONFIG_DREAL
+  if (flags & TAUCS_DOUBLE)
+    taucs_dvec_axpby_many(n,
+		     (taucs_double) a, (taucs_double*) x,
+		     (taucs_double) b, (taucs_double*) y,
+		     (taucs_double*) axpby, nrhs);
+#endif
+
+#ifdef TAUCS_CONFIG_SREAL
+  if (flags & TAUCS_SINGLE)
+    taucs_svec_axpby_many(n,
+		     (taucs_single) a, (taucs_single*) x,
+		     (taucs_single) b, (taucs_single*) y,
+		     (taucs_single*) axpby, nrhs);
+#endif
+
+#ifdef TAUCS_CONFIG_DCOMPLEX
+  if (flags & TAUCS_DCOMPLEX)
+    taucs_zvec_axpby_many(n,
+		     (taucs_double) a, (taucs_dcomplex*) x,
+		     (taucs_double) b, (taucs_dcomplex*) y,
+		     (taucs_dcomplex*) axpby, nrhs);
+#endif
+
+#ifdef TAUCS_CONFIG_SCOMPLEX
+  if (flags & TAUCS_SCOMPLEX)
+    taucs_cvec_axpby_many(n,
+		     (taucs_single) a, (taucs_scomplex*) x,
+		     (taucs_single) b, (taucs_scomplex*) y,
+		     (taucs_scomplex*) axpby, nrhs);
+#endif
+}
+
 void* taucs_vec_create(int n, int flags)
 {
 #ifdef TAUCS_CONFIG_DREAL
@@ -188,6 +227,30 @@ taucs_dtl(vec_axpby)(int n,
 #else
     axpby[i] = a * x[i] + b * y[i];
 #endif
+  }
+} 
+
+void
+taucs_dtl(vec_axpby_many)(int n, 
+		     taucs_real_datatype a, taucs_datatype* x,
+		     taucs_real_datatype b, taucs_datatype* y,
+		     taucs_datatype* axpby, int nrhs)
+{
+  int i,j;
+
+	for (j=0; j<nrhs; j++) {
+		for (i=0; i<n; i++) {
+#ifdef TAUCS_CORE_COMPLEX
+			axpby[i+j*n] = taucs_complex_create(a * taucs_re(x[i+j*n]) + b * taucs_re(y[i+j*n]),
+							a * taucs_im(x[i+j*n]) + b * taucs_im(y[i+j*n]));
+			/*
+			taucs_re(axpby[i]) = a * taucs_re(x[i]) + b * taucs_re(y[i]);
+			taucs_im(axpby[i]) = a * taucs_im(x[i]) + b * taucs_im(y[i]);
+			*/
+#else
+			axpby[i+j*n] = a * x[i+j*n] + b * y[i+j*n];
+#endif
+		}
   }
 } 
 

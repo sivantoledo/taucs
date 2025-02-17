@@ -1,6 +1,568 @@
+#include <stdio.h>
+#include <stdlib.h>
 /*************************************************************/
 /*                                                           */
 /*************************************************************/
+
+
+/* elad - papi header*/
+#include "papi.h"
+#include "papiStdEventDefs.h"
+/*
+#define UPDATE_ONLY
+*/
+/*
+#define elad
+*/
+#define UPDATEPROFILE
+#define NUMTESTS 61
+
+static const unsigned int eventlist[NUMTESTS]={
+PAPI_TOT_INS,	/*0x80000032	Instructions completed (c0,c0)*/
+PAPI_L1_LDM,	/*0x80000017	Level 1 load misses (f29,f29)*/
+PAPI_L1_STM,	/*0x80000018	Level 1 store misses (f2a,f2a)*/
+PAPI_L2_DCM,	/*0x80000002	Level 2 data cache misses (P6_L2_LINES_IN - P6_BUS_TRAN_IFETCH 0x24,68)*/
+PAPI_FP_INS,	/*0x80000034	Floating point instructions (c1,0)*/
+PAPI_FML_INS,	/*0x80000063	Yes	No	Floating point multiply instructions (0,12)*/
+PAPI_LD_INS,
+PAPI_SR_INS,
+PAPI_L1_DCA,	
+PAPI_L1_DCH,	
+PAPI_L1_DCM,	/*0x80000000	Level 1 data cache misses (45,45)*/
+PAPI_L1_ICM,	/*0x80000001	Level 1 instruction cache misses (f28,f28)*/
+PAPI_L2_ICM,	/*0x80000003	Level 2 instruction cache misses (68,68)*/
+PAPI_L1_TCM,	/*0x80000006	Level 1 cache misses (f2e,f2e)*/
+PAPI_L2_TCM,	/*0x80000007	Level 2 cache misses (24,24)*/
+PAPI_L2_LDM,	/*0x80000019	Level 2 load misses (24,25)*/
+PAPI_L2_STM,	/*0x8000001a	Level 2 store misses (25,25)*/
+PAPI_BR_CN,	/*0x8000002b	Conditional branch instructions (c4,c4)*/
+PAPI_BR_TKN,	/*0x8000002c	Conditional branch instructions taken (c9,c9)*/
+PAPI_BR_NTK,	/*0x8000002d	Conditional branch instructions not taken (c4,c9)*/
+PAPI_BR_MSP,	/*0x8000002e	Conditional branch instructions mispredicted (c5,c5)*/
+PAPI_BR_PRC,	/*0x8000002f	onditional branch instructions correctly predicted (c4,c5)*/
+PAPI_BR_INS,	/*0x80000037	Yes	No	Branch instructions (c4,c4)*/
+PAPI_VEC_INS,	/*0x80000038	Yes	No	Vector/SIMD instructions (b0,b0)*/
+PAPI_FLOPS,	/*0x80000039	Yes	Yes	Floating point instructions per second (c1,79)*/
+PAPI_RES_STL,	/*0x8000003a	Yes	No	Cycles stalled on any resource (a2,a2)*/
+PAPI_TOT_CYC,	/*0x8000003c	Yes	No	Total cycles (79,79)*/
+PAPI_IPS,	/*0x8000003d	Yes	Yes	Instructions per second (c0,79)*/
+PAPI_L1_DCH,	/*0x80000040	Yes	Yes	Level 1 data cache hits (43,45)*/
+PAPI_L1_DCA,	/*0x80000042	Yes	No	Level 1 data cache accesses (43,43)*/
+PAPI_L2_DCA,	/*0x80000043	Yes	Yes	Level 2 data cache accesses (f29,f2a)*/
+PAPI_L2_DCR,	/*0x80000046	Yes	No	Level 2 data cache reads (f29,f29)*/
+PAPI_L2_DCW,	/*0x80000049	Yes	No	Level 2 data cache writes (f2a,f2a)*/
+PAPI_L1_ICH,	/*0x8000004b	Yes	Yes	Level 1 instruction cache hits (80,f28)*/
+PAPI_L2_ICH,	/*0x8000004c	Yes	Yes	Level 2 instruction cache hits (f28,68)*/
+PAPI_L1_ICA,	/*0x8000004e	Yes	No	Level 1 instruction cache accesses (80,80)*/
+PAPI_L2_ICA,	/*0x8000004f	Yes	No	Level 2 instruction cache accesses (f28,f28)*/
+PAPI_L1_ICR,	/*0x80000051	Yes	No	Level 1 instruction cache reads (80,80)*/
+PAPI_L2_ICR,	/*0x80000052	Yes	No	Level 2 instruction cache reads (f28,f28)*/
+PAPI_L2_TCH,	/*0x80000058	Yes	Yes	Level 2 total cache hits (f2e,24)*/
+PAPI_L1_TCA,	/*0x8000005a	Yes	Yes	Level 1 total cache accesses (43,80)*/
+PAPI_L2_TCA,	/*0x8000005b	Yes	No	Level 2 total cache accesses (f2e,f2e)*/
+PAPI_L2_TCR,	/*0x8000005e	Yes	Yes	Level 2 total cache reads (f29,f28)*/
+PAPI_L2_TCW,	/*0x80000061	Yes	No	Level 2 total cache writes (f2a,f2a)*/
+PAPI_FDV_INS	/*0x80000065	Yes	No	Floating point divide instructions (0,13)*/
+};
+
+static int papi_tst = 1;
+static int papi_cntr = PAPI_TOT_CYC;
+
+static int retval ;
+static int EventSet;
+static long_long values[5];
+static long_long MFff[2],MFDiag[2],MFOffDiag[2],MFU[2],MFAdd[2];
+static long_long LLCheck[2],LLA2Dense[2],LLDense2L[2],LLff[2],LLDiag[2],LLOffDiag[2];
+static char descr[PAPI_MAX_STR_LEN];
+
+/************************************************************/
+/* for  papi                                                */
+/************************************************************/
+
+static void papi_getenv()
+{
+  char* name;
+  int i;
+
+  papi_tst = -1;
+
+  if ((name = getenv("PAPI_TEST")) != NULL) {
+    for(i=0;i<NUMTESTS;i++) {
+	  
+      PAPI_event_code_to_name(eventlist[i],descr);
+      if (!strcmp(name,descr)) {
+	papi_cntr = eventlist[i];
+	papi_tst = 1;
+	return;
+      }
+    }
+  }
+}
+
+static void papi_update_clear()
+{
+  if(papi_tst >= 0)
+  {
+       if((retval = PAPI_reset(EventSet))!=PAPI_OK)
+       {
+          taucs_printf("ERROR: PAPI_stop %d",retval);
+       }
+  }
+}
+
+static papi_my_start()
+{
+  
+  if(papi_tst >= 0) {
+    values[0]=-1ll;
+    values[1]=0ll;
+
+    retval = PAPI_library_init(PAPI_VER_CURRENT);
+    if ( retval!=PAPI_VER_CURRENT) {
+      taucs_printf("ERROR: PAPI_library_init %d",retval);
+      exit(1);
+    }
+
+    if( (retval=PAPI_create_eventset(&EventSet)) != PAPI_OK ) {
+      taucs_printf("ERROR PAPI_create_eventset %d",retval);
+      exit(1);
+    }
+
+    PAPI_event_code_to_name(papi_cntr,descr);
+    
+    if(PAPI_add_event(&EventSet, papi_cntr) != PAPI_OK) {
+      taucs_printf(" PAPI %-12s Not avalable\n",descr);
+      exit(1);
+    }
+
+    if((retval = PAPI_start(EventSet))!=PAPI_OK) {
+      taucs_printf("ERROR: PAPI_start %d",retval);
+      exit(1);
+    }
+
+    papi_update_clear();
+  }
+}
+
+static void papi_my_end()
+{
+  if(papi_tst >= 0)
+  {
+    if((retval = PAPI_stop(EventSet, values))!=PAPI_OK)
+    {
+      taucs_printf("ERROR: PAPI_stop %d",retval);
+      exit(1);
+    }
+
+    /*    taucs_printf(" PAPI %-12s = %lld\n",descr,values[0]);*/
+    taucs_printf(" PAPI %-12s = %.2e\n",descr,(double)(values[0]));
+
+    if( (retval = PAPI_rem_event(&EventSet, papi_cntr))!=PAPI_OK)
+    {
+       taucs_printf("ERROR: PAPI_rem %d",retval);
+       exit(1);
+    }
+
+    if((retval=PAPI_destroy_eventset(&EventSet))!=PAPI_OK)
+    {
+       taucs_printf("ERROR: PAPI_des %d",retval);
+       exit(1);
+    }
+  }
+  return 0;
+}
+
+
+static int papi_memory_data()
+{
+  const PAPI_mem_info_t *meminfo = NULL;
+  const PAPI_hw_info_t *hwinfo = NULL;
+  int retval;
+  int num_tests = NUMTESTS, i,tst;
+  int EventSet;
+  int d1,d2,mm[100][100];
+  long_long values[40];
+  char descr[PAPI_MAX_STR_LEN];
+
+  retval = PAPI_library_init(PAPI_VER_CURRENT);
+  if ( retval!=PAPI_VER_CURRENT) 
+    {
+      taucs_printf("ERROR: PAPI_library_init %d",retval);
+      return -100;
+    }
+  
+  if ((meminfo = PAPI_get_memory_info()) == NULL)
+    {
+      taucs_printf("ERROR: PAPI_get_memory_info");
+      return -100;
+    }
+  
+  taucs_printf("Test case:  Memory Information.\n");
+  taucs_printf("Total TLB size:  %d.\n",meminfo->total_tlb_size );
+  
+  if ( meminfo->itlb_size )
+    taucs_printf("Instruction TLB: %d entries, %d-way associative.\n",
+		 meminfo->itlb_size, meminfo->itlb_assoc );
+  
+  if ( meminfo->dtlb_size )
+    taucs_printf("Data TLB: %d entries, %d-way associative.\n",
+		 meminfo->dtlb_size, meminfo->dtlb_assoc );
+  
+  
+  if ( meminfo->total_L1_size )
+    taucs_printf("Total L1 cache: %d KB.\n",meminfo->total_L1_size );
+  
+  if ( meminfo->L1_icache_size )
+    taucs_printf("Instruction L1 cache: %d KB of %d-way associative and %d B lines.\n", 
+		 meminfo->L1_icache_size,meminfo->L1_icache_assoc,meminfo->L1_icache_linesize);
+  
+  if ( meminfo->L1_dcache_size )
+    taucs_printf("Data L1 cache: %d KB of %d-way associative and %d B lines.\n", 
+		 meminfo->L1_dcache_size,meminfo->L1_dcache_assoc,meminfo->L1_dcache_linesize);
+  
+  if ( meminfo->L2_cache_size )
+    taucs_printf("L2 cache: %d KB of %d-way associative and %d B lines.\n", 
+		 meminfo->L2_cache_size, meminfo->L2_cache_assoc,meminfo->L2_cache_linesize);
+  
+  if ( meminfo->L3_cache_size )
+    taucs_printf("L3 cache: %d KB of %d-way associative and %d B lines.\n", 
+		 meminfo->L3_cache_size,meminfo->L3_cache_assoc,meminfo->L3_cache_linesize);
+  
+  if ((hwinfo = PAPI_get_hardware_info()) == NULL)
+    {
+      retval = PAPI_ESBSTR;
+      taucs_printf("ERROR: PAPI_get_hardware_info %d",retval);
+      return -100;
+    }
+  
+  taucs_printf("Available hardware information.\n");
+  taucs_printf("Vendor string and code   : %s (%d)\n",
+	       hwinfo->vendor_string,hwinfo->vendor);
+  taucs_printf("Model string and code    : %s (%d)\n",
+	       hwinfo->model_string,hwinfo->model);
+  taucs_printf("CPU revision             : %f\n",hwinfo->revision);
+  taucs_printf("CPU Megahertz            : %f\n",hwinfo->mhz);
+  taucs_printf("CPU's in an SMP node     : %d\n",hwinfo->ncpu);
+  taucs_printf("Nodes in the system      : %d\n",hwinfo->nnodes);
+  taucs_printf("Total CPU's in the system: %d\n",hwinfo->totalcpus);
+  
+
+  if( (retval=PAPI_create_eventset(&EventSet)) != PAPI_OK )
+    {
+      taucs_printf("ERROR PAPI_create_eventset %d",retval);
+      return -101;
+  }
+
+  return 0;
+
+  for(tst=0;tst<2;tst++)
+    {
+      if(tst==0)
+	{
+	  taucs_printf("   for(d1=0;d1<100;d1++)\n");
+	  taucs_printf("      for(d2=0;d2<100;d2++)\n");
+	  taucs_printf("         mm[d1][d2]=mm[d1][d2]+mm[d1][d2]\n\n");
+	}
+      if(tst==1)
+	{
+	  taucs_printf("   for(d1=0;d1<100;d1++)\n");
+	  taucs_printf("      for(d2=0;d2<100;d2++)\n");
+	  taucs_printf("         mm[d1][d2]=mm[d1][d2]+mm[d2][d1]\n\n");
+	}
+      for(i=0;i<num_tests;i++) 
+	{
+	  values[0]=-1ll;
+	  values[1]=0ll;
+	  
+	  PAPI_event_code_to_name(eventlist[i],descr);
+	  
+	  if(PAPI_add_event(&EventSet, eventlist[i]) != PAPI_OK)
+	    {
+	      taucs_printf(" PAPI %-12s Not avalable\n",descr);
+	      
+	      continue;  /* All events may not be available */
+	    }
+	  
+	  if((retval = PAPI_start(EventSet))!=PAPI_OK)
+	    {
+	      taucs_printf("ERROR: PAPI_start %d",retval);
+	      return -111;
+	    }
+	  
+	  if(tst==0)
+	    {
+	      for(d1=0;d1<100;d1++)
+		for(d2=0;d2<100;d2++)
+		  mm[d1][d2]=mm[d1][d2]+mm[d1][d2];
+	    }
+	  if(tst==1)
+	    {
+	      for(d1=0;d1<100;d1++)
+		for(d2=0;d2<100;d2++)
+		  mm[d1][d2]=mm[d1][d2]+mm[d2][d1];
+	    }
+	  
+	  if((retval = PAPI_stop(EventSet, values))!=PAPI_OK)
+	    {
+	      taucs_printf("ERROR: PAPI_stop %d",retval);
+	      return -111;
+	    }
+	  
+	  
+	    taucs_printf(" PAPI %-12s %lld\n",descr,values[0]);
+	  
+	  if( (retval = PAPI_rem_event(&EventSet, eventlist[i]))!=PAPI_OK)
+	    {
+	      taucs_printf("ERROR: PAPI_rem %d",retval);
+	      return -111;
+	    }
+	}
+    }
+
+  if((retval=PAPI_destroy_eventset(&EventSet))!=PAPI_OK)
+    {
+      taucs_printf("ERROR: PAPI_des %d",retval);
+      return -111;
+    }
+
+  return 0;
+}
+
+#if 0
+
+int 
+papi_measure_mf(int sn,       /* this supernode */
+	     int is_root,  /* is v the root? */
+	     int* map,
+	     taucs_ccs_matrix* A,
+	     supernodal_factor_matrix* L,
+	     int* fail)
+{
+  
+ /*
+   papi_memory_data();
+ return;
+ */
+  
+  
+  if(papi_tst >= 0)
+  {
+    values[0]=-1ll;
+    values[1]=0ll;
+    MFff[0]=0ll;MFDiag[0]=0ll;MFOffDiag[0]=0ll;MFU[0]=0ll;MFAdd[0]=0ll;
+    MFff[1]=0ll;MFDiag[1]=0ll;MFOffDiag[1]=0ll;MFU[1]=0ll;MFAdd[1]=0ll;
+
+    retval = PAPI_library_init(PAPI_VER_CURRENT);
+    if ( retval!=PAPI_VER_CURRENT) 
+    {
+      taucs_printf("ERROR: PAPI_library_init %d",retval);
+      return -101;
+    }
+
+    if( (retval=PAPI_create_eventset(&EventSet)) != PAPI_OK )
+    {
+      taucs_printf("ERROR PAPI_create_eventset %d",retval);
+      return -101;
+    }
+
+    PAPI_event_code_to_name(eventlist[papi_tst],descr);
+    
+    if(PAPI_add_event(&EventSet, eventlist[papi_tst]) != PAPI_OK)
+    {
+         taucs_printf(" PAPI %-12s Not avalable\n",descr);
+         return -111;           
+    }
+
+    if((retval = PAPI_start(EventSet))!=PAPI_OK)
+    {
+       taucs_printf("ERROR: PAPI_start %d",retval);
+       return -111;
+    }
+  papi_update_clear();
+       taucs_printf("PAPI mf =[\n");
+  }
+
+  recursive_multifrontal_supernodal_factor_llt(sn,  
+					         is_root, 
+					         map,
+					         A,L,fail);
+
+  if(papi_tst >= 0)
+  {
+/*#ifdef UPDATE_ONLY*/	  
+  papi_update_mf_read();
+/*  taucs_printf("PAPI 0];\n");*/
+/*#endif*/       
+       taucs_printf("PAPI TOTAL %lld;\n ",
+                values[1]);
+    if((retval = PAPI_stop(EventSet, values))!=PAPI_OK)
+    {
+       taucs_printf("ERROR: PAPI_stop %d",retval);
+       return -111;
+    }
+/*
+    taucs_printf(" PAPI %-12s %lld\n",descr,values[0]);
+  */  
+    if( (retval = PAPI_rem_event(&EventSet, eventlist[papi_tst]))!=PAPI_OK)
+    {
+       taucs_printf("ERROR: PAPI_rem %d",retval);
+       return -111;
+    }
+
+    if((retval=PAPI_destroy_eventset(&EventSet))!=PAPI_OK)
+    {
+       taucs_printf("ERROR: PAPI_des %d",retval);
+       return -111;
+    }
+  }
+  return 0;
+}
+
+
+int
+papi_measure_llt(int p1,int p2,
+	int p3[],
+	taucs_datatype* p4,
+	taucs_ccs_matrix* p5,
+	supernodal_factor_matrix* p6)
+{
+  int val;
+  if(papi_tst >= 0)
+  {
+    values[0]=-1ll;
+    values[1]=0ll;
+    LLCheck[0]=0ll;LLA2Dense[0]=0ll;LLDense2L[0]=0ll;LLff[0]=0ll;LLDiag[0]=0ll;LLOffDiag[0]=0ll;
+    LLCheck[1]=0ll;LLA2Dense[1]=0ll;LLDense2L[1]=0ll;LLff[1]=0ll;LLDiag[1]=0ll;LLOffDiag[1]=0ll;
+    retval = PAPI_library_init(PAPI_VER_CURRENT);
+    if ( retval!=PAPI_VER_CURRENT) 
+    {
+      taucs_printf("ERROR: PAPI_library_init %d",retval);
+      return -1;
+    }
+
+    if( (retval=PAPI_create_eventset(&EventSet)) != PAPI_OK )
+    {
+      taucs_printf("ERROR PAPI_create_eventset %d",retval);
+      return -1;
+    }
+
+    PAPI_event_code_to_name(eventlist[papi_tst],descr);
+    
+    if(PAPI_add_event(&EventSet, eventlist[papi_tst]) != PAPI_OK)
+    {
+         taucs_printf(" PAPI %-12s Not avalable\n",descr);
+        return -1;           
+    }
+
+    if((retval = PAPI_start(EventSet))!=PAPI_OK)
+    {
+       taucs_printf("ERROR: PAPI_start %d",retval);
+       return -1;
+    }
+  papi_update_clear();
+       taucs_printf("PAPI ll =[\n");
+   }
+   val = recursive_leftlooking_supernodal_factor_llt( p1,p2,p3,p4,p5,p6); 
+
+   if(papi_tst >= 0)
+   {
+/*#ifdef UPDATE_ONLY*/	  
+  papi_update_read();
+/*  taucs_printf("PAPI  0];\n");*/
+/*#endif*/       
+    taucs_printf("PAPI TOTAL %lld;\n ",
+                values[1]);
+    if((retval = PAPI_stop(EventSet, values))!=PAPI_OK)
+    {
+       taucs_printf("ERROR: PAPI_stop %d",retval);
+       return -1;
+    }
+
+   /* taucs_printf(" PAPI %-12s %lld\n",descr,values[0]);
+    */
+    if( (retval = PAPI_rem_event(&EventSet, eventlist[papi_tst]))!=PAPI_OK)
+    {
+       taucs_printf("ERROR: PAPI_rem %d",retval);
+       return -1;
+    }
+
+    if((retval=PAPI_destroy_eventset(&EventSet))!=PAPI_OK)
+    {
+       taucs_printf("ERROR: PAPI_des %d",retval);
+       return -1;
+    }
+  }
+  return val;
+}
+
+void papi_update_mf_read()
+{
+  if(papi_tst >= 0)
+  {
+    if((retval = PAPI_read(EventSet, values))!=PAPI_OK)
+    {
+       taucs_printf("ERROR: PAPI_stop %d",retval);
+    }
+    else
+    {
+      /* taucs_printf("PAPI  %lld;\n ",
+                values[0]);
+*/
+       values[1] += values[0];
+
+       /*taucs_printf("PAPI %d, %lld, %d, %d;\n",
+                sn,values[0],
+                sn_size,up_size);*/
+       
+       if((retval = PAPI_reset(EventSet))!=PAPI_OK)
+       {
+          taucs_printf("ERROR: PAPI_stop %d",retval);
+       }
+    }
+#ifdef UPDATE_ONLY	
+  papi_update_clear();
+#endif  
+  }
+}
+
+void papi_update_read()
+{
+  if(papi_tst >= 0)
+  {
+    if((retval = PAPI_read(EventSet, values))!=PAPI_OK)
+    {
+       taucs_printf("ERROR: PAPI_stop %d",retval);
+    }
+    else
+    {
+       /*taucs_printf("PAPI %lld;\n ",
+                values[0]);
+		*/
+       values[1] += values[0];
+       /*taucs_printf("PAPI %d, %d, %lld, %d, %d, %d, %d; \n",
+                J,K,values[0],
+                M, LDC, N, PK);
+       */
+       if((retval = PAPI_reset(EventSet))!=PAPI_OK)
+       {
+          taucs_printf("ERROR: PAPI_stop %d",retval);
+       }
+    }
+#ifdef UPDATE_ONLY	
+  papi_update_clear();
+#endif  
+  }
+}
+
+
+#endif /* 0 */
+
+/*************************************************************/
+/*                                                           */
+/*************************************************************/
+
+
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1010,6 +1572,10 @@ taucs_dtl(supernodal_factor_get_diag)(void* vL)
 /* create and free frontal matrices                          */
 /*************************************************************/
 
+static double nfronts  = 0.0;
+static double frontmem = 0.0;
+static double factormem = 0.0;
+
 static supernodal_frontal_matrix* 
 supernodal_frontal_create(int* firstcol_in_supernode,
 			  int sn_size,
@@ -1056,12 +1622,31 @@ supernodal_frontal_create(int* firstcol_in_supernode,
     return NULL;
   }
 
+  /*
+  nfronts += 1.0;
+  frontmem += (double) (sizeof(taucs_datatype) * 
+			 ((tmp->up_size)*(tmp->up_size)));
+  factormem += (double) (sizeof(taucs_datatype) * 
+			((tmp->sn_size)*(tmp->sn_size) +
+			 (tmp->up_size)*(tmp->sn_size)));
+  taucs_printf("+++ nfronts %5.0f frontmem %5.0f MB factormem %5.0f MB\n",
+	       nfronts,frontmem/1048576.0,factormem/1048576.0);
+  */
+
   assert(tmp);
   return tmp;
 }
 
 static void supernodal_frontal_free(supernodal_frontal_matrix* to_del)
 {
+  /*
+  nfronts  -= 1.0;
+  frontmem -= (double) (sizeof(taucs_datatype) * 
+			((to_del->up_size)*(to_del->up_size)));
+  taucs_printf("--- nfronts %5.0f frontmem %5.0f MB factormem %5.0f MB\n",
+	       nfronts,frontmem/1048576.0,factormem/1048576.0);
+  */
+
   /* 
      SFM_F1 and SFM_F2 are moved to the factor,
      but this function may be called before they are
@@ -1413,10 +1998,14 @@ recursive_symbolic_elimination(int            j,
   in_previous_sn = 1;
   if (j == A->n) 
     in_previous_sn = 0; /* this is not a real column */
-  else if (first_child[j] == -1) 
+  else if (first_child[j] == -1) {
     in_previous_sn = 0; /* this is a leaf */
-  else if (next_child[first_child[j]] != -1) 
+    if (j==29) taucs_printf("leaf");
+  }
+  else if (next_child[first_child[j]] != -1) {
     in_previous_sn = 0; /* more than 1 child */
+    if (j==29) taucs_printf("more than one child");
+  }
   else { 
     /* check that the structure is nested */
     /* map contains child markers         */
@@ -1426,6 +2015,7 @@ recursive_symbolic_elimination(int            j,
       i = (A->rowind)[ip];
       in_previous_sn = in_previous_sn && (map[i] == c);
     }
+    if (j==29 && !in_previous_sn) taucs_printf("different structure");
   }
 
   if (in_previous_sn) {
@@ -1449,6 +2039,8 @@ recursive_symbolic_elimination(int            j,
 
     return 0;
   }
+
+  /*taucs_printf("*** new supernode at column %d\n",j);*/
 
   /* we are in a new supernode */
 
@@ -1847,6 +2439,8 @@ recursive_multifrontal_supernodal_factor_llt(int sn,       /* this supernode */
   int* first_child   = snL->first_child;
   int* next_child    = snL->next_child;
 
+  /*int nchildren = 0;*/
+
 #ifdef TAUCS_CILK
   /* Inlet for syncronization */
   inlet void extend_add_inlet(supernodal_frontal_matrix * child_matrix) {
@@ -1887,6 +2481,7 @@ recursive_multifrontal_supernodal_factor_llt(int sn,       /* this supernode */
   }
 
   for (child = first_child[sn]; child != -1; child = next_child[child]) {
+    /*nchildren++;*/
     /* original non-cilk code: */
     /*
     child_matrix = 
@@ -1941,6 +2536,8 @@ recursive_multifrontal_supernodal_factor_llt(int sn,       /* this supernode */
 #endif /* 0, old pre-cilk code */
   }
   sync;
+
+  /*taucs_printf(">>> node %d had %d children\n",sn,nchildren);*/
 
   /* in case we have no children, we allocate now */
   if (!is_root && !my_matrix) {
@@ -2094,14 +2691,23 @@ taucs_dtl(ccs_factor_llt_mf_maxdepth)(taucs_ccs_matrix* A,int max_depth)
   }
 #endif
 
+
+  papi_memory_data();
+  papi_getenv();
+
   wtime = taucs_wtime();
   ctime = taucs_ctime();
+
+  papi_my_start();
 
   fail = FALSE;
   spawn recursive_multifrontal_supernodal_factor_llt_caller((L->n_sn),  
 							    TRUE, 
 							    A,L,&fail);
   sync;
+
+  papi_my_end();
+
   
   wtime = taucs_wtime()-wtime;
   ctime = taucs_ctime()-ctime;
@@ -2562,8 +3168,13 @@ taucs_dtl(ccs_factor_llt_ll_maxdepth)(taucs_ccs_matrix* A,int max_depth)
     return NULL;
   }
 
+  papi_memory_data();
+  papi_getenv();
+
   wtime = taucs_wtime();
   ctime = taucs_ctime();
+
+  papi_my_start();
 
   if (recursive_leftlooking_supernodal_factor_llt((L->n_sn),  
 						  TRUE, 
@@ -2576,6 +3187,8 @@ taucs_dtl(ccs_factor_llt_ll_maxdepth)(taucs_ccs_matrix* A,int max_depth)
     taucs_free(map2);
     return NULL;
   }
+
+  papi_my_end();
 
   wtime = taucs_wtime()-wtime;
   ctime = taucs_ctime()-ctime;
@@ -3730,7 +4343,7 @@ taucs_ccs_symbolic_elimination(taucs_ccs_matrix* A,
     return -1;
   }
 
-  if (0) {
+  if (1) {
     double wtime;
     int *cc1,*cc2,*rc1,*rc2;
     int *p1;

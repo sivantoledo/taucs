@@ -1,0 +1,6138 @@
+#LyX 1.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 221
+\textclass article
+\begin_preamble
+\usepackage[T1]{fontenc}
+\usepackage{minion}
+
+%\usepackage{palatino}
+% \def\rmdefault{IowanOldStyle}
+\usepackage{euler}
+
+\def\cmttscale{0.975}
+\DeclareFontFamily{T1}{cmtt}{}
+\DeclareFontShape{T1}{cmtt}{m}{n}{<-> s * [\cmttscale] cmtt10}{}
+\def\ttdefault{cmtt}
+%\usepackage{minion}
+ 
+  \renewenvironment{lyxcode}
+    {\begin{list}{}{
+      \setlength{\rightmargin}{\leftmargin}
+      \setlength{\rightmargin}{0pt}
+      \setlength{\rightmargin}{-1in}
+      \setlength{\leftmargin}{0pt}
+      \setlength{\labelwidth}{0pt}
+      \setlength{\labelsep}{0pt}
+      \setlength{\itemindent}{0pt}
+      \setlength{\listparindent}{0pt}
+      \hyphenpenalty=10000
+      \raggedright
+      \setlength{\itemsep}{0pt}
+      \setlength{\parsep}{0pt}
+      \ttfamily}%
+     \item[]\bgroup}
+    {\egroup\end{list}}
+
+% this is very sloppy but works
+\tolerance=10000
+\hbadness=9999
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\leftmark}
+\fancyhead[R]{\thepage}
+\setlength{\headwidth}{6.5in}
+\renewcommand{\sectionmark}[1]{\markboth{#1}{#1}}
+
+\usepackage{url}
+\end_preamble
+\language english
+\inputencoding default
+\fontscheme default
+\graphics default
+\paperfontsize 10
+\spacing single 
+\papersize letterpaper
+\paperpackage a4
+\use_geometry 1
+\use_amsmath 0
+\use_natbib 0
+\use_numerical_citations 0
+\paperorientation portrait
+\leftmargin 1in
+\topmargin 1in
+\rightmargin 2in
+\bottommargin 1in
+\headheight 14pt
+\headsep 16pt
+\footskip 0pt
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\quotes_times 2
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+
+\layout Title
+
+
+\begin_inset Graphics
+	filename title.eps
+	display monochrome
+	width 6.5in
+	keepAspectRatio
+
+\end_inset 
+
+
+\layout Author
+
+
+\noun on 
+Sivan Toledo
+\noun default 
+
+\newline 
+ School of Computer Science
+\newline 
+Tel-Aviv University
+\newline 
+
+\family typewriter 
+stoledo@tau.ac.il
+\newline 
+http://www.tau.ac.il/~stoledo/taucs
+\layout Standard
+\noindent 
+With contributions by:
+\layout Standard
+\added_space_top medskip \added_space_bottom medskip \noindent 
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="3" columns="2">
+<features>
+<column alignment="left" valignment="top" width="0" special="@{}l">
+<column alignment="left" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\noun on 
+Doron Chen
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Maximum-weight-basis and Vaidya preconditioners
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\noun on 
+Vladimir Rotkin
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Out-of-core sparse Cholesky factorization
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\noun on 
+Omer Meshar
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+New configuration system
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Standard
+\noindent 
+This document is the user manual for version 2.2 of 
+\noun on 
+Taucs
+\noun default 
+.
+ Version 2.2 is the first to support multithreading.
+\layout Standard
+\noindent 
+The main new innovations in Version 2.1 were a new build and configuration
+ system, and a unified interface to all the linear solvers.
+ Smaller innovations in 2.1 include compilation with no warnings on several
+ platforms, and out-of-the-box builds for Windows and MacOS (in addition
+ to Linux, Irix, and Solaris, which were already well supported).
+ 
+\layout Standard
+\noindent 
+Version 2.0 was the first version to support both real and complex data type
+ (both in single and double precisions).
+ As a consequence, the interfaces to subroutines this version are somewhat
+ different than in version 1.0.
+ 
+\layout Standard
+
+
+\begin_inset LatexCommand \tableofcontents{}
+
+\end_inset 
+
+
+\layout Section
+
+Preliminaries
+\layout Subsection
+
+Introduction
+\layout Standard
+
+
+\noun on 
+Taucs
+\noun default 
+ is a C library of sparse linear solvers.
+ The current version of the library includes the following functionality:
+\layout Description
+
+Multifrontal\SpecialChar ~
+Supernodal\SpecialChar ~
+Cholesky\SpecialChar ~
+Factorization.
+ This code is quite fast (several times faster than 
+\noun on 
+Matlab\SpecialChar ~
+
+\noun default 
+6's sparse Cholesky).
+ It uses the 
+\noun on 
+blas
+\noun default 
+ and 
+\noun on 
+lapack
+\noun default 
+ to factor and compute updates from supernodes.
+ It uses relaxed and amalgamated supernodes.
+ This routine is multithreaded.
+\layout Description
+
+Left-Looking\SpecialChar ~
+Supernodal\SpecialChar ~
+Cholesky\SpecialChar ~
+Factorization.
+ Slower than the multifrontal solver but uses less memory.
+\layout Description
+
+Out-of-core\SpecialChar ~
+Sparse\SpecialChar ~
+Choleksy\SpecialChar ~
+Factorization.
+ This is a supernodal left-looking factorization code with an associated
+ solve routine that can solve very large problems by storing the Cholesky
+ factor on disk.
+ See\SpecialChar ~
+
+\begin_inset LatexCommand \cite{RotkinTo2003}
+
+\end_inset 
+
+ for further details.
+\layout Description
+
+Out-of-core\SpecialChar ~
+Sparse\SpecialChar ~
+Pivoting\SpecialChar ~
+
+\begin_inset ERT
+status Collapsed
+
+\layout Standard
+
+\backslash 
+mathversion{bold}
+\end_inset 
+
+
+\begin_inset Formula $LU$
+\end_inset 
+
+\SpecialChar ~
+Factorization.
+ This is a supernodal left-looking factorization code with an associated
+ solve routine that can solve very large problems by storing the LU factors
+ on disk.
+ The algorithm is a supernodal version of the algorithm described in\SpecialChar ~
+
+\begin_inset LatexCommand \cite{GilbertTo99}
+
+\end_inset 
+
+.
+\layout Description
+
+Drop-Tolerance\SpecialChar ~
+Incomplete-Cholesky\SpecialChar ~
+Factorization.
+ Much slower than the supernodal solvers when it factors a matrix completely,
+ but it can drop small elements from the factorization.
+ It can also modify the diagonal elements to maintain row sums.
+ The code uses a column-based left-looking approach with row lists.
+\layout Description
+
+
+\begin_inset ERT
+status Collapsed
+
+\layout Standard
+
+\backslash 
+mathversion{bold}
+\end_inset 
+
+
+\begin_inset Formula $LDL^{T}$
+\end_inset 
+
+\SpecialChar ~
+Factorization.
+ Column-based left-looking with row lists.
+ Use the supernodal codes instead, since they are faster, unless you really
+ need an 
+\begin_inset Formula $LDL^{T}$
+\end_inset 
+
+ factorization and not an 
+\begin_inset Formula $LL^{T}$
+\end_inset 
+
+ Cholesky factorization.
+\layout Description
+
+Ordering\SpecialChar ~
+Codes\SpecialChar ~
+and\SpecialChar ~
+Interfaces\SpecialChar ~
+to\SpecialChar ~
+Existing\SpecialChar ~
+Ordering\SpecialChar ~
+Codes.
+ The library includes a unified interface to several ordering codes, mostly
+ existing ones.
+ The ordering codes include Joseph Liu's 
+\family typewriter 
+genmmd
+\family default 
+ (a minimum-degree code in Fortran), Tim Davis's 
+\family typewriter 
+amd
+\family default 
+ codes (approximate minimum degree), 
+\noun on 
+Metis
+\noun default 
+ (a nested-dissection/minimum-degree code by George Karypis and Vipin Kumar),
+ and a special-purpose minimum-degree code for no-fill ordering of tree-structur
+ed matrices.
+ All of these are symmetric orderings.
+ The library also includes an interface to Tim Davis's 
+\family typewriter 
+colamd
+\family default 
+ column ordering code for 
+\begin_inset Formula $LU$
+\end_inset 
+
+ factorization with partial pivoting.
+\layout Description
+
+Matrix\SpecialChar ~
+Operations.
+ Matrix-vector multiplication, triangular solvers, matrix reordering.
+\layout Description
+
+Matrix\SpecialChar ~
+Input/Output.
+ Routines to read and write sparse matrices using a simple file format with
+ one line per nonzero, specifying the row, column, and value.
+ 
+\layout Description
+
+Matrix\SpecialChar ~
+Generators.
+ Routines that generate finite-differences discretizations of 2- and 3-dimension
+al partial differential equations.
+ Useful for testing the solvers.
+\layout Description
+
+Iterative\SpecialChar ~
+Solvers.
+ Preconditioned conjugate-gradients and preconditioned 
+\noun on 
+minres
+\noun default 
+ (See\SpecialChar ~
+
+\begin_inset LatexCommand \cite{Templates}
+
+\end_inset 
+
+, for example).
+\layout Description
+
+Support-Graph\SpecialChar ~
+Preconditioners.
+ These preconditioners construct a matrix larger than the coefficient matrix
+ and use the Schur complement of the larger matrix as the preconditioner.
+ The construction routine can construct Gremban-Miller preconditioners\SpecialChar ~
+
+\begin_inset LatexCommand \cite{GrembanMiZa95,Gremban96}
+
+\end_inset 
+
+ along with other (yet undocumented) variants.
+\layout Description
+
+Vaidya's\SpecialChar ~
+Preconditioners.
+ Augmented Maximum-weight-basis and Maximum-spanning-tree preconditioners\SpecialChar ~
+
+\begin_inset LatexCommand \cite{BernGiHeNgTo01,BomanChHeTo01,ChenToledo2003ETNA,Vaidya91}
+
+\end_inset 
+
+.
+ These preconditioners work by dropping nonzeros from the coefficient matrix
+ and them factoring the preconditioner directly.
+\layout Description
+
+Recursive\SpecialChar ~
+Vaidya's\SpecialChar ~
+Preconditioners.
+ These preconditioners\SpecialChar ~
+
+\begin_inset LatexCommand \cite{Boman01RECURSIVE,Reif98,Vaidya91}
+
+\end_inset 
+
+ also drop nonzeros, but they don't factor the resulting matrix completely.
+ Instead, they eliminate rows and columns which can be eliminated without
+ producing much fill.
+ They then form the Schur complement of the matrix with respect to these
+ rows and columns and drop elements from the Schur complement, and so on.
+ During the preconditioning operation, we solve for the Schur complement
+ elements iteratively.
+\layout Description
+
+Utility\SpecialChar ~
+Routines.
+ Timers (wall-clock and CPU time), physical-memory estimator, and logging.
+\layout Standard
+
+The routines that you are not likely to find in other libraries of sparse
+ linear solvers are the direct supernodal solvers, the out-of-core solvers,
+ and Vaidya's preconditioners.
+ The supernodal solvers are fast and not many libraries include them; in
+ particular, I don't think any freely-distributed library includes a sparse
+ Cholesky factorization that is as fast as 
+\noun on 
+Taucs
+\noun default 
+'s multifrontal code.
+ I am not aware of any othe library at all that includes efficient out-of-core
+ sparse factorizations.
+\layout Standard
+
+As of version 2.0, the direct solvers work on real and complex matrices,
+ single or double precision.
+ The iterative solvers work on real matrices only.
+\layout Standard
+
+To get a sense of the speed of the in-core multifrontal sparse Cholesky
+ routine, let's compare it to 
+\noun on 
+Matlab
+\noun default 
+\SpecialChar ~
+6's sparse Cholesky solver.
+ On a 
+\begin_inset Formula $600\times600$
+\end_inset 
+
+ mode problem (matrix order is 
+\begin_inset Formula $360000$
+\end_inset 
+
+) 
+\noun on 
+Taucs
+\noun default 
+ reorders the matrix using a minimum degree code that results in a Cholesky
+ factor with approximately 12 million nonzeros.
+ 
+\noun on 
+Taucs
+\noun default 
+ factors the reordered matrix in 15.6 seconds, whereas 
+\noun on 
+Matlab
+\noun default 
+\SpecialChar ~
+6 takes 81.6 seconds to perform the same factorization, more than 5 times
+ slower.
+ The ratio is probably even higher on 3D meshes.
+ (These experiments were performed with version 1.0 of the library on one
+ processor of a 600MHz dual-Pentium\SpecialChar ~
+III computer running Linux.)
+\layout Standard
+
+
+\noun on 
+Taucs
+\noun default 
+ is easy to use and easy to cut up in pieces.
+ It uses a nearly trivial design with only one externally-visible structure.
+ If you need to use just a few routines from the library (say, the supernodal
+ solvers), you should be able to compile and use almost only the files that
+ include these routines; there are not many dependences among source files.
+ The new configuration system, introduced in Version\SpecialChar ~
+2.1 makes it almost trivial
+ to build a subset library that contains only the routines that you need
+ (and the ones they depend on).
+\layout Standard
+
+Two minor design goals that the library does attempt to achieve is avoidance
+ of name-space pollution and clean failures.
+ All the C routines in the library start with the prefix 
+\family typewriter 
+taucs
+\family default 
+ and so do the name of structures and preprocessor macros.
+ Therefore, you should not have any problems using the library together
+ with other libraries.
+ Also, the library attempts to free all the memory it allocates even if
+ it fails, so you should not worry about memory leaks.
+ This also allows you to try to call a solver in your program, and if it
+ fails, simply call another.
+ The failed call to the first solver should not have any side effects.
+ In particular, starting in version 2.0 we use special infrastructure to
+ find and eliminate memory leaks.
+ This infrastructure allows us to ensure that no memory remains allocated
+ after the user's program calls the appropriate 
+\family typewriter 
+free
+\family default 
+ routines, and that no memory remains allocated in case of failures.
+ This infrastructure also allows us to artificially induce failures; we
+ use this feature to test the parts of the code that handle failures (e.g.,
+ failures of 
+\family typewriter 
+malloc
+\family default 
+), parts that are normally very rarely used.
+\layout Standard
+
+The library is currently sequential.
+ You can use parallelized 
+\noun on 
+blas
+\noun default 
+, which may give some speedup on shared-memory multiprocessors.
+ We have an experimental parallel version of the multifrontal Cholesky factoriza
+tion, but it is not part of this release.
+\layout Subsubsection*
+
+A Preview of Things to Come
+\layout Standard
+
+The next versions of the library should include
+\layout Itemize
+
+In-core and out-of-core sparse symmetric indefinite factorizations.
+\layout Itemize
+
+High-performance multithreaded 
+\begin_inset Formula $LU$
+\end_inset 
+
+ factorization for unsymmetric matrices.
+\layout Itemize
+
+A drop-tolerance incomplete 
+\begin_inset Formula $LU$
+\end_inset 
+
+ factorization and nonsymmetric iterative solvers.
+ The code is written but some of it needs to be converted from Fortran to
+ C and it needs to be integrated into the library.
+ 
+\layout Standard
+
+More distant versions may include
+\layout Itemize
+
+A multithreaded version of the supernodal Cholesky factorizations.
+\layout Standard
+
+Your input is welcome regarding which features you would like to see.
+ We have implemented quite a few features as a direct response to users's
+ requests (e.g., the complex routines and the out-of-core sparse 
+\begin_inset Formula $LU$
+\end_inset 
+
+), so don't be shy!
+\layout Subsection
+
+License
+\layout Standard
+
+
+\noun on 
+Taucs
+\noun default 
+ comes with no warranty whatsoever and is distributed under the GNU LGPL
+ (Library or Lesser GNU Public Library).
+ The license is available in 
+\family typewriter 
+www.gnu.org
+\family default 
+.
+ Alternatively, you can also elect to use 
+\noun on 
+Taucs
+\noun default 
+ under the following 
+\noun on 
+umfpack
+\noun default 
+-style license, which is simpler to understand than the LGPL:
+\layout Quote
+
+
+\noun on 
+Ttaucs
+\noun default 
+ Version 1.0, November 29, 2001.
+ Copyright (c) 2001 by Sivan Toledo, Tel-Aviv Univesity, stoledo@tau.ac.il.
+ All Rights Reserved.
+ 
+\layout Quote
+
+TAUCS License:
+\layout Quote
+
+Your use or distribution of TAUCS or any derivative code implies that you
+ agree to this License OR to the GNU LGPL.
+ 
+\layout Quote
+
+THIS MATERIAL IS PROVIDED AS IS, WITH ABSOLUTELY NO WARRANTY EXPRESSED OR
+ IMPLIED.
+ ANY USE IS AT YOUR OWN RISK.
+ 
+\layout Quote
+
+Permission is hereby granted to use or copy this program, provided that
+ the Copyright, this License, and the Availability of the original version
+ is retained on all copies.
+ User documentation of any code that uses this code or any derivative code
+ must cite the Copyright, this License, the Availability note, and "Used
+ by permission." If this code or any derivative code is accessible from within
+ 
+\noun on 
+Matlab
+\noun default 
+, then typing "help taucs" must cite the Copyright, and "type taucs" must
+ also cite this License and the Availability note.
+ Permission to modify the code and to distribute modified code is granted,
+ provided the Copyright, this License, and the Availability note are retained,
+ and a notice that the code was modified is included.
+ This software is provided to you free of charge.
+\layout Standard
+
+The distribution also includes the AMD symmetric ordering routines, which
+ come under a different, more restrictive license.
+ Please consult this license in the source files (say 
+\family typewriter 
+src/amdtru.f
+\family default 
+).
+ You can compile and use the library without these routines if you cannot
+ accept their license.
+\layout Section
+
+Installation and Configuration
+\layout Standard
+
+This section explains how to build 
+\noun on 
+taucs
+\noun default 
+ and how to configure it to suit different needs and different platforms.
+ The configuration and build system described here was introduced in Version\SpecialChar ~
+2.1
+ of 
+\noun on 
+taucs
+\noun default 
+.
+ This system simplifies the installation process, allows the user to control
+ the configuration of the library, and allows the user to maintain in a
+ single diretory tree builds with different configurations and for different
+ platforms.
+\layout Subsection
+
+Quick Start
+\layout Standard
+
+In the top-level directory that you unpacked, type 
+\family typewriter 
+configure
+\family default 
+ and then type 
+\family typewriter 
+make
+\family default 
+ (or 
+\family typewriter 
+nmake
+\family default 
+ on windows).
+ This should build the library and a few test programs.
+ If this fails, or if you need to tune the library to your needs, you'll
+ have to read a bit more.
+ If this succeeds, the build process will put the resulting library in the
+ directory 
+\family typewriter 
+lib/OSTYPE
+\family default 
+, where 
+\family typewriter 
+OSTYPE
+\family default 
+ stands for the operating system, such as 
+\family typewriter 
+win32
+\family default 
+ (Windows), 
+\family typewriter 
+darwin
+\family default 
+ (MacOS X), 
+\family typewriter 
+linux
+\family default 
+, 
+\family typewriter 
+solaris
+\family default 
+, 
+\family typewriter 
+irix
+\family default 
+, 
+\family typewriter 
+aix
+\family default 
+, and so on.
+ Test programs will reside in 
+\family typewriter 
+bin/OSTYPE
+\family default 
+, and object files, which you probably do not need ,will be stored in 
+\family typewriter 
+obj/OSTYPE
+\family default 
+.
+\layout Standard
+
+The command 
+\family typewriter 
+make clean
+\family default 
+ removes the object files, binaries, and libraries.
+\layout Standard
+
+To build the software on a new operating system (in the same directory tree),
+ simply run 
+\family typewriter 
+configure
+\family default 
+ and 
+\family typewriter 
+make
+\family default 
+ again; the two builds will resided in completely different subdirectories.
+ If you later need to build again the first distribution, use 
+\family typewriter 
+make -f build/OSTYPE/makefile
+\family default 
+ (or 
+\family typewriter 
+nmake /F
+\family default 
+ on Windows).
+ The makefile in the top-level directory is essentially a link to the most-recen
+tly configured makefile, but older makefiles remain in the 
+\family typewriter 
+build
+\family default 
+ directory.
+\layout Subsection
+
+An Overview of the Configuration and Build Process
+\layout Standard
+
+Building the 
+\noun on 
+taucs
+\noun default 
+ involves two stages, a configuration stage and a build stage.
+ The 
+\family typewriter 
+configure
+\family default 
+ script performs the configuration stage.
+ It does essentially three things:
+\layout Enumerate
+
+determines the operating system you are running on,
+\layout Enumerate
+
+builds a program, called 
+\family typewriter 
+configurator
+\family default 
+, that will build a makefile appropriate for that operating system, and
+\layout Enumerate
+
+runs 
+\family typewriter 
+configurator
+\family default 
+.
+\layout Standard
+
+This stage usually runs without a problem.
+ The only likely problem is when the script cannot figure out which operating
+ system you are running on.
+ It was tested to work correctly on Windows, Linux, MacOS\SpecialChar ~
+X, Solaris, Irix,
+ and AIX, and it will probably work on most other Unix systems.
+ If it fails and asks you to set the environment variable 
+\family typewriter 
+OSTYPE
+\family default 
+, set it and try again (and please let me know about this problem).
+\layout Standard
+
+Typing 
+\family typewriter 
+make
+\family default 
+ (on Windows, both GNU 
+\family typewriter 
+make
+\family default 
+ and 
+\family typewriter 
+nmake
+\family default 
+ work) performs the second stage, which builds the library and test programs.
+ To build the library, 
+\family typewriter 
+make
+\family default 
+ needs to know how to run the compiler and library manger, and to build
+ the test programs, 
+\family typewriter 
+make
+\family default 
+ also needs to know how to run the linker and where to find libraries that
+ 
+\noun on 
+taucs
+\noun default 
+ calls.
+\layout Standard
+
+The 
+\family typewriter 
+make
+\family default 
+ process reads the platform- and site-dependent information that it needs
+ from a file called 
+\family typewriter 
+config/OSTYPE.mk
+\family default 
+, where 
+\family typewriter 
+OSTYPE
+\family default 
+ stands for the operating system.
+ The distribution comes with 
+\family typewriter 
+OSTYPE.mk
+\family default 
+ files containing reasonable defaults for several operating systems, but
+ you may need to edit these files (or override them as explained below in
+ the secion on variant builds).
+ 
+\series bold 
+In particular, supplying references to high-performance of LAPACK the Basic
+ Linear-Algebra Subroutines (the BLAS) is crucial
+\series default 
+; if the build process cannot find these libraries, the build will fail,
+ and if you supply references to low-performance implementations, the libraries
+ and test programs will build, but will be unnecessarily slow.
+\layout Standard
+
+You can control both stages of the configuration and build process.
+ You can control the first stage by instructing 
+\family typewriter 
+configure
+\family default 
+ what parts of the package to build.
+ For example, you can create a makefile that will build some or none of
+ the test programs, you can create a makefile that will build your own program,
+ you can create a makefile that will create a library with subset functionality
+ (e.g., only out-of-core direct solvers for complex data types), and so on.
+ You can create files that represent these configurations, so you can build
+ the same configurations on multiple platforms.
+\layout Standard
+
+You can control the build stage in two ways.
+ The first is to change the definition of macros in the 
+\family typewriter 
+OSTYPE.mk
+\family default 
+ files.
+ The second is to define 
+\emph on 
+build variants
+\emph default 
+.
+ A build variant is a set of macro definitions that override those in the
+ 
+\family typewriter 
+OSTYPE.mk
+\family default 
+ files.
+ By creating several variants, you can maintain versions of the library
+ (and of client programs) that use different compilers, different compiler
+ options, or different libraries, all on the same platform.
+ For example, you can use variants to maintain libraries that link with
+ several different BLAS implementations, debug and release libraries, and
+ so on.
+\layout Subsection
+
+Configuration
+\layout Standard
+
+The 
+\family typewriter 
+configure
+\family default 
+ script is responsible for determing 
+\family typewriter 
+OSTYPE
+\family default 
+, for building the configuration program 
+\family typewriter 
+configurator/configurator
+\family default 
+, and for running it.
+ It passes any command-line argument it received to it.
+ The 
+\family typewriter 
+configurator
+\family default 
+ program is the one that actually builds the makefile according to a given
+ configuration.
+\layout Standard
+
+The package (the library and test programs) is broken into 
+\emph on 
+modules
+\emph default 
+, and a 
+\emph on 
+configuration
+\emph default 
+ specifies which modules are included in a build and which are not.
+ There are several kinds of modules:
+\layout Itemize
+
+
+\emph on 
+Number-type modules
+\emph default 
+ that control whether or not the library supports certain number types.
+ The four number types 
+\noun on 
+taucs
+\noun default 
+ supports are double- and single-precision floating-point real numbers,
+ and double- and single-precision complex numbers (modules names 
+\family typewriter 
+DREAL
+\family default 
+, 
+\family typewriter 
+SREAL
+\family default 
+, 
+\family typewriter 
+DCOMPLEX
+\family default 
+, 
+\family typewriter 
+SCOMPLEX
+\family default 
+).
+\layout Itemize
+
+
+\emph on 
+Library-functionalify modules
+\emph default 
+.
+ These are the most common modules.
+ They control which subroutines are compiled and packaged in the final library.
+ These modules include the in-core sparse Cholesky factorizations (
+\family typewriter 
+LLT
+\family default 
+), out-of-core factorizations (
+\family typewriter 
+OOC_LLT
+\family default 
+ and 
+\family typewriter 
+OOC_LU
+\family default 
+), and so on.
+ Several modules control access to external ordering codes (
+\family typewriter 
+AMD
+\family default 
+, 
+\family typewriter 
+GENMMD
+\family default 
+, 
+\family typewriter 
+COLAMD
+\family default 
+, 
+\family typewriter 
+METIS
+\family default 
+).
+ If you include the first three, the actual ordering code is included in
+ the library.
+ If you include the 
+\family typewriter 
+METIS
+\family default 
+ module, 
+\noun on 
+taucs
+\noun default 
+ will be able to call 
+\noun on 
+metis
+\noun default 
+, but you will need to provide 
+\noun on 
+metis
+\noun default 
+ in a separate library.
+\layout Itemize
+
+
+\emph on 
+Test-program modules
+\emph default 
+.
+ This modules control which one of the test programs are built.
+ The test programs need quite a lot of functionality, so a configuration
+ that builds them may be too large for some applications.
+ For example, the test programs need the 
+\family typewriter 
+MATRIX_IO
+\family default 
+ module, which contains routines for reading and writing matrices to various
+ file formats.
+ When you call 
+\noun on 
+taucs
+\noun default 
+ from an application code, the application code provides the matrices and
+ uses the solvers, but it may not need to read or write matrices to files.
+ There is one special test-program module, called 
+\family typewriter 
+AD_HOC_TEST
+\family default 
+, which we use for building small test programs.
+ Do you include it in standard configurations.
+\layout Standard
+
+The specification of a module includes a list of modules it depends on.
+ They are automatically included in the configuration if the dependent module
+ is included.
+ 
+\layout Standard
+
+There are several ways to specify a configuration.
+ When you run 
+\family typewriter 
+configure
+\family default 
+ without any arguments, it will use a built-in configuration that includes
+ essentially all the modules.
+ If you run 
+\family typewriter 
+configure
+\family default 
+ with the option 
+\family typewriter 
+interactive
+\family default 
+, it will ask you interactively whether or not to include each module.
+ It will skip modules that must be included because of dependecies by other
+ modules you already included.
+ If you just hit 
+\noun on 
+enter
+\noun default 
+ as a reply, the program will use the built-in default as a reply.
+\layout Standard
+
+You can also run 
+\family typewriter 
+configurate
+\family default 
+ with an option 
+\family typewriter 
+in=
+\family default 
+\emph on 
+filename
+\emph default 
+, in which case it will read a configuration from 
+\emph on 
+filename
+\emph default 
+.
+ Configuration files have two useful features that are worth knowning about.
+ First, they can specify a configuration by first including all modules
+ and then excluding the ones that are not part of the configuration, or
+ they can first exclude all modules and then include the ones that are needed.
+ This feature helps create almost-full and almost-empty configurations.
+ Second, The file can contain other text in addition to the configuration
+ specification.
+ This allow you to embed a configuration specification within comments in
+ C files, and so on.
+ The precise format of the configuration file is explained in the on-line
+ documentation, which is printed out when you run 
+\family typewriter 
+configure help
+\family default 
+.
+ You can also create a configuration file using the 
+\family typewriter 
+out=
+\family default 
+\emph on 
+filename
+\emph default 
+ option, which saves the configuration (say one generated interactively)
+ to a file.
+\layout Standard
+
+The last way to specify a configuration, or more precisely to tune one,
+ is with 
+\family typewriter 
+module=
+\family default 
+\emph on 
+modulename
+\emph default 
+ or 
+\family typewriter 
+module=!
+\family default 
+\emph on 
+modulename
+\emph default 
+.
+ These options include or exclude a specific module.
+ Because options are processed in a sequence, this allows you to override
+ the built-in configuration or a configuration read from a file.
+ For example, the command 
+\family typewriter 
+configure in=myconfig module=!METIS
+\family default 
+ excludes one module from a stored configuration.
+ You cannot violate dependencies this way, since the set of required module
+ is recomputed after every configuration change.
+ You will need to escape the exclamation mark (which signals module exclusion)
+ in most Unix shells.
+ That is, in Linux and Unix you probably need to run 
+\family typewriter 
+configure in=myconfig module=
+\color red
+
+\backslash 
+!
+\color default
+METIS
+\family default 
+.
+ You can mix several 
+\family typewriter 
+in=
+\family default 
+ and 
+\family typewriter 
+module=
+\family default 
+ options in one invocation.
+\layout Subsection
+
+Controlling Build Parameters
+\layout Standard
+
+The 
+\family typewriter 
+configure
+\family default 
+ script generates a makefile and an include file.
+ The include file defines a preprocessor variable for each included module,
+ which allows the sources to know what parts of the library are available
+ and what parts are missing from the current configuration.
+ The makefile is almost completely generic: only the first few lines differ
+ from one 
+\family typewriter 
+OSTYPE
+\family default 
+ to another (the only differences are the definition of the 
+\family typewriter 
+OSTYPE
+\family default 
+ macro itself, which is needed in case it is not set in the environment,
+ and the path separator character in the names of included makefiles).
+ To build 
+\noun on 
+taucs
+\noun default 
+ on different platforms, the makefile utilizes a number of macros that define
+ the names and command-line options of the compilers and other build-related
+ tools, and the names of libraries needed to build executables.
+\layout Standard
+
+The external libraries that you need to point to are 
+\noun on 
+blas
+\noun default 
+ and 
+\noun on 
+lapack
+\noun default 
+, the C libraries (some linkers include them automatically, but not always;
+ on Unix and Linux systems you need to specify 
+\family typewriter 
+-lm
+\family default 
+ to link with the library of mathematical routines), the Fortran\SpecialChar ~
+77 libraries,
+ and 
+\noun on 
+metis
+\noun default 
+.
+ The first three are always required, but the last two are not strictly
+ required.
+ You only need to point to 
+\noun on 
+metis
+\noun default 
+ if the 
+\family typewriter 
+METIS
+\family default 
+ module is included.
+ You only need the Fortran libraries if you use a Fortran compiler or if
+ you use the 
+\family typewriter 
+MATRIX_IO
+\family default 
+ module.
+\layout Standard
+
+
+\noun on 
+Taucs
+\noun default 
+ comes with a few Fortran sources.
+ Most are ordering codes, and one contains a set of routines that read matrices
+ in Harwell-Boeing format.
+ The distribution comes with automatically-produced C translations for all
+ of them.
+ The translations were generated by the 
+\family typewriter 
+f2c
+\family default 
+ translator
+\begin_inset Foot
+collapsed true
+
+\layout Standard
+
+
+\family typewriter 
+http://netlib.bell-labs.com/netlib/f2c/
+\end_inset 
+
+.
+ To use the translations, simply define the macros that define the Fortran
+ compiler to be the same to those defining the C compiler, and define the
+ macro 
+\family typewriter 
+F2CEXT
+\family default 
+ to be 
+\family typewriter 
+.c
+\family default 
+.
+ The ordering codes perform no I/O, so the C versions do not need any external
+ libraries.
+ The Harwell-Boeing interface routines, however, need the Fortran standard
+ library, so if you include the 
+\family typewriter 
+MATRIX_IO
+\family default 
+ module, you will need to point to the Fortran libraries if you actually
+ use a Fortran compiler, or to the 
+\family typewriter 
+f2c
+\family default 
+ library if you only use a C compiler.
+\layout Standard
+
+The 
+\begin_inset Quotes eld
+\end_inset 
+
+full
+\begin_inset Quotes erd
+\end_inset 
+
+ distribution of 
+\noun on 
+taucs
+\noun default 
+ contains a complete set of freely-available binary libraries for some platforms
+ in the 
+\family typewriter 
+external/lib/OSTYPE
+\family default 
+ directory.
+ These libraries should allow you to build the default configuration of
+ 
+\noun on 
+taucs
+\noun default 
+ without any external libraries.
+ However, the performance of these bundled libraries may be suboptimal.
+ In particular, try to find the best implementation of the 
+\noun on 
+blas
+\noun default 
+ and 
+\noun on 
+lapack
+\noun default 
+, because their performance strongly influences 
+\noun on 
+taucs
+\noun default 
+'s.
+ If you use the 
+\noun on 
+atlas
+\noun default 
+ implementation
+\begin_inset Foot
+collapsed true
+
+\layout Standard
+
+
+\family typewriter 
+http://math-atlas.sourceforge.net/
+\end_inset 
+
+, try to build it on your computer, or to download a version suited for
+ your processor.
+\layout Subsection
+
+Variant Builds
+\layout Standard
+
+
+\emph on 
+Variants
+\emph default 
+ allow you to maintain several builds with different configurations and
+ build parameters simulteneously.
+ You create a variant by running 
+\family typewriter 
+configure
+\family default 
+ with the option 
+\family typewriter 
+variant=
+\family default 
+\emph on 
+variantname
+\emph default 
+.
+ This option does two things: it changes the names of the subdirectories
+ containing object files, binary executables, and binary libraries to include
+ the variant's name, and it instructs the makefile to load a second macro-defini
+tion file after 
+\family typewriter 
+config/OSTYPE.mk
+\family default 
+.
+ The name of the second file is 
+\family typewriter 
+config/OSTYPE
+\family default 
+\emph on 
+variantname
+\family typewriter 
+\emph default 
+.mk
+\family default 
+.
+\layout Standard
+
+For example, suppose we want to create a Linux build that uses Intel's 
+\noun on 
+mkl
+\noun default 
+ (an implementation of 
+\noun on 
+lapack
+\noun default 
+ and the 
+\noun on 
+blas
+\noun default 
+) instead of 
+\noun on 
+atlas
+\noun default 
+, which we normally use.
+ We create a variant called 
+\family typewriter 
+_mkl
+\family default 
+ by running 
+\family typewriter 
+configure
+\family default 
+ 
+\family typewriter 
+variant=_mkl
+\family default 
+.
+ Then we create a file 
+\family typewriter 
+config/linux_mkl.mk
+\family default 
+ that redefines the macros that point to 
+\noun on 
+lapack
+\noun default 
+ and the 
+\noun on 
+blas
+\noun default 
+.
+ When we run 
+\family typewriter 
+make
+\family default 
+, it will use the redefined macros, and will place the objects, binaries,
+ and libraries in 
+\family typewriter 
+obj/linux_mkl
+\family default 
+, 
+\family typewriter 
+bin/linux_mkl
+\family default 
+, and 
+\family typewriter 
+lib/linux_mkl
+\family default 
+, instead of in 
+\family typewriter 
+*/linux
+\family default 
+.
+\layout Standard
+
+You can also use variants to maintain different configurations.
+ For example, suppose that you want to maintain both a default configuration
+ and a configuration which doesn't use 
+\noun on 
+metis
+\noun default 
+ on Windows.
+ You first run 
+\family typewriter 
+configure
+\family default 
+ and then 
+\family typewriter 
+make
+\family default 
+ to build the default configuration.
+ Then, you create an empty file 
+\family typewriter 
+config/win32_nometis.mk
+\family default 
+ and run 
+\family typewriter 
+configure variant=_nometis module=!METIS
+\family default 
+.
+ When you now run 
+\family typewriter 
+make
+\family default 
+, it will build the 
+\noun on 
+metis
+\noun default 
+-less configuration and put the results in 
+\family typewriter 
+*/win32_nometis
+\family default 
+.
+ You can also, of course, create variants that represent both special configurat
+ions and special build parameters.
+\layout Standard
+
+Note that if you use variants to represent your local build parameters,
+ instead of changing the provided 
+\family typewriter 
+config/OSTYPE.mk
+\family default 
+ files, unpacking new versions of 
+\noun on 
+taucs
+\noun default 
+ will not overwrite your changes.
+\layout Subsection
+
+Building a Multithreaded Library
+\layout Standard
+
+Starting in version\SpecialChar ~
+2.2, some of the routines in 
+\noun on 
+taucs
+\noun default 
+ are multithreaded (in\SpecialChar ~
+2.2, only the multifrontal Cholesky factorization is
+ multithreaded).
+ 
+\noun on 
+Taucs
+\noun default 
+ uses Cilk
+\begin_inset Foot
+collapsed true
+
+\layout Standard
+
+
+\family typewriter 
+http://supertech.lcs.mit.edu/cilk/
+\end_inset 
+
+\SpecialChar ~
+
+\begin_inset LatexCommand \cite{frigo98implementation,Cilk532}
+
+\end_inset 
+
+, a parallel programming language, to implement the multithreaded algorithms.
+ Cilk is a programming environment that supports a fairly minimal parallel
+ extension of the C programming language using a Cilk-to-C translator and
+ a specialized run-time system.
+ It is specifically designed to parallelize recursive codes.
+ One of the most important aspects of using Cilk is the fact that it performs
+ automatic dynamic scheduling that leads to both load balancing and locality
+ of reference.
+\layout Standard
+
+To enable multithreading in 
+\noun on 
+taucs
+\noun default 
+, simply define the macros 
+\family typewriter 
+CILKC
+\family default 
+, 
+\family typewriter 
+CILKFLAGS
+\family default 
+, and 
+\family typewriter 
+CILKOUTFLG
+\family default 
+ in 
+\family typewriter 
+config/OSTYPE.mk
+\family default 
+, or better yet, in the variant 
+\family typewriter 
+.mk
+\family default 
+ file.
+ The 
+\noun on 
+taucs
+\noun default 
+ distribution comes with 
+\family typewriter 
+_cilk
+\family default 
+ variant files for Linux, Solaris (Sun), and Irix (SGI), so you can use
+ these as templates.
+ You should probably define the linker (the 
+\family typewriter 
+LD
+\family default 
+ macro) to be the Cilk compiler, to allow the compiler to link with the
+ Cilk run-time libraries.
+ If these macros indeed point to a Cilk compiler and appropriate flags,
+ some routines in 
+\noun on 
+taucs
+\noun default 
+ will be multithreaded.
+ 
+\noun on 
+Taucs
+\noun default 
+ parallelize both sparse operations and dense operations, so you do not
+ need to link Cilk builds of 
+\noun on 
+taucs
+\noun default 
+ with a multithreaded 
+\noun on 
+blas
+\noun default 
+ library.
+ (On the other hand, if you do not want to bother with a Cilk build, a multithre
+aded 
+\noun on 
+blas
+\noun default 
+ will provided some speedup, but not as much as a Cilk build.)
+\layout Standard
+
+To control the level of multithreading, pass the option 
+\family typewriter 
+taucs.cilk.nproc=
+\family default 
+\emph on 
+number
+\emph default 
+ to 
+\family typewriter 
+taucs_linsolve
+\family default 
+.
+\layout Standard
+
+For more information on our implementation of the multifrontal sparse Cholesky
+ algorithm in Cilk, including performance results, see\SpecialChar ~
+
+\begin_inset LatexCommand \cite{IronyShToFGCS}
+
+\end_inset 
+
+ (a preprint should be in the 
+\family typewriter 
+doc
+\family default 
+ directory).
+ The implementation that we distribute is simpler than the implementation
+ described in\SpecialChar ~
+
+\begin_inset LatexCommand \cite{IronyShToFGCS}
+
+\end_inset 
+
+ (but easier to maintain, which is the reason we distribute it), but follows
+ same principles except for the blocked and recursive dense data layouts.
+\layout Standard
+
+The Cilk support is currently experimental.
+\layout Standard
+
+
+\noun on 
+Taucs
+\noun default 
+ does not support 
+\noun on 
+mpi
+\noun default 
+ or other distributed-memory programming models.
+\layout Subsection
+
+Testing
+\layout Standard
+
+Typing 
+\family typewriter 
+testscript
+\family default 
+ runs a script that builds a set of test programs, runs them, and records
+ the results in a file called 
+\family typewriter 
+testscript.log
+\family default 
+ in the top-level directory.
+ Each program configures 
+\noun on 
+taucs
+\noun default 
+ differently, so for each test program the library is compiled from scratch.
+ Therefore, the script takes a while to run.
+\layout Standard
+
+You can control which modules are included in these test builds and what
+ compiler options and libraries are used.
+ The 
+\family typewriter 
+testscript
+\family default 
+ script passes its command-line argument to the 
+\family typewriter 
+configure
+\family default 
+ script, after the 
+\family typewriter 
+in=
+\family default 
+\emph on 
+filename
+\emph default 
+ argument that specifies the build.
+ This allows you to add or remove modules and to use variants.
+ For example, suppose that you have a variant called 
+\family typewriter 
+_intel
+\family default 
+ that uses the Intel compilers and the Intel 
+\noun on 
+blas
+\noun default 
+, and that you do not have 
+\noun on 
+metis
+\noun default 
+ on your system.
+ By running 
+\family typewriter 
+testscript module=!METIS variant=_intel
+\family default 
+ you will test the 
+\family typewriter 
+_intel
+\family default 
+ variant without the 
+\noun on 
+metis
+\noun default 
+ module.
+\layout Standard
+
+The testing programs are an on-going effort and they currently do not exhaustive
+ly test the library.
+\layout Subsection
+
+Obscure Details
+\layout Standard
+
+As the title of this section indicates, you should probably skip it, unless
+ you are curious about details of the configuration and build process, or
+ you run into trouble.
+\layout Paragraph*
+
+Testing the Capabilities of the Compilers and External Libraries
+\layout Standard
+
+
+\noun on 
+Taucs
+\noun default 
+ uses C preprocessor macros defined in two automatically-produced header
+ files to control compile-time options.
+ One file, 
+\family typewriter 
+build/OSTYPE/taucs_config_build.h
+\family default 
+, defines a macro for each module that is included in the configuration.
+ This allows 
+\noun on 
+taucs
+\noun default 
+'s sources to know whether a given module is included or excluded.
+ The other file, 
+\family typewriter 
+build/OSTYPE/taucs_config_tests.h
+\family default 
+, defines macros that indicate the presense of various capabilities of the
+ compiler and of external libraries.
+\layout Standard
+
+The header file 
+\family typewriter 
+build/OSTYPE/taucs_config_tests.h
+\family default 
+ is created by 
+\noun on 
+taucs
+\noun default 
+'s makefile.
+ To create it, the makefile tries to compile, link, and run several programs.
+ Each such program tests for one capability.
+ If the program compiles, links, and runs correctly, it write a macro definition
+ to the header file.
+ If it fails to compile, link, or run, the macro definition is simply not
+ written to the header file.
+\layout Standard
+
+As of version 2.2, there are four such programs.
+ One tests whether the Fortran 
+\noun on 
+blas
+\noun default 
+ subroutines can be called from C as if they were compiled by the C compiler;
+ a sister program tests whether the Fortran 
+\noun on 
+blas
+\noun default 
+ can be called from C by adding an underscore to the subroutine names (this
+ is a convension of many Fortran compilers).
+ Typically, one of these programs succeeds and the other fails to link with
+ the 
+\noun on 
+blas
+\noun default 
+.
+ If both fail, the entire build of 
+\noun on 
+taucs
+\noun default 
+ will fail.
+ This failure typically indicates that the linker cannot find the 
+\noun on 
+blas
+\noun default 
+ at all.
+ A third program tests whether the C compiler supports C99 complex numbers,
+ and a fourth tests whether the nominal Cilk compiler is indeed a Cilk compiler,
+ or simply a C compiler.
+ The repertoire of these test programs is likely to change between versions
+ of 
+\noun on 
+taucs
+\noun default 
+.
+\layout Standard
+
+If ones of these programs fail even though you think they should have succeeded,
+ check your 
+\family typewriter 
+.mk
+\family default 
+ file.
+ The problem can usually be traced to inappropriate compiler, compiler flags,
+ or library specification.
+ For example, if you specify the C compiler flags for the 
+\noun on 
+gcc
+\noun default 
+ compiler as 
+\family typewriter 
+-std=c89
+\family default 
+, the C99-complex-numbers test will fail, but if you specify 
+\family typewriter 
+-std=c99
+\family default 
+ it will succeed.
+\layout Section
+
+Using 
+\noun on 
+Taucs
+\noun default 
+ without Programming
+\layout Standard
+
+There are three ways to use 
+\noun on 
+taucs
+\noun default 
+ without much programming: to use a read-made executable, to use a simple
+ interface that allows 
+\noun on 
+Matlab
+\noun default 
+ to call 
+\noun on 
+taucs
+\noun default 
+, or to use the 
+\noun on 
+taucs
+\noun default 
+ routines that are built into products like 
+\noun on 
+Mathematica
+\noun default 
+ and 
+\noun on 
+Matlab.
+\layout Subsection
+
+Ready-to-use Executables
+\layout Standard
+
+The 
+\family typewriter 
+progs
+\family default 
+ directory contains example programs that you can use to test 
+\noun on 
+Taucs
+\noun default 
+ without writing any code, and to guide you in calling the library from
+ your own programs.
+ These programs can generate matrices or read them from files, and they
+ can employ several solvers.
+ The programs print out detailed usage instructions when invoked with no
+ arguments.
+ The main programs are
+\layout Description
+
+taucs_run The main sample executable, which can solve linear systems iteratively
+ or directly.
+ It solves the system by calling 
+\family typewriter 
+taucs_linsolve
+\family default 
+ and passing to it its command-line arguments, so you can control the solution
+ method using the 
+\family typewriter 
+taucs_linsolve
+\family default 
+ arguments.
+ It can generate test matrices using the command-line arguments 
+\family typewriter 
+taucs_run.mesh2d=
+\family default 
+\emph on 
+size
+\emph default 
+ and 
+\family typewriter 
+taucs_run.mesh3d=
+\family default 
+\emph on 
+size
+\emph default 
+, or it can read matrices from files using the arguments 
+\family typewriter 
+taucs_run.ijv=
+\family default 
+\emph on 
+filename
+\emph default 
+ or 
+\family typewriter 
+taucs_run.hb=
+\family default 
+\emph on 
+filename
+\emph default 
+.
+\layout Description
+
+direct An old test routine for direct solvers.
+ It is useful as an example if you need to call solvers directly rather
+ than through 
+\family typewriter 
+taucs_linsolve
+\family default 
+.
+\layout Description
+
+iter An old test routine for iterative solvers.
+\layout Subsection
+
+Calling 
+\noun on 
+Taucs
+\noun default 
+ from 
+\noun on 
+Matlab
+\layout Standard
+
+The 
+\noun on 
+taucs
+\noun default 
+ distribution contains code that allows 
+\noun on 
+Matlab
+\noun default 
+ to call 
+\noun on 
+taucs
+\noun default 
+ routines.
+ The code consists of several 
+\noun on 
+Matlab
+\noun default 
+ functions (
+\family typewriter 
+.m
+\family default 
+ files), a set of special input-output routines within 
+\noun on 
+taucs
+\noun default 
+, and the above-mentioned executables.
+ Using the code is simple: using the provided 
+\noun on 
+Matlab
+\noun default 
+ functions, you write the coefficient matrix and right-hand side of a linear
+ system of equations to files.
+ You then invoke, from within 
+\noun on 
+Matlab
+\noun default 
+, an executable that uses the special input-output routines to read these
+ files, solves the linear system using a 
+\noun on 
+taucs
+\noun default 
+ routine, and writes the solution to a third file.
+ Another 
+\noun on 
+Matlab
+\noun default 
+ function reads the solution vector from the file.
+ There is also a sample 
+\noun on 
+Matlab
+\noun default 
+ function that automates the entire procedure, so to solve 
+\begin_inset Formula $Ax=b$
+\end_inset 
+
+ you simply invoke 
+\family typewriter 
+x=taucs_ooc_solve(A,b)
+\family default 
+.
+ You can easily modify that function to invoke other linear solvers in 
+\noun on 
+taucs
+\noun default 
+.
+\layout Standard
+
+The files that are used to pass matrices and vectors between 
+\noun on 
+Matlab
+\noun default 
+ and 
+\noun on 
+taucs
+\noun default 
+ are binary files.
+ Data is essentially just dumped from memory into these files, so writing
+ and reading them is typically fast and does not represent a significant
+ performance overhead.
+ Obviously, the more expensive the linear solver, the less important this
+ overhead becomes.
+\layout Standard
+
+To build the executable that these 
+\noun on 
+Matlab
+\noun default 
+ scripts call, run 
+\family typewriter 
+configure in=progs/ooc_factor_solve.c
+\family default 
+ and then 
+\family typewriter 
+make -f build/OSTYPE/makefile
+\family default 
+ (on Windows, replace 
+\family typewriter 
+/
+\family default 
+ by 
+\family typewriter 
+
+\backslash 
+
+\family default 
+ and replace 
+\family typewriter 
+make -f
+\family default 
+ by 
+\family typewriter 
+nmake /F
+\family default 
+).
+\layout Standard
+
+We currently do not maintain interface codes in C that would allow 
+\noun on 
+Matlab
+\noun default 
+ to call 
+\noun on 
+taucs
+\noun default 
+ routines packaged into dynamically-linked library without storing matrices
+ and vectors into files.
+ The diversity of routines in 
+\noun on 
+taucs
+\noun default 
+, at least in versions 2.0 and earlier, makes it quite hard to maintain such
+ codes.
+ Version 2.1 introduces a new unified routine, so perhaps in the future we
+ will provide such an interface code.
+\layout Subsection
+
+
+\noun on 
+Taucs
+\noun default 
+ Routines in other Software
+\layout Standard
+
+
+\noun on 
+Taucs
+\noun default 
+ routines are built into some other software packages.
+ They are usually invoked automatically when appropriate.
+\layout Standard
+
+
+\noun on 
+Mathematica
+\noun default 
+ 5 uses 
+\noun on 
+taucs
+\noun default 
+'s in-core sparse Cholesky factorization to factor sparse matrices within
+ 
+\noun on 
+Mathematica
+\noun default 
+'s linear solver (
+\family typewriter 
+LinearSolve[A,Method->Cholesky]
+\family default 
+), and within the interior-point linear-programming solver.
+\layout Standard
+
+
+\noun on 
+Matlab 7
+\noun default 
+ will use
+\noun on 
+ taucs
+\noun default 
+'s in-core sparse Cholesky factorization within the backslash linear solver.
+\layout Section
+
+
+\noun on 
+Taucs
+\noun default 
+ Fundamentals
+\layout Subsection
+
+Sparse Matrix Representation and Interface Conventions
+\layout Standard
+
+
+\noun on 
+Taucs
+\noun default 
+ uses the following compressed-column-storage (CCS) structure to represent
+ sparse matrices.
+ Like other 
+\noun on 
+taucs
+\noun default 
+ data structures and data types, it is defined in 
+\family typewriter 
+src/taucs.h
+\family default 
+, which must be included in source files that call 
+\noun on 
+taucs
+\noun default 
+ routines.
+\layout LyX-Code
+
+typedef struct {
+\layout LyX-Code
+
+  int     n;      
+\family roman 
+\emph on 
+number of columns
+\layout LyX-Code
+
+  int     m;      
+\family roman 
+\emph on 
+number of rows
+\layout LyX-Code
+
+  int     flags;  
+\family roman 
+\emph on 
+see below
+\layout LyX-Code
+
+  int*    colptr; 
+\family roman 
+\emph on 
+pointers to where columns begin in rowind and values
+\layout LyX-Code
+
+                  
+\family roman 
+\emph on 
+0-based, length is (n+1)
+\layout LyX-Code
+
+  int*    rowind; 
+\family roman 
+\emph on 
+row indices, 0-based
+\family default 
+\emph default 
+ 
+\layout LyX-Code
+
+  union { 
+\layout LyX-Code
+
+    void*           v; 
+\layout LyX-Code
+
+    taucs_double*   d; 
+\layout LyX-Code
+
+    taucs_single*   s; 
+\layout LyX-Code
+
+    taucs_dcomplex* z; 
+\layout LyX-Code
+
+    taucs_scomplex* c; } 
+\layout LyX-Code
+
+  values;         
+\family roman 
+\emph on 
+numerical values
+\layout LyX-Code
+
+} taucs_ccs_matrix;
+\layout Standard
+
+(Comments are set in italics).
+ Before version 2.0, the type of 
+\family typewriter 
+values
+\family default 
+ was 
+\family typewriter 
+double*
+\family default 
+; since version 2.0, 
+\family typewriter 
+values
+\family default 
+ is a union, to support multiple data types.
+ The data types 
+\family typewriter 
+taucs_double
+\family default 
+, 
+\family typewriter 
+taucs_single
+\family default 
+, 
+\family typewriter 
+taucs_scomplex
+\family default 
+, and 
+\family typewriter 
+taucs_dcomplex
+\family default 
+ correspond to C's native 
+\family typewriter 
+float
+\family default 
+ and 
+\family typewriter 
+double
+\family default 
+ and to arrays of two such numbers to represent the real and imaginary parts
+ of complex numbers.
+ In C compilers that support complex arithmetic, the build process uses
+ native complex representations for 
+\family typewriter 
+taucs_scomplex
+\family default 
+, and 
+\family typewriter 
+taucs_dcomplex
+\family default 
+ (
+\family typewriter 
+gcc
+\family default 
+ support complex arithmetic; in the future, we expect most C compilers to
+ support complex arithmetic since this is part of the new C99 standard for
+ the C language).
+ Otherwise, we use arrays of two 
+\family typewriter 
+float
+\family default 
+s or 
+\family typewriter 
+double
+\family default 
+s.
+\layout Standard
+
+The flags member contains the bitwise or of several symbolic constants that
+ describe the matrix:
+\layout LyX-Code
+
+TAUCS_INT        
+\family roman 
+\emph on 
+matrix contains integer data
+\layout LyX-Code
+
+TAUCS_SINGLE     
+\family roman 
+\emph on 
+matrix contains single-precision real data
+\layout LyX-Code
+
+TAUCS_DOUBLE     
+\family roman 
+\emph on 
+matrix contains double-precision real data
+\layout LyX-Code
+
+TAUCS_SCOMPLEX   
+\family roman 
+\emph on 
+matrix contains single-precision complex data
+\layout LyX-Code
+
+TAUCS_DCOMPLEX   
+\family roman 
+\emph on 
+matrix contains double-precision complex data
+\layout LyX-Code
+
+TAUCS_PATTERN    
+\family roman 
+\emph on 
+matrix contains no numric values, only a nonzero pattern
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+TAUCS_TRIANGULAR 
+\family roman 
+\emph on 
+matrix is triangular
+\layout LyX-Code
+
+TAUCS_SYMMETRIC  
+\family roman 
+\emph on 
+matrix is symmetric
+\layout LyX-Code
+
+TAUCS_HERMITIAN  
+\family roman 
+\emph on 
+matrix is hermitian
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+TAUCS_LOWER      
+\family roman 
+\emph on 
+matrix is lower triangular (if 
+\family default 
+\emph default 
+TAUCS_TRIANGULAR
+\family roman 
+\emph on 
+ is set)
+\layout LyX-Code
+
+                 
+\family roman 
+\emph on 
+or the lower part of a triangular/hermitian matrix
+\layout LyX-Code
+
+TAUCS_UPPER      
+\family roman 
+\emph on 
+upper triangular or upper part of symmetric/hermitian
+\layout LyX-Code
+
+\layout Standard
+
+In symmetric and hermitian matrices we store only one triangle, normally
+ the lower one.
+ Most of the routines fail if their argument contain the upper triangle
+ of a symmetric/hermitian matrix.
+\layout Subsubsection*
+
+Generic and Type-Specific Routines
+\layout Standard
+
+Most of the computational and data-structure-related rourines in 
+\noun on 
+Taucs
+\noun default 
+ have five entry points, one for each data type (real/complex, single/double),
+ and one generic.
+ The generic routine calls one of the four specific routines based on the
+ data type of the actual arguments.
+ For example, the following five routines compute the Cholesky factorization
+ of a matrix 
+\begin_inset Formula $A$
+\end_inset 
+
+.
+ 
+\layout LyX-Code
+
+void* taucs_sccs_factor_llt_mf (taucs_ccs_matrix* A);
+\layout LyX-Code
+
+void* taucs_dccs_factor_llt_mf (taucs_ccs_matrix* A);
+\layout LyX-Code
+
+void* taucs_cccs_factor_llt_mf (taucs_ccs_matrix* A);
+\layout LyX-Code
+
+void* taucs_zccs_factor_llt_mf (taucs_ccs_matrix* A);
+\layout LyX-Code
+
+void* taucs_ccs_factor_llt_mf  (taucs_ccs_matrix* A);
+\layout Standard
+
+Each of the first four routines operate on a single data type.
+ Each one of them expects 
+\begin_inset Formula $A$
+\end_inset 
+
+'s elements to be of a specific data type.
+ For example, 
+\family typewriter 
+taucs_zccs_factor_llt_mf
+\family default 
+ expects 
+\begin_inset Formula $A$
+\end_inset 
+
+'s elements to be of type 
+\family typewriter 
+taucs_dcomplex
+\family default 
+.
+ Names of type-specific routines always start with 
+\family typewriter 
+taucs_s
+\family default 
+, 
+\family typewriter 
+taucs_d
+\family default 
+, 
+\family typewriter 
+taucs_c
+\family default 
+, or 
+\family typewriter 
+taucs_z
+\family default 
+.
+ The fifth declaration is for the generic routine, which determines the
+ data type using 
+\family typewriter 
+A->flags
+\family default 
+ and calls the appropriate type-specific routine.
+ Calling the generic routine incurs a small overhead compared to calling
+ the appropriate type-specific routine, but this overhead is negligible
+ in most cases.
+ User codes that call 
+\noun on 
+taucs
+\noun default 
+ should call the generic routines.
+\layout Standard
+
+The rest of the documentation only documents generic routines.
+\layout Subsubsection*
+
+Creating and Deleting Sparse Matrices
+\layout Standard
+
+The following routines create and delete sparse matrices.
+ 
+\layout LyX-Code
+
+taucs_ccs_matrix* taucs_ccs_create(int m, int n, int nnz, flags);
+\layout LyX-Code
+
+void              taucs_ccs_free  (taucs_ccs_matrix* A);
+\layout Standard
+
+The first routine, 
+\family typewriter 
+taucs_ccs_create
+\family default 
+, allocates memory for an 
+\begin_inset Formula $m$
+\end_inset 
+
+-by-
+\begin_inset Formula $n$
+\end_inset 
+
+ matrix with space for 
+\family typewriter 
+nnz
+\family default 
+ nonzeros.
+ Its last argument specifies the data type for the matrix, and can also
+ specify other properties, such as symmetry.
+ 
+\color red
+The interface to 
+\family typewriter 
+taucs_ccs_create
+\family default 
+ changed in version 2.0!
+\color default
+ The matrix is not initialized in any way apart from setting the flags.
+ The second routine frees a matrix and all the memory associated with it.
+\layout Subsubsection*
+
+Reading and Writing Sparse Matrices
+\layout Standard
+
+
+\noun on 
+Taucs
+\noun default 
+ includes a number of routines to read and write sparse matrices from and
+ to files in various formats.
+ The first pair of routines hanle 
+\family typewriter 
+ijv
+\family default 
+ files, which have a simple textual format: each line contains the row index,
+ column index, and numerical value of one matrix entry.
+ Indices are 
+\begin_inset Formula $1$
+\end_inset 
+
+-based.
+ The file does not contain any flags regarding symmetry and so on, so you
+ have to pass both data type and structural flags to 
+\family typewriter 
+taucs_ccs_read_ijv
+\family default 
+., which reads a matrix from a file.
+\layout LyX-Code
+
+taucs_ccs_matrix* taucs_ccs_read_ijv (char* filename,int flags);
+\layout LyX-Code
+
+int               taucs_ccs_write_ijv(taucs_ccs_matrix* A, char* filename);
+\layout Standard
+
+The 
+\family typewriter 
+ijv
+\family default 
+-reading routine assumes that the lower part of symmetric and hermitian
+ matrices is stored in the file; if the upper part is also stored, the routine
+ simply ignores it.
+ The 
+\family typewriter 
+ijv
+\family default 
+-writing routine always writes all the matrix's entries into the file.
+ You can read 
+\family typewriter 
+ijv
+\family default 
+ files into 
+\noun on 
+Matlab
+\noun default 
+ using the command
+\layout LyX-Code
+
+read 'Afile.ijv' -ascii; A=spconvert(Afile);
+\layout Standard
+
+The next format, the 
+\family typewriter 
+mtx
+\family default 
+ format, is almost identical to the 
+\family typewriter 
+ijv
+\family default 
+ format, but the first line in the file contains the number of rows and
+ columns, and nonzeros in the matrix.
+ 
+\layout LyX-Code
+
+taucs_ccs_matrix* taucs_ccs_read_mtx (char* filename,int flags);
+\layout LyX-Code
+
+int               taucs_ccs_write_mtx(taucs_ccs_matrix* A, char* filename);
+\layout Standard
+
+The 
+\family typewriter 
+ccs
+\family default 
+ format is also a textual format.
+ The first integer in the file store the matrix's dimension 
+\begin_inset Formula $n$
+\end_inset 
+
+.
+ It is followed the integers in the arrays 
+\family typewriter 
+colptr
+\family default 
+ and 
+\family typewriter 
+rowind
+\family default 
+ in the CCS data structure, and then the array of real or complex values.
+ This is essentially a textual representation for square CCS matrices, but
+ excluding the 
+\family typewriter 
+flags
+\family default 
+.
+\layout LyX-Code
+
+taucs_ccs_matrix* taucs_ccs_read_ccs (char* filename,int flags);
+\layout LyX-Code
+
+int               taucs_ccs_write_ccs(taucs_ccs_matrix* A, char* filename);
+\layout Standard
+
+The 
+\family typewriter 
+binary
+\family default 
+ format simply dumps a 
+\family typewriter 
+taucs_ccs_matrix
+\family default 
+ into (or from) a binary file.
+ This format is not archival (it may change in future versions of 
+\noun on 
+taucs)
+\noun default 
+, but it can be used to transfer matrices quickly between 
+\noun on 
+taucs
+\noun default 
+ clients and 
+\noun on 
+Matlab
+\noun default 
+ or other programs (we have 
+\noun on 
+Matlab
+\noun default 
+ routines to read and write such matrices).
+ The current version of 
+\noun on 
+taucs
+\noun default 
+ includes only a 
+\family typewriter 
+binary
+\family default 
+-reading routine.
+ Since the 
+\family typewriter 
+flags
+\family default 
+ are stored in the file, there is no 
+\family typewriter 
+flags
+\family default 
+ argument to the routine.
+\layout LyX-Code
+
+taucs_ccs_matrix* taucs_ccs_read_binary(char* filename);
+\layout Standard
+
+Finally, the following routine reads a matrix stored in Harwell-Boeing format,
+ which is used in matrix collections such as MatrixMarket and Tim Davis's.
+ Harwell-Boeing files contain structural infomation (e.g., symmetry) and distingui
+sh between real and complex matrices, so the 
+\family typewriter 
+flags
+\family default 
+ argument to this routine only specifies whether the resulting matrix will
+ be single or double precision.
+ If the Harwell-Boeing matrix contains only a nonzero pattern, the routine
+ creates a matrix with random elements in the specified positions (if the
+ Harwell-Boeing matrix is symmetric the diagonal elements are not set to
+ random values but to values that ensure that the matrix is diagonally dominant).
+\layout LyX-Code
+
+taucs_ccs_matrix* taucs_ccs_read_hb(char* filename, int flags);
+\layout Subsection
+
+Vectors
+\layout Standard
+
+
+\noun on 
+Taucs
+\noun default 
+ represents vectors as simple arrays of numbers, with no type or length
+ information.
+ If one of the arguments to a generic routine is a matrix and the other
+ is a vector, the routine determines the length and type of the vector from
+ the information associated with the matrix.
+ The following routine, for example, multiplies a sparse matrix 
+\begin_inset Formula $A$
+\end_inset 
+
+ by a vector 
+\begin_inset Formula $x$
+\end_inset 
+
+ and stores the result in another vector, 
+\begin_inset Formula $b$
+\end_inset 
+
+.
+ 
+\layout LyX-Code
+
+void taucs_ccs_times_vec  (taucs_ccs_matrix* A,
+\layout LyX-Code
+
+                           void*             x,
+\layout LyX-Code
+
+                           void*             b);
+\layout Standard
+
+The pointers 
+\family typewriter 
+x
+\family default 
+ and 
+\family typewriter 
+b
+\family default 
+ must point to arrays of numbers with the same type as 
+\begin_inset Formula $A$
+\end_inset 
+
+'s elements.
+ That is, if 
+\family typewriter 
+TAUCS_DCOMPLEX
+\family default 
+ is set in 
+\family typewriter 
+A->flags
+\family default 
+, then 
+\family typewriter 
+x
+\family default 
+ and 
+\family typewriter 
+b
+\family default 
+ must point to arrays of 
+\family typewriter 
+taucs_dcomplex
+\family default 
+ elements.
+ The size of 
+\family typewriter 
+x
+\family default 
+ and 
+\family typewriter 
+b
+\family default 
+ must match the number of columns in 
+\begin_inset Formula $A$
+\end_inset 
+
+.
+ 
+\layout Standard
+
+Vector handing routines that have no matrix argument have explicit arguments
+ that specify the data type and length of input and output vectors.
+ For example, the next two routines read and write vectors from and to binary
+ (non archival) files.
+\layout LyX-Code
+
+void* taucs_vec_read_binary (int n, int flags, char* filename); 
+\layout LyX-Code
+
+int   taucs_vec_write_binary(int n, int flags, void* v, char* filename);
+\layout Subsection
+
+Utility Routines
+\layout Standard
+
+
+\noun on 
+Taucs
+\noun default 
+ routines print information to a log file using a special routine,
+\layout LyX-Code
+
+int    taucs_printf(char *fmt, ...);
+\layout Standard
+
+Another routine,
+\layout LyX-Code
+
+void   taucs_logfile(char* file_prefix);
+\layout Standard
+
+sets the name of the log file.
+ The names 
+\family typewriter 
+stdout
+\family default 
+, 
+\family typewriter 
+stderr
+\family default 
+ and 
+\family typewriter 
+none
+\family default 
+ are acceptable, as are actual file names.
+ If you do not call this routine or if you set log file to 
+\family typewriter 
+none
+\family default 
+, the library produces no printed output at all.
+\layout LyX-Code
+
+int    taucs_printf(char *fmt, ...);
+\layout Standard
+
+
+\noun on 
+Taucs
+\noun default 
+ can usually determine the amount of memory available.
+ This can be useful when calling an out-of-core solver, which needs this
+ information in order to plan its schedule.
+ This information can also be useful for determining whether an in-core
+ direct solver is likely to run out of memory or not before calling it.
+ 
+\layout LyX-Code
+
+double taucs_system_memory_size();
+\layout LyX-Code
+
+double taucs_available_memory_size();
+\layout Standard
+
+The first routine attempts to determine how much physical memory the computer
+ has, in bytes.
+ The second reports the amount of memory in bytes that you can actually
+ allocate and use.
+ It returns the minimum of 0.75 of the physical memory if it can determine
+ the amount of physical memory, and the amount that it actually managed
+ to allocate and use.
+ You should use the second routine, since the first may fail or may report
+ more memory than your program can actually allocate.
+\layout Standard
+
+The next routines measure time.
+\layout LyX-Code
+
+double taucs_wtime();
+\layout LyX-Code
+
+double taucs_ctime();
+\layout Standard
+
+The first routine returns the time in seconds from some fixed time in the
+ past (so-called wall-clock time).
+ The second returns the 
+\noun on 
+cpu
+\noun default 
+ time in seconds that the process used since it started.
+ The 
+\noun on 
+cpu
+\noun default 
+ time is mostly useful for determining that the wall-clock measurements
+ are not reliable due to other processes, paging, I/O, etc.
+\layout Subsection
+
+Error Codes
+\layout Standard
+
+Some 
+\noun on 
+taucs
+\noun default 
+ routines return an integer error code.
+ Before version 2.1, routines that return an integer error code returned
+ 0 to signal success and -1 to signal failure.
+ Routines that return a pointer used the value 
+\family typewriter 
+NULL
+\family default 
+ to signal failure.
+ Version 2.1 introduces symbolic integer error codes, so that routines can
+ report several kinds of errors.
+\layout Standard
+\added_space_top medskip \noindent 
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="6" columns="2">
+<features islongtable="true">
+<column alignment="block" valignment="top" width="2in" special="@{}p{2in}">
+<column alignment="block" valignment="top" width="3.5in" special="@{}p{4.5in}">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+TAUCS_SUCCESS
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+the routine completed its task successfully; guaranteed to have value zero
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+TAUCS_ERROR
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+an error occured, but either none of the specific error codes is appropriate,
+ or the routine could not determine which error code to return (this might
+ happen if the error occured deep in the code)
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+TAUCS_ERROR_NOMEM
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+failure to dynamically allocate memory
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+TAUCS_ERROR_BADARGS
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+the arguments to the routine are invalid
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+TAUCS_ERROR_MAXDEPTH
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+recursion is too deep and might cause a stack overflow
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+TAUCS_ERROR_INDEFINITE
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+input matrix was supposed to be positive definite but appears to be indefinite
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Section
+
+The Unified Linear Solver
+\layout Standard
+
+Version\SpecialChar ~
+2.1 introduces a unified linear-solver interface.
+ The interface consists of a single C routine that allows the user to invoke
+ almost all the linear solvers that 
+\noun on 
+taucs
+\noun default 
+ provides.
+\layout Standard
+
+The new interface is designed to achieve two main objectives.
+ First, it allows us to add new functionality without adding new routines
+ and without modifying client codes.
+ Suppose that we want to add a new way to handle zero pivots in a Cholesky
+ solver.
+ In the pre-2.1 interface style, we had two choices: (1) to add a new routine
+ that would treat zero pivots in a new way, or (2) add an argument on an
+ existing routine, an argument that would tell it how to treat zero pivots.
+ Both options have flaws.
+ The first option causes the number of externally-visible routines to explode,
+ and the second breaks old client codes.
+ The new interface style allows us to add features in a cleaner way.
+\layout Standard
+
+The second objective of the new interface style is to allow multiple ways
+ for client codes to specify how a linear system should be solved.
+ The solver specification can be embeded in the client's source code, in
+ configuration files, or even on the client's command line.
+\layout Standard
+
+The main drawback of the new interface is some additional overhead.
+ The convenience of the new interface is achieved mostly by parsing character
+ strings that represent solver options, and parsing these arguments takes
+ time.
+ For most linear systems, this overhead is negligeable.
+\layout Standard
+
+We plan to keep supporting the old interfaces, but we recommend that new
+ codes use the new interface unless the new interface results in actual
+ and significant performance penalty.
+ 
+\layout Standard
+
+There are a few things that the old-style interfaces can do but the new
+ ones cannot.
+ The most important one is allow direct access to the factors of a matrix.
+ We are still unsure as to how to do this with the new interface.
+ We would welcome any suggestions from users.
+\layout Subsection
+
+Usage by Example
+\layout Standard
+
+The new interface consists of a general-purpose linear-solver routine,
+\layout LyX-Code
+
+int taucs_linsolve(taucs_ccs_matrix* A,  
+\family roman 
+\emph on 
+input matrix
+\layout LyX-Code
+
+                   void** factorization, 
+\family roman 
+\emph on 
+an approximate inverse
+\layout LyX-Code
+
+                   int    nrhs,          
+\family roman 
+\emph on 
+number of right-hand sides
+\layout LyX-Code
+
+                   void*  X,             
+\family roman 
+\emph on 
+unknowns
+\layout LyX-Code
+
+                   void*  B,             
+\family roman 
+\emph on 
+right-hand sides
+\layout LyX-Code
+
+                   char*  options[]      
+\family roman 
+\emph on 
+options (what to do and how)
+\layout LyX-Code
+
+                   void*  arguments[]);  
+\family roman 
+\emph on 
+option arguments
+\layout Standard
+
+The first argument is a coefficient matrix 
+\begin_inset Formula $A$
+\end_inset 
+
+.
+ The second is the address of a pointer to a representation of an approximate
+ inverse.
+ As we shall see below, this representation can include a Cholesky factorization
+ of 
+\begin_inset Formula $A$
+\end_inset 
+
+, an incomplete factorization of 
+\begin_inset Formula $A$
+\end_inset 
+
+, a factorization of an approximation to 
+\begin_inset Formula $A$
+\end_inset 
+
+, and so on.
+ The next three arguments specify the number of linear system of equations
+ with the same coefficient matrix that we wish to solve, an array of unknowns
+ (
+\family typewriter 
+nrhs
+\family default 
+ columns of 
+\family typewriter 
+A->n
+\family default 
+ elements, column oriented), and an array of right-hand sides.
+ The next two arguments are an array of options in character-string format,
+ and an optional array of option arguments; both should be 
+\family typewriter 
+NULL
+\family default 
+ terminated.
+ The routine returns 
+\family typewriter 
+TAUCS_SUCCESS
+\family default 
+ or an error code.
+\layout Standard
+
+Let us see how this interface works using a few examples.
+ The first example simply solves a single linear system 
+\begin_inset Formula $Ax=b$
+\end_inset 
+
+ where 
+\begin_inset Formula $A$
+\end_inset 
+
+ is symmetric positive definite,
+\layout LyX-Code
+
+char* options = { "taucs.factor.LLT=true", NULL };
+\layout LyX-Code
+
+...
+\layout LyX-Code
+
+if (taucs_linsolve(A,NULL,1,x,b,options,NULL) != TAUCS_SUCCESS)
+\layout LyX-Code
+
+  handle_the_error_somehow();
+\layout Standard
+
+The options array tells the routine to use a Cholesky factorization.
+ The routine will find a fill reducing row and column permutation, permute
+ the matrix, factor the reordered matrix, and solve the linear system using
+ this factorization.
+ Since we did not pass an address of a pointer to a factorization, the factoriza
+tion will be destroyed before the routine returns.
+ If we want to reuse the same factorization later, we can separate the factor
+ and solve phases (from here on we omit the error checking from the examples),
+\layout LyX-Code
+
+char* options_factor = { "taucs.factor.LLT=true", NULL };
+\layout LyX-Code
+
+void* F = NULL;
+\layout LyX-Code
+
+...
+\layout LyX-Code
+
+taucs_linsolve(A,&F,0,NULL,NULL,options,NULL); 
+\family roman 
+\emph on 
+factor
+\layout LyX-Code
+
+...
+\layout LyX-Code
+
+taucs_linsolve(A,&F,1,x,b,NULL,NULL);          
+\family roman 
+\emph on 
+solve
+\layout LyX-Code
+
+...
+\layout LyX-Code
+
+taucs_linsolve(NULL,&F,0,NULL,NULL,NULL,NULL); 
+\family roman 
+\emph on 
+free the factorization
+\layout Standard
+
+The first call creates the factor, but does not solve any linear system,
+ and the second uses that factor to solve a linear system.
+ The third call, which passes a factorization object to the routine but
+ no linear system (no matrix and no right-hand sides), is by convension
+ a request to free the factorization.
+ The same routine can also solve linear systems iteratively,
+\layout LyX-Code
+
+char* opt_no_precond = { "taucs.solve.cg=true", NULL };
+\layout LyX-Code
+
+char* opt_incomplete = { "taucs.factor.LLT=true", 
+\layout LyX-Code
+
+                         "taucs.factor.droptol=1e-2",
+\layout LyX-Code
+
+                         "taucs.solve.cg=true", 
+\layout LyX-Code
+
+                         NULL };
+\layout LyX-Code
+
+char* opt_amwb       = { "taucs.approximate.amwb=true", 
+\layout LyX-Code
+
+                         "taucs.approximate.amwb.subgraphs=300",
+\layout LyX-Code
+
+                         "taucs.factor.LLT=true", 
+\layout LyX-Code
+
+                         "taucs.solve.cg=true", 
+\layout LyX-Code
+
+                         NULL }; sivan toledo how are you sivan test test
+ test test
+\layout Standard
+
+The first options vector indicates an iterative solution with no preconditioner,
+ the second using a drop tolerance incomplete Cholesky preconditioner, and
+ the third using a complete Cholesky factorization of an approximation to
+ the coefficient matrix.
+\layout Subsection
+
+More on Options and their Arguments
+\layout Standard
+
+There are four types of kinds of options:boolean, numeric, strings, and
+ pointers.
+ There are two ways to specify the value of an option: witnin the option
+ string itself, following an 
+\family typewriter 
+=
+\family default 
+ sign, or in the arguments array.
+\layout Standard
+
+For example, you can specify a boolean option with the string literals 
+\family typewriter 
+true
+\family default 
+ and 
+\family typewriter 
+false
+\family default 
+ within the option string, as the previous examples have demostrated.
+ You can also specify a boolean option in the arguments array,
+\layout LyX-Code
+
+int   factor_llt = 1;
+\layout LyX-Code
+
+char* options_factor = { "taucs.factor.LLT=#0", NULL };
+\layout LyX-Code
+
+void* arguments[]    = { &factor_llt, NULL };
+\layout LyX-Code
+
+...
+\layout LyX-Code
+
+taucs_linsolve(A,&F,0,NULL,NULL,options,arguments);
+\layout Standard
+
+The 
+\family typewriter 
+#
+\family default 
+ sign implies that the option is specified in a given location of the arguments
+ array, rather than in the character string itself.
+ The nonnegative integer that follows the 
+\family typewriter 
+#
+\family default 
+ sign indicates the location within the arguments array, the first location
+ (index 0) in this example.
+ This style of passing arguments allows you to control the option-value
+ that your program passes to 
+\noun on 
+taucs
+\noun default 
+ without converting it to a string.
+ 
+\layout Standard
+
+When you use the 
+\family typewriter 
+#
+\family default 
+ notataion, the element in the arguments array should be an 
+\family typewriter 
+int*
+\family default 
+ when the option is boolean, 
+\family typewriter 
+double*
+\family default 
+ when the option is numeric (even if only integer values make sense), 
+\family typewriter 
+char*
+\family default 
+ when the option is a string, and 
+\family typewriter 
+void*
+\family default 
+ when the option is a pointer.
+\layout Standard
+
+You can define arrays of options within your source code, as these examples
+ show.
+ You can also pass them to your program on the command line, and have your
+ program pass them to 
+\family typewriter 
+taucs_linsolve
+\family default 
+ without any processing,
+\layout LyX-Code
+
+int main(int argc, char* argv[]) {
+\layout LyX-Code
+
+  ...
+\layout LyX-Code
+
+  taucs_linsolve(A,NULL,1,x,b,argv,NULL);
+\layout Standard
+
+In 
+\noun on 
+ansi
+\noun default 
+ C, the 
+\family typewriter 
+argv
+\family default 
+ array must be 
+\family typewriter 
+NULL
+\family default 
+ terminated, so you can pass it safely to 
+\family typewriter 
+taucs_linsolve
+\family default 
+.
+ The routine will use the options it understand; it will complain about
+ the ones it does not understand, but it will otherwise ignore them.
+ If you want to suppress these warnings, remove from the options array strings
+ that do not start with 
+\family typewriter 
+taucs
+\family default 
+.
+ This mechanism allows you to take advantage of new options in future versions
+ of 
+\noun on 
+taucs
+\noun default 
+ simply by relinking your code with the new version of 
+\noun on 
+taucs
+\noun default 
+; you don't even have to recompile your program.
+ 
+\layout Subsection
+
+A Catalog of Options
+\layout Standard
+
+The following table documents the options that 
+\family typewriter 
+taucs_linsolve
+\family default 
+ understands.
+ In most cases, values have reasonable defaults.
+ For example, if you do not specify an ordering, the routine will select
+ an appropriate ordering based on the kind of factorization and the configuratio
+n of the library.
+\layout Standard
+\added_space_top medskip \noindent 
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="22" columns="3">
+<features islongtable="true">
+<column alignment="block" valignment="top" width="3in" special="@{}p{3in}">
+<column alignment="block" valignment="top" width="1in" special="@{}p{0.5in}">
+<column alignment="block" valignment="top" width="7cm" special="@{}p{3in}@{}">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.approximate.amwb
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+boolean
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+maximum-weight-basis and Vaidya preconditioners
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.approximate.amwb.subgraphs
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+double
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+desired number of subgraphs in the tree partitioning
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.approximate.amwb.randomseed
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+double
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+random seed, specify an integer in 
+\begin_inset Formula $[0,2^{31}-1]$
+\end_inset 
+
+
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.factor.LLT
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+boolean
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Chokesky factorization
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.factor.LU
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+boolean
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\begin_inset Formula $LU$
+\end_inset 
+
+ factorization with partial pivoting
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.factor.ldlt
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+boolean
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\begin_inset Formula $LDL^{T}$
+\end_inset 
+
+ factorization without pivoting
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.factor.mf
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+boolean
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+multifrontal factorization
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.factor.ll
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+boolean
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+left-looking factorization
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.factor.symbolic
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+boolean
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+if false, the code will use the symbolic factorization from an earlier code
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.factor.numeric
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+boolean
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+if false, the code will only perform a symbolic factorization
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.factor.ordering
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+string
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+what preordering to use 
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.ooc
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+boolean
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+requests out-of-core processing
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.ooc.basename
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+string
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+path name and base file name for data files
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.ooc.iohandle
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+pointer
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+pointer to an open 
+\family typewriter 
+taucs_io_handle
+\family default 
+.
+ Specify either this option or the 
+\family typewriter 
+basename
+\family default 
+ option in out-of-core requests
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.ooc.memory
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+double
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+the amount of in-core memory to use
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.solve
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+boolean
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+specify false if you do not want to solve linear systems; same as requesting
+ to solve zero systems
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.solve.cg
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+boolean
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+requests an iterative solve with the Conjugate Gradients algorithm; if you
+ do not specify any iterative solver, the routine will use a direct solve
+ (single application of the preconditioner or of the factorization)
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.solve.minres
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+boolean
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+requests an iterative solve with the 
+\noun on 
+minres
+\noun default 
+ algorithm
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.solve.maxits
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+double
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+maximum number of iterations
+\end_inset 
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.solve.convergetol
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+double
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+reduction in the norm of the residual that is considered convergence
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.maxdepth
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+double
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+maximum depth of recursion in recursive routines that traverse elimination
+ trees; can be used to reduce chances of stack overflows
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+taucs.cilk.nproc
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\emph on 
+double
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+number of threads to be used in multithreaded routines
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Section
+
+Matrix Reordering
+\layout Standard
+
+Reordering the rows and columns of a matrix prior to factoring it can have
+ a dramatic effect on the time and storage required to factor it.
+ Reordering a matrix prior to an iterative linear solver can have a significant
+ effect on the convergence rate of the solver and on the time each iteration
+ takes (since the reordering affects the time matrix-vector multiplication
+ takes).
+ The following routine computes various permutations that can be used effectivel
+y to permute a matrix.
+\layout LyX-Code
+
+void              taucs_ccs_order(taucs_ccs_matrix* matrix, 
+\layout LyX-Code
+
+                                  int** perm, int** invperm,
+\layout LyX-Code
+
+                                  char* which);
+\layout LyX-Code
+
+\layout Standard
+
+The string argument 
+\family typewriter 
+which
+\family default 
+ can take one of the following values, all of which are fill-reducing permutatio
+ns.
+ All except the last are for for symmetric matrices, and the last is only
+ for unsymmetric matrices.
+\layout Description
+
+identity The identity permutation.
+\layout Description
+
+genmmd Multiple minimum degree.
+ In my experience, this routine is often the fastest and it produces effective
+ permutations on small- and medium-sized matrices.
+\layout Description
+
+md,\SpecialChar ~
+mmd,\SpecialChar ~
+amd True minimum degree, multiple minimum degree, and approximate
+ minimum degree from the AMD package.
+ In my experience they are slower then genmmd although they are supposed
+ to be faster.
+\layout Description
+
+metis Hybrid nested-dissection minimum degree ordering from the 
+\noun on 
+Metis
+\noun default 
+ library.
+ Quite fast and should be more effective than minimum degree codes alone
+ on large problems.
+\layout Description
+
+treeorder No-fill ordering code for matrices whose graphs are trees.
+ This is a special case of minimum degree but the code is faster than a
+ general minimum degree code.
+\layout Description
+
+colamd Tim Davis's column approximate minimum-degree code.
+ This ordering produces a column ordering that reduces fill in sparse 
+\begin_inset Formula $LU$
+\end_inset 
+
+ factorizations with partial pivoting.
+\layout Standard
+
+The next routine takes the permutation returned from 
+\family typewriter 
+taucs_ccs_order
+\family default 
+ and permutes a matrix symmetrically.
+ That is, the permutation is applied to both the rows and the columns.
+\layout LyX-Code
+
+taucs_ccs_matrix* taucs_ccs_permute_symmetrically(taucs_ccs_matrix* A, 
+\layout LyX-Code
+
+                                                  int* perm, int* invperm);
+\layout Standard
+
+The last two routines are auxiliary routines that permute a vector or inverse
+ permute a vector.
+ 
+\color red
+The interface to these routines changed in version 2.0!
+\layout LyX-Code
+
+void taucs_vec_permute (int n, 
+\layout LyX-Code
+
+                        int flags,      
+\family roman 
+\emph on 
+data type
+\layout LyX-Code
+
+                        double v[],     
+\family roman 
+\emph on 
+input vector
+\family default 
+\emph default 
+ 
+\layout LyX-Code
+
+                        double pv[],    
+\family roman 
+\emph on 
+permuted output vector
+\layout LyX-Code
+
+                        int    p[]);    
+\family roman 
+\emph on 
+permutation, 0-based
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+void taucs_vec_ipermute(int n, 
+\layout LyX-Code
+
+                        int flags,      
+\family roman 
+\emph on 
+data type
+\layout LyX-Code
+
+                        double v[],     
+\family roman 
+\emph on 
+input vector
+\family default 
+\emph default 
+ 
+\layout LyX-Code
+
+                        double pv[],    
+\family roman 
+\emph on 
+permuted output vector
+\layout LyX-Code
+
+                        int    invp[]); 
+\family roman 
+\emph on 
+inverse permutation
+\layout Section
+
+Sparse Direct Linear Solvers
+\layout Subsection
+
+
+\begin_inset LatexCommand \label{sec:in-core-symmetric-factorizations}
+
+\end_inset 
+
+In-Core Sparse Symmetric Factorizations
+\layout Standard
+
+The next routine factors a symmetric matrix 
+\begin_inset Formula $A$
+\end_inset 
+
+ completely or incompletely into a product of lower triangular matrix 
+\begin_inset Formula $L$
+\end_inset 
+
+ and its transpose 
+\begin_inset Formula $L^{T}$
+\end_inset 
+
+.
+ If 
+\family typewriter 
+droptol
+\family default 
+ is set to 
+\begin_inset Formula $0$
+\end_inset 
+
+, the matrix is factored completely into 
+\begin_inset Formula $A=LL^{T}$
+\end_inset 
+
+.
+ If 
+\family typewriter 
+droptol
+\family default 
+ is positive, small elements are dropped from the factor 
+\begin_inset Formula $L$
+\end_inset 
+
+ after they are computed but before they update other coefficients.
+ Elements are dropped if they are smaller than 
+\family typewriter 
+droptol
+\family default 
+ times the norm of the column of 
+\begin_inset Formula $L$
+\end_inset 
+
+ and they are not on the diagonal and they are not in the nonzero pattern
+ of 
+\begin_inset Formula $A$
+\end_inset 
+
+.
+ If you set 
+\family typewriter 
+modified
+\family default 
+ to true (nonzero value), the factorization is modified so that the row
+ sums of 
+\begin_inset Formula $LL^{T}$
+\end_inset 
+
+ are equal to the row sums of 
+\begin_inset Formula $A$
+\end_inset 
+
+.
+ A complete factorization should only break down numerically when 
+\begin_inset Formula $A$
+\end_inset 
+
+ is not positive definite.
+ An incomplete factorization can break down even if 
+\begin_inset Formula $A$
+\end_inset 
+
+ is positive definite.
+\layout LyX-Code
+
+taucs_ccs_matrix* taucs_ccs_factor_llt(taucs_ccs_matrix* A,
+\layout LyX-Code
+
+                                       double droptol, 
+\layout LyX-Code
+
+                                       int modified);
+\layout Standard
+
+The factorization routine returns a lower triangular matrix which you can
+ use to solve the linear system 
+\begin_inset Formula $LL^{T}x=b$
+\end_inset 
+
+ (if the factorization is complete, that is, if 
+\begin_inset Formula $A=LL^{T}$
+\end_inset 
+
+, then this solves 
+\begin_inset Formula $Ax=b$
+\end_inset 
+
+).
+ The formal type of the argument is 
+\family typewriter 
+void*
+\family default 
+ but the routine really expects a 
+\family typewriter 
+taucs_ccs_matrix*
+\family default 
+, presumably one returned from 
+\family typewriter 
+taucs_ccs_factor_llt
+\family default 
+.
+ The reason that we declare the argument to be 
+\family typewriter 
+void*
+\family default 
+ is that all the solve routines that might be used as preconditioners must
+ have the same type but each one accepts a different data type.
+\layout LyX-Code
+
+int               taucs_ccs_solve_llt  (void* L, 
+\layout LyX-Code
+
+                                        double* x, 
+\layout LyX-Code
+
+                                        double* b);
+\layout Standard
+
+The routine 
+\family typewriter 
+taucs_ccs_factor_llt
+\family default 
+ factors a matrix column by column.
+ It is quite slow in terms of floating-point operations per second due to
+ overhead associated with the sparse data structures and to cache misses.
+ 
+\noun on 
+Taucs
+\noun default 
+ also includes faster routines that can only factor matrices completely.
+ These routines rely on an easy-to-compute decomposition of 
+\begin_inset Formula $L$
+\end_inset 
+
+ into so-called supernodes, or set of columns with similar structure.
+ Exploiting supernodes allow these routines to reduce overhead and to utilize
+ cache memories better.
+\layout LyX-Code
+
+void* taucs_ccs_factor_llt_mf(taucs_ccs_matrix* A);
+\layout LyX-Code
+
+void* taucs_ccs_factor_llt_ll(taucs_ccs_matrix* A);
+\layout Standard
+
+The first routine (
+\family typewriter 
+_mf
+\family default 
+) is a supernodal multifrontal routine and the second (
+\family typewriter 
+_ll
+\family default 
+) is a supernodal left-looking routine.
+ The multifrontal code is faster but uses more temporary storage.
+ Both routines return the factor in an opaque data structure that you can
+ pass to the solve routine to solve 
+\begin_inset Formula $LL^{T}x=b$
+\end_inset 
+
+.
+\layout LyX-Code
+
+int taucs_supernodal_solve_llt(void* L,
+\layout LyX-Code
+
+                               double* x, 
+\layout LyX-Code
+
+                               double* b);
+\layout Standard
+
+The next routine deallocates the storage associated with such a factor.
+\layout LyX-Code
+
+void taucs_supernodal_factor_free(void* L);
+\layout Standard
+
+You can also convert a supernodal factor structure to a compressed-column
+ matrix using the following routine
+\layout LyX-Code
+
+taucs_ccs_matrix* 
+\layout LyX-Code
+
+     taucs_supernodal_factor_to_ccs(void* L);
+\layout Standard
+
+There may be two reason to perform this conversion.
+ First, the compressed-column solve routine may be slightly faster than
+ the supernodal solve routine due to cache effects and indexing overhead.
+ Second, the only operations on supernodal factors are the solve and free
+ routines, so if you want to perform another operation on the factor, such
+ as writing it out to a file, you need to convert it to a compressed-column
+ structure.
+\layout Standard
+
+The following three routines are usefull when the application needs to factor
+ several matrices with the same nonzero structure but different numerical
+ values.
+ These routines call the supernodal multifrontal factorization code.
+ The first routine performs a symbolic elimination, which is a preprocessing
+ steps that depends only on the nonzero structure of the input matrix.
+ It returns a factor object, but with no numerical values (it cannot be
+ yet used for solving linear systems).
+\layout LyX-Code
+
+void* taucs_ccs_factor_llt_symbolic(taucs_ccs_matrix* A);
+\layout Standard
+
+The next routine takes a symbolic factor and a matrix and performs the numerical
+ factorization.
+ It returns 
+\begin_inset Formula $0$
+\end_inset 
+
+ if the factorization succeeds, 
+\begin_inset Formula $-1$
+\end_inset 
+
+ otherwise.
+ It appends the numeric values of the factors to the factor object, which
+ can now be used to solve linear systems.
+\layout LyX-Code
+
+int   taucs_ccs_factor_llt_numeric(taucs_ccs_matrix* A,void* L);
+\layout Standard
+
+If you want to reuse the symbolic factor, you can release the numeric informatio
+n and call the previous routine with a different matrix, but with the same
+ structure.
+ The following routine releases the numeric information.
+\layout LyX-Code
+
+void taucs_supernodal_factor_free_numeric(void* L);
+\layout Standard
+
+An auxiliary routine computes the elimination tree of a matrix (the graph
+ of column dependences in the symmetric factorization) and the nonzero counts
+ for rows of the complete factor 
+\begin_inset Formula $L$
+\end_inset 
+
+, columns of 
+\begin_inset Formula $L$
+\end_inset 
+
+, and all of 
+\begin_inset Formula $L$
+\end_inset 
+
+.
+ This routine is used internally by the factorization routines, but it can
+ be quite useful without them.
+ In particular, computing the number of nonzeros can help a program determine
+ whether there is enough memory for a complete factorization.
+ Currently this routine is not as fast as it can be; it runs in time proportiona
+l to the number of nonzeros in 
+\begin_inset Formula $L$
+\end_inset 
+
+ (which is still typically a lot less than the time to compute the factor).
+ I hope to include a faster routine in future versions of 
+\noun on 
+Taucs
+\noun default 
+.
+ 
+\layout LyX-Code
+
+int taucs_ccs_etree(taucs_ccs_matrix* A, 
+\family roman 
+\emph on 
+input matrix
+\family default 
+\emph default 
+ 
+\layout LyX-Code
+
+                    int  parent[],       
+\family roman 
+\emph on 
+an n-vector to hold the etree
+\layout LyX-Code
+
+                    int  L_colcount[],   
+\family roman 
+\emph on 
+output; NULL is allowed
+\layout LyX-Code
+
+                    int  L_rowcount[],   
+\family roman 
+\emph on 
+output; NULL is allowed
+\layout LyX-Code
+
+                    int* L_nnz           
+\family roman 
+\emph on 
+output; NULL is allowed
+\layout LyX-Code
+
+                    );
+\layout Standard
+
+You must pass the address of the output arguments if you want them or 
+\family typewriter 
+NULL
+\family default 
+ if you do not need them.
+\layout Standard
+
+The next routine factors a symmetric matrix 
+\begin_inset Formula $A$
+\end_inset 
+
+ completely into a product 
+\begin_inset Formula $LDL^{T}$
+\end_inset 
+
+ where 
+\begin_inset Formula $L$
+\end_inset 
+
+ is lower triangular and 
+\begin_inset Formula $D$
+\end_inset 
+
+ is diagonal.
+\layout LyX-Code
+
+taucs_ccs_matrix* taucs_ccs_factor_ldlt(taucs_ccs_matrix* A);
+\layout Standard
+
+The factorization routine returns a lower triangular matrix that packs both
+ 
+\begin_inset Formula $L$
+\end_inset 
+
+ and 
+\begin_inset Formula $D$
+\end_inset 
+
+ into a single triangular, and which you can use to solve the linear system
+ 
+\begin_inset Formula $LDL^{T}x=b$
+\end_inset 
+
+.
+ The formal type of the argument is 
+\family typewriter 
+void*
+\family default 
+ but the routine really expects a 
+\family typewriter 
+taucs_ccs_matrix*
+\family default 
+, presumably one returned from 
+\family typewriter 
+taucs_ccs_factor_llt
+\family default 
+.
+ The matrices 
+\begin_inset Formula $L$
+\end_inset 
+
+ and 
+\begin_inset Formula $D$
+\end_inset 
+
+ are packed into the matrix 
+\begin_inset Formula $C$
+\end_inset 
+
+ that the routine returns in the following way: the diagonal of 
+\begin_inset Formula $D$
+\end_inset 
+
+ is the diagonal of 
+\begin_inset Formula $C$
+\end_inset 
+
+, and the strictly lower triagular part of 
+\begin_inset Formula $L$
+\end_inset 
+
+ is the strictly lower triangular part of 
+\begin_inset Formula $C$
+\end_inset 
+
+; the diagonal of 
+\begin_inset Formula $L$
+\end_inset 
+
+ contains only 
+\begin_inset Formula $1$
+\end_inset 
+
+, and is not represented explicitly.
+ To solve linear systems you do not need to understand this packed format,
+ only if you need to access elements of 
+\begin_inset Formula $D$
+\end_inset 
+
+ or 
+\begin_inset Formula $L$
+\end_inset 
+
+.
+\layout LyX-Code
+
+int               taucs_ccs_solve_ldlt (void* L, 
+\layout LyX-Code
+
+                                        double* x, 
+\layout LyX-Code
+
+                                        double* b);
+\layout Standard
+
+The routine 
+\family typewriter 
+taucs_ccs_factor_ldlt
+\family default 
+ factors a matrix column by column.
+ It is quite slow in terms of floating-point operations per second due to
+ overhead associated with the sparse data structures and to cache misses.
+\layout Subsection
+
+Out-of-Core Sparse Symmetric Factorizations
+\layout Standard
+
+
+\noun on 
+Taucs
+\noun default 
+ can factor a matrix whose factors are larger than main memory by storing
+ the factor on disk files.
+ The code works correctly even if the factor takes more than 4\SpecialChar ~
+GB of memory
+ to store, even on a 32-bit computer (we have factored matrices whose factors
+ took up to 46\SpecialChar ~
+GB of disk space on a Pentium-III computer running Linux).
+ On matrices that can be factored by one of the supernodal in-core routines,
+ the out-of-core code is usually faster if the in-core routines cause a
+ significant amount of paging activity, but slower if there is little or
+ no paging activity.
+ As a rule of thumb, use the out-of-core routines if the in-core routines
+ run out of memory or cause significant paging.
+\layout Standard
+
+The basic sequence of operations to solve a linear system out-of-core is
+ as follows:
+\layout Enumerate
+
+Represent the coefficient matrix as a 
+\family typewriter 
+taucs_ccs_matrix
+\family default 
+.
+\layout Enumerate
+
+Find a fill-reducing symmetric ordering and permute the matrix.
+\layout Enumerate
+
+Create a file that will store the factor by calling 
+\family typewriter 
+taucs_io_create_multifile
+\family default 
+.
+\layout Enumerate
+
+Factor the permuted coefficient matrix into the file by calling 
+\family typewriter 
+taucs_ooc_factor_llt
+\family default 
+.
+ The Cholesky factor is now stored on disk files.
+\layout Enumerate
+
+Solve one or more linear systems using the disk-resident factor by calling
+ 
+\family typewriter 
+taucs_ooc_solve_llt
+\family default 
+.
+\layout Enumerate
+
+Delete the factor from disk using 
+\family typewriter 
+taucs_io_delete
+\family default 
+, or just close the disk files by calling 
+\family typewriter 
+taucs_io_close
+\family default 
+.
+ If you just close the file, you can keep it on disk and use it later to
+ solve additional linear systems by opening it (
+\family typewriter 
+taucs_io_open_multifile
+\family default 
+) and calling the solve routine.
+\layout Standard
+
+
+\noun on 
+Taucs
+\noun default 
+ stores the sparse factor in multiple files, each at most than one gigabyte
+ in size.
+ The file-creation routine,
+\layout LyX-Code
+
+taucs_io_handle* taucs_io_create_multifile(char* basename);
+\layout Standard
+
+receives a string argument that is used to generate file names.
+ For example, if the argument is 
+\family typewriter 
+"/tmp/bcsstk38.L"
+\family default 
+, then the factor will be stored in the files 
+\family typewriter 
+/tmp/bcsstk38.L.0
+\family default 
+, 
+\family typewriter 
+/tmp/bcsstk38.L.1
+\family default 
+, 
+\family typewriter 
+/tmp/bcsstk38.L.2
+\family default 
+, and so on.
+ To open an existing collection of files that represent a sparse matrix,
+ call 
+\layout LyX-Code
+
+taucs_io_handle* taucs_io_open_multifile(char* basename);
+\layout Standard
+
+If you want to stop the program but retain the contents of such files, you
+ must close them explicitly,
+\layout LyX-Code
+
+int taucs_io_close(taucs_io_handle* h);
+\layout Standard
+
+The argument is the handle that the create or open routine returned.
+ This routine returns 
+\family typewriter 
+-1
+\family default 
+ in case of failure and 
+\family typewriter 
+0
+\family default 
+ in case of success.
+ To delete an existing an open collection of files, and to release the memory
+ associated with a handle to the files, call
+\layout LyX-Code
+
+int taucs_io_delete(taucs_io_handle* h);
+\layout Standard
+
+There is no way to delete files that are not open; if you want to delete
+ an exising on-disk matrix, open it and then delete it.
+\layout Standard
+
+Using the out-of-core factor and solve routines is easy:
+\layout LyX-Code
+
+int taucs_ooc_factor_llt(taucs_ccs_matrix* A,
+\layout LyX-Code
+
+                         taucs_io_handle* L,
+\layout LyX-Code
+
+                         double memory);
+\layout LyX-Code
+
+int taucs_ooc_solve_llt (void* L, double* x, double* b);
+\layout Standard
+
+The first argument of the factor routine is the matrix to be factored (permute
+ it first!), the second is a handle to a newly created 
+\noun on 
+taucs
+\noun default 
+ file that will contain the factor upon return, and the third is the amount
+ of main memory that the factor routine should use.
+ In general, the value of the third argument should be only slightly smaller
+ than the amount of physical main memory the computer has.
+ The larger the argument, the less explicit I/O the factorization performs.
+ But a value larger than the physical memory will cause explicit I/O in
+ the form of paging activity and this typically slows down the factorization.
+ If you do not know how much memory to allow the routine to use, just pass
+ the value returned by 
+\family typewriter 
+taucs_available_memory_size()
+\family default 
+; in most cases, this will deliver near-optimal performance.
+ The return value of both the factor and solve routines is 
+\family typewriter 
+0
+\family default 
+ in case of success and 
+\family typewriter 
+-1
+\family default 
+ otherwise.
+\layout Standard
+
+The first argument of the solve routine is the handle to the file containing
+ the factor.
+ The formal argument is declared as 
+\family typewriter 
+void*
+\family default 
+ to ensure a consistent interface to all the solve routines, but the actual
+ argument must be of type 
+\family typewriter 
+taucs_io_handle*
+\family default 
+.
+ Do not pass a filename!
+\layout Standard
+
+In this version of 
+\noun on 
+taucs
+\noun default 
+ the out-of-core routines are not completely reliable in case of failure.
+ They will generally print a correct error message, but they may not return
+ immediately and they may not release all the disk space and memory that
+ they have allocated.
+ In particular, this may happen if they run out of disk space.
+ We will attempt to rectify this in future versions.
+\layout Standard
+
+Finally, this version of the documentation does not document the interfaces
+ to the matrix I/O routines that the out-of-core codes use.
+ If you need such documentation to develop additional out-of-core matrix
+ algorithms using 
+\noun on 
+taucs
+\noun default 
+'s I/O infrastructure, please let me know.
+ 
+\layout Subsection
+
+Out-of-Core Sparse Unsymmetric Factorizations
+\layout Standard
+
+
+\noun on 
+Taucs
+\noun default 
+ can solve unsymmetric linear systems using an out-of-core sparse 
+\begin_inset Formula $LU$
+\end_inset 
+
+ factorization with partial pivoting.
+\layout LyX-Code
+
+int taucs_ooc_factor_lu (taucs_ccs_matrix* A, 
+\layout LyX-Code
+
+                         int*              colperm,
+\layout LyX-Code
+
+                         taucs_io_handle*  LU,
+\layout LyX-Code
+
+                         double            memory);
+\layout LyX-Code
+
+int taucs_ooc_solve_lu  (taucs_io_handle*  LU,
+\layout LyX-Code
+
+                         void*             x,
+\layout LyX-Code
+
+                         void*             b);
+\layout Standard
+
+The interface to these routines is similar to the interface of the out-of-core
+ symmetric routines, except that you do not need to prepermute 
+\begin_inset Formula $A$
+\end_inset 
+
+ and you do not need to permute 
+\begin_inset Formula $b$
+\end_inset 
+
+ and 
+\begin_inset Formula $x$
+\end_inset 
+
+ before and after the solve.
+ The argument 
+\family typewriter 
+colperm
+\family default 
+ is a fill-reducing column permutation that you can obtain by calling 
+\family typewriter 
+taucs_ccs_order
+\family default 
+ with a 
+\family typewriter 
+colamd
+\family default 
+ ordering-specification.
+ These routines perform all the necessary permutations internally, so you
+ do not have to perform any.
+\layout Subsection
+
+Inverse Factorizations
+\layout Standard
+
+
+\noun on 
+Taucs
+\noun default 
+ can directly compute the sparse Cholesky factor of the inverse of a matrix.
+ This factorization always fills more than the Cholesky factorization of
+ the matrix itself, so it is usually not particularly useful, and is included
+ mainly for research purposes.
+ One interesting aspect of this factorization is that the solve phase involves
+ two sparse matrix-vector multiplications, as opposed to two triangular
+ solves that constitute the solve phase of convensional triangular factorization
+s.
+ This fact may make the factorization useful in certain iterative solvers,
+ such as solvers that use support trees as preconditioners\SpecialChar ~
+
+\begin_inset LatexCommand \cite{GrembanMiZa95,Gremban96}
+
+\end_inset 
+
+.
+ For further details about the factorization, see\SpecialChar ~
+
+\begin_inset LatexCommand \cite{TufoFischerJPDC}
+
+\end_inset 
+
+; for a different perspective, along with an analysis of fill, see\SpecialChar ~
+
+\begin_inset LatexCommand \cite{BridsonTang99}
+
+\end_inset 
+
+.
+\layout Standard
+
+The first routine computes the factor of the inverse, the second uses this
+ factor to solve a linear system.
+ The interface is identical to the interface of the Cholesky routines.
+\layout LyX-Code
+
+taucs_ccs_matrix* taucs_ccs_factor_xxt(taucs_ccs_matrix* A);
+\layout LyX-Code
+
+int               taucs_ccs_solve_xxt (void* X,
+\layout LyX-Code
+
+                                       double* x,
+\layout LyX-Code
+
+                                       double* b);
+\layout Section
+
+Iterative Linear Solvers
+\layout Standard
+
+The iterations of conjugate gradients are cheaper than the iterations of
+ MINRES, but conjugate gradients is only guaranteed to work on symmetric
+ positive-definite matrices, whereas MINRES should work on any symmetric
+ matrix.
+ The two iterative solver routines have identical interfaces.
+ To solve a system 
+\begin_inset Formula $Ax=b$
+\end_inset 
+
+, you pass the sparse matrix 
+\begin_inset Formula $A$
+\end_inset 
+
+, the addresses of the right-hand side 
+\begin_inset Formula $b$
+\end_inset 
+
+ and of the output 
+\begin_inset Formula $x$
+\end_inset 
+
+, the preconditioner, and the parameters of the stopping criteria 
+\family typewriter 
+itermax
+\family default 
+ and 
+\family typewriter 
+convergetol
+\family default 
+.
+ 
+\layout Standard
+
+The iterative algorithm stops when the maximum number of iterations reaches
+ 
+\family typewriter 
+itermax
+\family default 
+ or when the 
+\begin_inset Formula $2$
+\end_inset 
+
+-norm of the residual 
+\begin_inset Formula $b-Ax$
+\end_inset 
+
+ drops by a factor of 
+\family typewriter 
+convergetol
+\family default 
+ or more.
+ 
+\layout Standard
+
+The preconditioner is specified using two arguments: the address of a routine
+ that solves 
+\begin_inset Formula $Mz=r$
+\end_inset 
+
+ for 
+\begin_inset Formula $z$
+\end_inset 
+
+ given 
+\begin_inset Formula $M$
+\end_inset 
+
+ and 
+\begin_inset Formula $r$
+\end_inset 
+
+ and the address of an opaque data structure that represents 
+\begin_inset Formula $M$
+\end_inset 
+
+.
+ For example, if you construct an incomplete-Cholesky preconditioner by
+ calling 
+\family typewriter 
+taucs_ccs_factor_llt
+\family default 
+, the value of 
+\family typewriter 
+precond_fn
+\family default 
+ should be 
+\family typewriter 
+taucs_ccs_solve_llt
+\family default 
+ and the value of 
+\family typewriter 
+precond_arg
+\family default 
+ should be the address of the incomplete triangular factor returned by
+\family typewriter 
+ taucs_ccs_factor_llt
+\family default 
+.
+\layout LyX-Code
+
+int taucs_conjugate_gradients(
+\layout LyX-Code
+
+                 taucs_ccs_matrix*  A,
+\layout LyX-Code
+
+                 int     (*precond_fn)(void*,double z[],double r[]),
+\layout LyX-Code
+
+                 void*   precond_args,
+\layout LyX-Code
+
+                 double  x[],
+\layout LyX-Code
+
+                 double  b[],
+\layout LyX-Code
+
+                 int     itermax,
+\layout LyX-Code
+
+                 double  convergetol);
+\layout LyX-Code
+
+\layout LyX-Code
+
+int taucs_minres(taucs_ccs_matrix*  A,
+\layout LyX-Code
+
+                 int     (*precond_fn)(void*,double z[],double r[]),
+\layout LyX-Code
+
+                 void*   precond_args,
+\layout LyX-Code
+
+                 double  x[],
+\layout LyX-Code
+
+                 double  b[],
+\layout LyX-Code
+
+                 int     itermax,
+\layout LyX-Code
+
+                 double  convergetol);
+\layout Section
+
+Preconditioners for Iterative Linear Solvers
+\layout Standard
+
+This section describes 
+\noun on 
+taucs
+\noun default 
+ routines that construct preconditioners for iterative linear solvers.
+\layout Subsection
+
+Drop-Tolerance Incomplete Cholesky
+\layout Standard
+
+As described in Section\SpecialChar ~
+
+\begin_inset LatexCommand \ref{sec:in-core-symmetric-factorizations}
+
+\end_inset 
+
+, 
+\family typewriter 
+taucs_ccs_factor_llt
+\family default 
+ can construct relaxed-modified and unmodified incomplete Cholesky factorization
+s.
+\layout Subsection
+
+Maximum-Weight-Basis (Vaidya's) Preconditioners
+\layout Standard
+
+The next routine constructs a so-called Vaidya preconditioner for a symmetric
+ diagonally-dominant matrix with positive diagonal elements.
+ The preconditioner 
+\begin_inset Formula $M$
+\end_inset 
+
+ that is returned is simply 
+\begin_inset Formula $A$
+\end_inset 
+
+ without some of the off-diagonal nonzeros dropped and with a certain diagonal
+ modification.
+ To be used as a preconditioner in an iterative linear solver, you normally
+ have to factor 
+\begin_inset Formula $M$
+\end_inset 
+
+ into its Cholesky factors.
+ The routine accepts two parameters that affect the resulting preconditioner.
+ The construction of 
+\begin_inset Formula $M$
+\end_inset 
+
+ is randomized and 
+\family typewriter 
+rnd
+\family default 
+ is used as a random value.
+ Different values result in slightly different preconditioners.
+ Subgraphs is a number that controls how many nonzeros are dropped from
+ 
+\begin_inset Formula $A$
+\end_inset 
+
+ to form 
+\begin_inset Formula $M$
+\end_inset 
+
+.
+ The value 
+\begin_inset Formula $1.0$
+\end_inset 
+
+ results in the sparsest possible preconditioner that this routine can construct
+; it will have less than 
+\begin_inset Formula $n$
+\end_inset 
+
+ offdiagonal nonzeros (for an 
+\begin_inset Formula $n$
+\end_inset 
+
+-by-
+\begin_inset Formula $n$
+\end_inset 
+
+ matrix) and it can be factored with 
+\begin_inset Formula $O(n)$
+\end_inset 
+
+ work and fill.
+ If all the offdiagonal nonzeros in 
+\begin_inset Formula $A$
+\end_inset 
+
+ are negative, the graph of 
+\begin_inset Formula $M$
+\end_inset 
+
+ will be a tree.
+ The value 
+\begin_inset Formula $n$
+\end_inset 
+
+ for 
+\family typewriter 
+subgraphs
+\family default 
+ results in 
+\begin_inset Formula $M=A$
+\end_inset 
+
+.
+ In-between values result in in-between levels of fill.
+ The sparsity of 
+\begin_inset Formula $M$
+\end_inset 
+
+ is roughly, but not strictly, monotone in 
+\family typewriter 
+subgraphs
+\family default 
+.
+ 
+\layout Standard
+
+The routine may fail due to several reasons: failure to allocate memory,
+ an input matrix that is not symmetric or symmetric with only the upper
+ part stored, or an input matrix with negative diagonal elemtents.
+ In the first case the routine returns 
+\family typewriter 
+NULL
+\family default 
+, in all the other cases the address of 
+\begin_inset Formula $A$
+\end_inset 
+
+.
+\layout LyX-Code
+
+taucs_ccs_matrix* taucs_amwb_preonditioner_create(
+\layout LyX-Code
+
+                    taucs_ccs_matrix* A,
+\layout LyX-Code
+
+                    int rnd,
+\layout LyX-Code
+
+                    double subgraphs);
+\layout Standard
+
+Note that the theory of Vaidya's preconditioner only applies to symmetric
+ diagonally-dominant matrices with positive diagonal elements, but the routine
+ works on any symmetric matrix with positive diagonals.
+ Furthermore, the returned preconditioner is always symmetric and positive
+ definite, so it should always have a Cholesky factor and, at least in theory,
+ it should always lead to Conjugate Gradients convergence if 
+\begin_inset Formula $A$
+\end_inset 
+
+ is symmetric positive definite.
+ We enforce the diagonal dominance of the preconditioner by always constructing
+ a preconditioner for 
+\begin_inset Formula $A+D$
+\end_inset 
+
+, where 
+\begin_inset Formula $D$
+\end_inset 
+
+ is a diagonal matrix that brings 
+\begin_inset Formula $A+D$
+\end_inset 
+
+ to diagonal dominance.
+ However, when 
+\begin_inset Formula $A$
+\end_inset 
+
+ is not diagonally dominant, convergence may be slow.
+\layout Standard
+
+The next set of routines creates a so-called recursive Vaidya preconditioner.
+ It works in the following way.
+ It drops elements from 
+\begin_inset Formula $A$
+\end_inset 
+
+.
+ It then finds all the rows and columns in 
+\begin_inset Formula $A$
+\end_inset 
+
+ that can be eliminated without creating much fill (elimination of degree-
+\begin_inset Formula $1$
+\end_inset 
+
+ and 
+\begin_inset Formula $2$
+\end_inset 
+
+ vertices until all vertices have degree 
+\begin_inset Formula $3$
+\end_inset 
+
+ or more).
+ It then eliminates these rows and columns and computes the Schur complement
+ of 
+\begin_inset Formula $A$
+\end_inset 
+
+ with respect to them.
+ Now it drops elements again from the Schur complement and so on.
+ When the sparsified Schur complement is small enough, it factors it directly.
+ In a 2-level preconditioner, in which we drop elements, compute the Schur
+ complement, drop elements from it, and factor it directly, each preconditioning
+ iteration requires an iterative solve for the unknowns associated with
+ the Schur complement.
+ The preconditioner in the inner solve is an augmented-maximum-weight-basis
+ preconditioner.
+ In a 3-level preconditioner, the nesting of iterative solves inside iterative
+ solves is deeper.
+ 
+\layout Standard
+
+The creation routine returns both a preconditioner and the reordering permutatio
+n and its inverse.
+\layout Standard
+
+The construction depends on several parameters.
+ The routine builds a preconditioner with at most 
+\family typewriter 
+maxlevels
+\family default 
+ levels.
+ It does not recurse if the matrix or Schur complement is smaller than 
+\family typewriter 
+nsmall
+\family default 
+.
+ The parameters 
+\family typewriter 
+c
+\family default 
+ and 
+\family typewriter 
+epsilon
+\family default 
+ determine how may elements we drop from the matrix or from a Schur complement
+ when building an augmented-maximum-weight-basis preconditioner them.
+ A small 
+\family typewriter 
+
+\begin_inset Formula $\mathtt{epsilon}>0$
+\end_inset 
+
+
+\family default 
+ will drop few elements, a large 
+\family typewriter 
+epsilon
+\family default 
+ will drop many.
+ A large 
+\begin_inset Formula $\mathtt{c}<1$
+\end_inset 
+
+ will drop few elements, a large 
+\family typewriter 
+c
+\family default 
+ will drop many.
+ The parameters 
+\family typewriter 
+innerits
+\family default 
+ and 
+\family typewriter 
+innerconv
+\family default 
+ control the accuracy of the inner iterative solves in terms of the maximum
+ number of iteration and the convergence ratio.
+\layout Standard
+
+We have not experimented extensively with these preconditioners and we are
+ unsure when they are effective and how to control their construction.
+ Therefore, the interface to the construction routine may change in the
+ future.
+\layout LyX-Code
+
+void* taucs_recursive_mst_preconditioner_create(
+\layout LyX-Code
+
+        taucs_ccs_matrix* A, 
+\layout LyX-Code
+
+        double c, 
+\layout LyX-Code
+
+        double epsilon, 
+\layout LyX-Code
+
+        int    nsmall,
+\layout LyX-Code
+
+        int    maxlevels,
+\layout LyX-Code
+
+        int    innerits,
+\layout LyX-Code
+
+        double innerconv,
+\layout LyX-Code
+
+        int**  perm, 
+\layout LyX-Code
+
+        int**  invperm);
+\layout LyX-Code
+
+\layout LyX-Code
+
+int
+\layout LyX-Code
+
+taucs_recursive_mst_preconditioner_solve(void* P, 
+\layout LyX-Code
+
+                                         double* z, 
+\layout LyX-Code
+
+                                         double* r);
+\layout Subsection
+
+Multilevel Support-Graph Preconditioners (Including Gremban-Miller Preconditione
+rs)
+\layout Standard
+
+
+\noun on 
+Taucs
+\noun default 
+ can construct a wide range of multilevel preconditioners that are called
+ 
+\emph on 
+support-graph
+\emph default 
+ preconditioners.
+ Such preconditioners were first proposed by Gremban and Miller\SpecialChar ~
+
+\begin_inset LatexCommand \cite{GrembanMiZa95,Gremban96}
+
+\end_inset 
+
+.
+ The next routine constructs Gremban-Miller preconditioners, as well as
+ a range of other multilevel preconditioners.
+ This version of the documentation only documents the construction of Gremban-Mi
+ller preconditioners using this routine; its other capabilities will be
+ described at a later date.
+\layout Standard
+
+This routine relies on 
+\noun on 
+metis
+\noun default 
+ and it will not work if you build the library with the 
+\family typewriter 
+NOMETIS
+\family default 
+ option.
+\layout Standard
+
+Also, the routine works only on symmetric diagonally-dominant matrices with
+ negative offdiagonals.
+\layout Standard
+
+The Gremban-Miller preconditioner is the Schur complement of a matrix whose
+ graph is a tree.
+ The leaves of the tree correspond to the unknowns, and the preconditioner
+ is the Schur complement of the tree with respect to its leaves (in other
+ words, all the internal vertices are eliminated and the reduced matrix
+ on the leaves is the preconditioner).
+ However, the Schur complement is not formed explicitly.
+ Instead, the construction routine factors the entire tree matrix and uses
+ this factor to apply the preconditioner implicitly.
+ This ensures that the preconditioner can be factored and applied to a vector
+ using 
+\begin_inset Formula $\Theta(n)$
+\end_inset 
+
+ work, where 
+\begin_inset Formula $n$
+\end_inset 
+
+ is the dimension of the linear system.
+ The construction of the tree is quite expensive, however, since it involves
+ repeated calls to graph partitioning routines in 
+\noun on 
+metis
+\noun default 
+.
+\layout LyX-Code
+
+void* taucs_sg_preconditioner_create(taucs_ccs_matrix *A,
+\layout LyX-Code
+
+                                     int* *perm, 
+\layout LyX-Code
+
+                                     int* *invperm,
+\layout LyX-Code
+
+                                     char* ordering,
+\layout LyX-Code
+
+                                     char *gremban_command);
+\layout Standard
+
+The first argument is the coefficient matrix of the linear system.
+ The second and third arguments allow the routine to return a new ordering
+ for the rows and columns of 
+\begin_inset Formula $A$
+\end_inset 
+
+.
+ You should permute 
+\begin_inset Formula $A$
+\end_inset 
+
+ symmetrically using this ordering before calling the iterative solver.
+ The third argument is ignored when this routine constructs Gremban Precondition
+ers; so you can pass 
+\family typewriter 
+"identity"
+\family default 
+.
+ The last argument is a string that specifies the specific support-tree
+ preconditioner that you want to construct.
+ To construct a Gremban-Miller support tree, specify 
+\family typewriter 
+"regular:GM:2"
+\family default 
+.
+ The integer at the end of the string specifies the degree of the tree's
+ internal vertices, and we have found that high degrees lead to more efficient
+ construction and to a more effective preconditioner (higher degrees increase
+ the number of iterations, but reduce the cost of each iterations).
+ It seems that values between 8 and 32 work well.
+ The routine returns an opaque object that you can use to apply the precondition
+er (or 
+\family typewriter 
+NULL
+\family default 
+ if the construction fails):
+\layout LyX-Code
+
+int taucs_sg_preconditioner_solve(void* P, 
+\layout LyX-Code
+
+                                  double* z, 
+\layout LyX-Code
+
+                                  double* r);
+\layout Standard
+
+The first argument of the solve routine should be the pointer that the construct
+ion routine returns.
+ This routine solves the linear system 
+\begin_inset Formula $Pz=r$
+\end_inset 
+
+.
+\layout Standard
+
+To free the memory associated with a support-tree preconditioner, call
+\layout LyX-Code
+
+void taucs_sg_preconditioner_free(void* P);
+\layout Standard
+
+The ordering that the construction routine returns consists of two integer
+ vectors that you can deallocate with 
+\family typewriter 
+free()
+\family default 
+.
+\layout Section
+
+Matrix Generators
+\layout Standard
+
+
+\noun on 
+Taucs
+\noun default 
+ includes several matrix generators that we use to test linear solvers.
+ The first creates a symmetric matrix that is a finite-differences discretizatio
+n of 
+\begin_inset Formula $c_{x}\frac{\partial^{2}u}{\partial x^{2}}+c_{y}\frac{\partial^{2}u}{\partial y^{2}}$
+\end_inset 
+
+ in the unit square.
+ The argument 
+\family typewriter 
+n
+\family default 
+ specifies the size of the mesh (the size of the matrix is 
+\begin_inset Formula $n^{2}$
+\end_inset 
+
+ and the string argument 
+\family typewriter 
+which
+\family default 
+ specifies 
+\begin_inset Formula $c_{x}$
+\end_inset 
+
+, 
+\begin_inset Formula $c_{y}$
+\end_inset 
+
+, and the boundary conditions.
+ The possible values of 
+\family typewriter 
+which
+\family default 
+ are 
+\layout Description
+
+dirichlet 
+\begin_inset Formula $u=0$
+\end_inset 
+
+ on the boundary, 
+\begin_inset Formula $c_{x}=c_{y}$
+\end_inset 
+
+.
+\layout Description
+
+neumann 
+\begin_inset Formula $\frac{\partial u}{\partial n}=0$
+\end_inset 
+
+ (the derivative in the direction normal to the boundary is 
+\begin_inset Formula $0$
+\end_inset 
+
+), 
+\begin_inset Formula $c_{x}=c_{y}$
+\end_inset 
+
+.
+ The diagonal is modified at one corner to make the matrix definite.
+\layout Description
+
+anisotropic_x 
+\begin_inset Formula $\frac{\partial u}{\partial n}=0$
+\end_inset 
+
+, 
+\begin_inset Formula $c_{x}=100c_{y}$
+\end_inset 
+
+, diagonal modification at a corner.
+\layout Description
+
+anisotropic_y 
+\begin_inset Formula $\frac{\partial u}{\partial n}=0$
+\end_inset 
+
+, 
+\begin_inset Formula $100c_{x}=c_{y}$
+\end_inset 
+
+, diagonal modification at a corner.
+\layout LyX-Code
+
+taucs_ccs_matrix* taucs_ccs_generate_mesh2d(int n,char *which);
+\layout Standard
+
+The second generator creates a finite-differences discretization of 
+\begin_inset Formula $\frac{\partial^{2}u}{\partial x^{2}}+\frac{\partial^{2}u}{\partial y^{2}}+\frac{\partial^{2}u}{\partial z^{2}}$
+\end_inset 
+
+ using an 
+\family typewriter 
+X
+\family default 
+-by-
+\family typewriter 
+Y
+\family default 
+-by-
+\family typewriter 
+Z
+\family default 
+ mesh, with Neumann boundary conditions.
+\layout LyX-Code
+
+taucs_ccs_matrix* taucs_ccs_generate_mesh3d(int X, int Y, int Z);
+\layout Standard
+
+The last generator creates a random 
+\family typewriter 
+m
+\family default 
+-by-
+\family typewriter 
+n
+\family default 
+ dense matrix.
+ If 
+\family typewriter 
+flags
+\family default 
+ is 
+\family typewriter 
+TAU_SYMMETRIC
+\family default 
+, the routine returns a symmetric matrix.
+ 
+\layout Standard
+
+The library includes several additional generators that are not documented
+ in this version.
+\layout Section*
+
+Changelog
+\layout Description
+
+September\SpecialChar ~
+2003 Version 2.2.
+ Added in this version:
+\begin_deeper 
+\layout Itemize
+
+Multithreading using Cilk
+\layout Itemize
+
+Better testing scripts and better testing programs
+\end_deeper 
+\layout Description
+
+August\SpecialChar ~
+2003 Version 2.1.
+ Added in this version:
+\begin_deeper 
+\layout Itemize
+
+A unified interface to all the linear solvers
+\layout Itemize
+
+New configuration and build process
+\layout Itemize
+
+Out-of-the-box support for Windows and MacOS\SpecialChar ~
+X
+\end_deeper 
+\layout Description
+
+5\SpecialChar ~
+May\SpecialChar ~
+2002 Version 2.0.
+ Added in this version:
+\begin_deeper 
+\layout Itemize
+
+Complex routines, mutiple precisions, and generic routines
+\layout Itemize
+
+Extensive automated testing for memory leaks and failure-handling
+\end_deeper 
+\layout Description
+
+21\SpecialChar ~
+January\SpecialChar ~
+2002 Added the 
+\begin_inset Formula $LDL^{T}$
+\end_inset 
+
+ factorization.
+ It was mentioned in the documentation all along, but the code was missing
+ from the distribution.
+ I also added detailed information about the 
+\begin_inset Formula $LDL^{T}$
+\end_inset 
+
+ routines.
+\layout Description
+
+12\SpecialChar ~
+December\SpecialChar ~
+2001 Version 1.0.
+ Added in this version:
+\begin_deeper 
+\layout Itemize
+
+Out-of-core sparse Cholesky and associated I/O routines.
+\layout Itemize
+
+Relaxed and amalgamated supernodes.
+\layout Itemize
+
+Cholesky factorization of the inverse.
+\layout Itemize
+
+Gremban-Miller and other support-tree preconditioners (only the Gremban-Miller
+ ones are fully documented, however).
+\layout Itemize
+
+Faster construction of Vaidya's perconditioners when the input matrix has
+ no positive elements outside the main diagonal.
+ In such cases, 
+\noun on 
+taucs
+\noun default 
+ now uses a specialized routine that constructs a preconditioner based on
+ maximum spanning trees rather than more general maximum weight bases.
+ The savings depends on the matrix, but in our experiments with 2D problems
+ the new routine is about 3 times faster than the old one.
+\layout Itemize
+
+More matrix generators.
+\end_deeper 
+\layout Description
+
+26\SpecialChar ~
+July\SpecialChar ~
+2001 Added symbolic/numeric routines to allow efficient factorization
+ of multiple systems with the same nonzero structure.
+ Also some performance improvements to the construction of Vaidya preconditioner
+s.
+\layout Description
+
+28\SpecialChar ~
+June\SpecialChar ~
+2001 Added a routine to convert a supernodal factor to a compressed-column
+ factor.
+ Cleaned up memory management in construction of AMWB preconditioners; if
+ they fail all the memory is deallocated before the routine returns.
+\layout Description
+
+27\SpecialChar ~
+June\SpecialChar ~
+2001 Included missing Fortran sources in the tarball; Fixed a missing
+ reference in the documentation; added routines to permute vectors.
+\layout Description
+
+24\SpecialChar ~
+June\SpecialChar ~
+2001 Version 0.9.
+ Initial release.
+\layout Standard
+
+
+\begin_inset LatexCommand \BibTeX[plain]{/home/stoledo/Bib/Sivan,/home/stoledo/Bib/Refs}
+
+\end_inset 
+
+
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+\the_end

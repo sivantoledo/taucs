@@ -7,6 +7,80 @@
 #pragma lang -C
 #endif
 
+/*** multilu ***/
+
+taucs_multilu_symbolic *taucs_ccs_factor_lu_symbolic(taucs_ccs_matrix *A, 
+						     int *column_order);
+void taucs_multilu_symbolic_free(taucs_multilu_symbolic *symbolic);
+
+taucs_cilk taucs_multilu_factor* taucs_ccs_factor_lu_numeric(taucs_ccs_matrix *A, 
+							     taucs_multilu_symbolic *symbolic, 
+							     taucs_double thresh);
+
+taucs_cilk taucs_multilu_factor* taucs_dtl(ccs_factor_lu_numeric)(taucs_ccs_matrix *A, 
+								  taucs_multilu_symbolic *symbolic, 
+								  taucs_double thresh);
+
+taucs_cilk taucs_multilu_factor* taucs_ccs_factor_lu_numeric_maxdepth(taucs_ccs_matrix *A, 
+								      taucs_multilu_symbolic *symbolic, 
+								      taucs_double thresh, int max_depth);
+
+taucs_cilk taucs_multilu_factor* taucs_dtl(ccs_factor_lu_numeric_maxdepth)(taucs_ccs_matrix *A, 
+									   taucs_multilu_symbolic *symbolic, 
+									   taucs_double thresh, int max_depth);
+
+taucs_cilk taucs_multilu_factor* taucs_ccs_factor_lu(taucs_ccs_matrix* A, 
+						     int *column_order, 
+						     taucs_double thresh);
+
+taucs_cilk taucs_multilu_factor* taucs_dtl(ccs_factor_lu)(taucs_ccs_matrix* A, 
+							  int *column_order, 
+							  taucs_double thresh);
+
+taucs_cilk taucs_multilu_factor* taucs_ccs_factor_lu_maxdepth(taucs_ccs_matrix* A, 
+							      int *column_order, 
+							      taucs_double thresh, int max_depth);
+
+taucs_cilk taucs_multilu_factor* taucs_dtl(ccs_factor_lu_maxdepth)(taucs_ccs_matrix* A, 
+								   int *column_order, 
+								   taucs_double thresh, int max_depth);
+
+taucs_cilk int taucs_multilu_solve_many(taucs_multilu_factor *F,
+					int n, 
+					void* X, int ld_X,
+					void* B, int ld_B);
+
+taucs_cilk int taucs_dtl(multilu_solve_many)(taucs_multilu_factor *F,
+					     int n, 
+					     taucs_datatype* X, int ld_X,
+					     taucs_datatype* B, int ld_B);
+
+taucs_cilk int taucs_multilu_solve(taucs_multilu_factor *F, void* x, void* b);
+
+taucs_cilk int taucs_dtl(multilu_solve)(taucs_multilu_factor *F, taucs_datatype* x, taucs_datatype* b);
+
+void taucs_multilu_factor_free(taucs_multilu_factor* F);
+
+taucs_lu_factor *taucs_multilu_factor_to_lu_factor(taucs_multilu_factor *F);
+
+taucs_lu_factor *taucs_dtl(multilu_factor_to_lu_factor)(taucs_multilu_factor *F);
+
+void taucs_lu_factor_free(taucs_lu_factor* F);
+
+taucs_cilk int taucs_lu_solve_many(taucs_lu_factor *F,
+				   int n, 
+				   void* X, int ld_X,
+				   void* B, int ld_B);
+
+taucs_cilk int taucs_dtl(lu_solve_many)(taucs_lu_factor *F,
+					int n, 
+					taucs_datatype* X, int ld_X,
+					taucs_datatype* B, int ld_B);
+
+taucs_cilk int taucs_lu_solve(taucs_lu_factor *F, void* x, void* b);
+
+taucs_cilk int taucs_dtl(lu_solve)(taucs_lu_factor *F, taucs_datatype* x, taucs_datatype* b);
+
 /*** taucs_ccs_factor.c ***/
 int taucs_getopt_boolean(char* cmd, void* args[], char* name, int*    x);
 int taucs_getopt_double (char* cmd, void* args[], char* name, double* x);
@@ -68,6 +142,12 @@ void              taucs_dtl(ccs_times_vec)       (taucs_ccs_matrix* m,
 void                        taucs_ccs_times_vec  (taucs_ccs_matrix* m, 
 						  void* X,
 						  void* B);
+void              taucs_dtl(ccs_times_vec_many)       (taucs_ccs_matrix* m, 
+						  taucs_datatype* X,
+						  taucs_datatype* B, int nrhs);
+void                        taucs_ccs_times_vec_many  (taucs_ccs_matrix* m, 
+						  void* X,
+						  void* B, int nrhs);
 
 /* matrix-vector with double-precision accumulator for iterative refinement */
 void              taucs_sccs_times_vec_dacc      (taucs_ccs_matrix* m, 
@@ -77,14 +157,20 @@ void              taucs_sccs_times_vec_dacc      (taucs_ccs_matrix* m,
 taucs_ccs_matrix* taucs_dtl(ccs_augment_nonpositive_offdiagonals)(taucs_ccs_matrix* A);
 taucs_ccs_matrix*     taucs_ccs_augment_nonpositive_offdiagonals (taucs_ccs_matrix* A);
 
+taucs_ccs_matrix* taucs_dtl(ccs_transpose)(taucs_ccs_matrix* A);
+taucs_ccs_matrix* taucs_ccs_transpose     (taucs_ccs_matrix* A);
+void              taucs_ccs_permute_rows_inplace(taucs_ccs_matrix *A, int *row_order);
+
+
 /*** taucs_ccs_io.c ***/
 
 int               taucs_dtl(ccs_write_ijv)       (taucs_ccs_matrix* matrix, 
 						  char* filename);
 int                    taucs_ccs_write_ijv       (taucs_ccs_matrix* matrix, 
 						  char* filename);
-taucs_ccs_matrix* taucs_dtl(ccs_read_ijv)        (char* filename,int flags);
+taucs_ccs_matrix* taucs_dtl(ccs_read_ijv)        (char* filename,int flags,int base);
 taucs_ccs_matrix*     taucs_ccs_read_ijv         (char* filename,int flags);
+taucs_ccs_matrix*     taucs_ccs_read_ijv_zero_based(char* filename,int flags);
 taucs_ccs_matrix* taucs_dtl(ccs_read_mtx)        (char* filename,int flags);
 taucs_ccs_matrix*     taucs_ccs_read_mtx         (char* filename,int flags);
 taucs_ccs_matrix* taucs_dtl(ccs_read_ccs)        (char* filename,int flags);
@@ -145,6 +231,7 @@ int               taucs_ccs_solve_xxt            (void* X, double* x, double* b)
 taucs_ccs_matrix* taucs_ccs_generate_mesh2d      (int n,char *which);
 taucs_ccs_matrix* taucs_ccs_generate_mesh2d_negative(int n);
 taucs_ccs_matrix* taucs_ccs_generate_mesh3d      (int X, int Y, int Z);
+taucs_ccs_matrix* taucs_ccs_generate_mesh3d_random(int X, int Y, int Z, int brand);
 taucs_ccs_matrix* taucs_ccs_generate_dense       (int m,int n, int flags);
 taucs_ccs_matrix* taucs_ccs_generate_rrn         (int X, int Y, int Z, 
 						  double drop_probability, 
@@ -229,6 +316,60 @@ void taucs_dtl(supernodal_factor_free_numeric)        (void* L);
 taucs_ccs_matrix* taucs_dtl(supernodal_factor_to_ccs) (void* L);
 taucs_datatype* taucs_dtl(supernodal_factor_get_diag) (void* L);
 
+/* taucs_sn_ldlt.c */
+taucs_ccs_matrix* taucs_dtl(supernodal_factor_ldlt_to_ccs)(void* vL);
+taucs_ccs_matrix* taucs_dtl(supernodal_factor_diagonal_to_ccs)(void* vL);
+taucs_ccs_matrix* taucs_supernodal_factor_diagonal_to_ccs (void* L);
+taucs_ccs_matrix* taucs_supernodal_factor_ldlt_to_ccs (void* L);
+void* taucs_dtl(ccs_factor_ldlt_symbolic)         (taucs_ccs_matrix* A);
+void* taucs_dtl(ccs_factor_ldlt_symbolic_maxdepth)(taucs_ccs_matrix* A,int max_depth);
+int taucs_ccs_ldlt_symbolic_elimination(taucs_ccs_matrix* A,void* vL,int do_order,int max_depth);
+
+void* taucs_dtl(ccs_factor_ldlt_mf)               (taucs_ccs_matrix* A);
+void* taucs_dtl(ccs_factor_ldlt_mf_maxdepth)      (taucs_ccs_matrix* A,int max_depth);
+void* taucs_dtl(ccs_factor_ldlt_symbolic_maxdepth)(taucs_ccs_matrix* A, int max_depth);
+void* taucs_ccs_factor_ldlt_mf                    (taucs_ccs_matrix* A);
+void* taucs_ccs_factor_ldlt_mf_maxdepth           (taucs_ccs_matrix* A,int max_depth);
+void* taucs_ccs_factor_ldlt_symbolic_maxdepth			(taucs_ccs_matrix* A,int max_depth);
+void* taucs_dtl(ccs_factor_ldlt_ll)               (taucs_ccs_matrix* A);
+void* taucs_dtl(ccs_factor_ldlt_ll_maxdepth)      (taucs_ccs_matrix* A,int max_depth);
+void* taucs_ccs_factor_ldlt_ll_maxdepth           (taucs_ccs_matrix* A,int max_depth);
+
+
+int   taucs_dtl(ccs_factor_ldlt_numeric)          (taucs_ccs_matrix* A,void* L);
+int   taucs_ccs_factor_ldlt_numeric               (taucs_ccs_matrix* A,void* L);
+void taucs_supernodal_factor_ldlt_free            (void* L);
+void taucs_dtl(supernodal_factor_ldlt_free)(void* vL);
+void taucs_supernodal_factor_ldlt_free_numeric    (void* L);
+void taucs_dtl(supernodal_factor_ldlt_free_numeric)(void* vL);
+
+int   taucs_dtl(supernodal_solve_ldlt)            (void* vL, void* x, void* b);
+int   taucs_supernodal_solve_ldlt                 (void* vL, void* x, void* b);
+void	taucs_dtl(get_statistics)										(int* pbytes,double* pflops,
+																									 double* pnnz,void* vL);
+void	taucs_get_statistics(int* pbytes,double* pflops,double* pnnz,void* vL);
+void	taucs_dtl(inertia_calc)(void* vL, int* inertia);
+void	taucs_inertia_calc(void* vL, int* inertia);
+int taucs_supernodal_solve_ldlt_many(void *L,int n,void* X, int ld_X,void* B, int ld_B);
+int taucs_dtl(supernodal_solve_ldlt_many) (void* L ,int n,void* X, int ld_X, void* B, int ld_B);
+
+int taucs_dtl(internal_supernodal_front_factor_ldlt)(void* fct,taucs_datatype* F1,
+																								taucs_datatype* F2,taucs_datatype* DB,
+																								int* db_size,int sn_size,
+																								int up_size,int sn,int alg);
+
+/* taucs_ccs_ooc_ldlt */
+int taucs_dtl(ooc_factor_ldlt)(taucs_ccs_matrix* A,taucs_io_handle*  L,double memory);
+int taucs_ooc_factor_ldlt(taucs_ccs_matrix* A,taucs_io_handle*  L,double memory);
+int taucs_dtl(ooc_solve_ldlt) (void* L ,void* x, void* b);
+int taucs_ooc_solve_ldlt (void* L ,void* x, void* b);
+void taucs_dtl(get_statistics_ooc)(double* pflops,double* pnnz,void* vL);
+void taucs_get_statistics_ooc(int flags, double* pflops,double* pnnz,void* vL);
+void	taucs_dtl(inertia_calc_ooc)(taucs_io_handle* h,int* inertia);
+void	taucs_inertia_calc_ooc(int flags,taucs_io_handle* h,int* inertia);
+int taucs_ooc_solve_ldlt_many(void *L,int n,void* X, int ld_X,void* B, int ld_B);
+int taucs_dtl(ooc_solve_ldlt_many) (void* L ,int n,void* X, int ld_X, void* B, int ld_B);
+
 int taucs_ccs_etree                              (taucs_ccs_matrix* A,
 						  int* parent,
 						  int* l_colcount,
@@ -267,6 +408,14 @@ void  taucs_vec_axpby        (int n,int flags,
 			      taucs_double a,void* x,
 			      taucs_double b,void* y,
 			      void* axpby);
+void  taucs_dtl(vec_axpby_many)   (int n,
+			      taucs_real_datatype a,taucs_datatype* x,
+			      taucs_real_datatype b,taucs_datatype* y,
+			      taucs_datatype* axpby, int nrhs);
+void  taucs_vec_axpby_many    (int n,int flags,
+			      taucs_double a,void* x,
+			      taucs_double b,void* y,
+			      void* axpby, int nrhs);
 void taucs_dtl(vec_permute)  (int n, taucs_datatype v[],  taucs_datatype pv[], int p[]);
 void taucs_dtl(vec_ipermute) (int n, taucs_datatype pv[], taucs_datatype v[],  int invp[]);
 void taucs_vec_permute(int n, int flags, void* v, void* pv, int p[]);
@@ -316,6 +465,12 @@ int              taucs_io_read(taucs_io_handle* f,
 			       int   flags,
 			       void* data
 			       );
+int              taucs_io_read_try(taucs_io_handle* f,
+			       int   index,
+			       int   m,int n,
+			       int   flags,
+			       void* data
+			       );
 
 char*            taucs_io_get_basename(taucs_io_handle* f);
 
@@ -345,7 +500,7 @@ int taucs_ooc_solve_llt (void* L /* actual type: taucs_io_handle* */,
 /* Out-of-core Sparse LU                                 */
 /*********************************************************/
 
-void taucs_dtl(ooc_factor_lu)(taucs_ccs_matrix* A_in,
+int taucs_dtl(ooc_factor_lu)(taucs_ccs_matrix* A_in,
 		              int    colperm[],
                               taucs_io_handle* LU,
   	                      double memory);
@@ -359,7 +514,7 @@ int taucs_dtl(ooc_solve_lu)(taucs_io_handle*   LU,
 			    taucs_datatype* x, 
                             taucs_datatype* b);
 
-int taucs_ooc_solve_lu     (taucs_io_handle*   LU,
+int taucs_ooc_solve_lu     (void* LU /* taucs_io_handle*   LU */,
 			    void* x, 
                             void* b);
 
@@ -374,6 +529,7 @@ double taucs_system_memory_size(void);
 double taucs_available_memory_size(void);
 double taucs_wtime(void);
 double taucs_ctime(void);
+
 
 /*********************************************************/
 /*                                                       */

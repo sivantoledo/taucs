@@ -2548,7 +2548,7 @@ int taucs_dtl(ooc_factor_llt)(taucs_ccs_matrix* A,
     return -1;
     }*/
  
-  taucs_printf("\t\tOOC Supernodal Left-Looking: panel-is-paged\n",n_pn);
+  /*taucs_printf("\t\tOOC Supernodal Left-Looking: panel-is-paged\n",n_pn);
 
   if(recursive_smart_panelize_ooc_supernodes(L->n_sn,
 					     TRUE,
@@ -2556,7 +2556,15 @@ int taucs_dtl(ooc_factor_llt)(taucs_ccs_matrix* A,
 					     &n_pn,
 					     sn_in_core,
 					     sn_to_panel_map,
-					     L)<0.0){
+					     L)<0.0){*/
+	 if(recursive_panelize_ooc_supernodes(L->n_sn,
+					 TRUE,
+					 (memory - memory_overhead)/3.0,
+					 (memory - memory_overhead)/3.0,
+					 &n_pn,
+					 sn_in_core,
+					 sn_to_panel_map,
+					 L)<0.0){
     ooc_supernodal_factor_free(L);
     taucs_free(sn_in_core);
     taucs_free(sn_to_panel_map);  

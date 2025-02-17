@@ -15,9 +15,6 @@
 
 #include "taucs.h"
 
-#include <assert.h>
-#include <math.h>
-
 #ifdef OSTYPE_win32
 #include <io.h>
 #else
@@ -25,6 +22,8 @@
 #include <sys/uio.h>
 #endif
 
+#include <assert.h>
+#include <math.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -271,19 +270,18 @@ int taucs_io_append(taucs_io_handle* f,
 		    void* data
 		    )
 {
-  int this_size = 0; /* warning */
-  int next_size;
+  int this_size = 0,next_size = 0;
   int first_size = 0;
   int added_files = 0;
   int written_bytes = 0;
-  off_t this_offset;
-  double this_multi_offset,new_last_offset;
-  ssize_t nbytes;
-  int i;
+  off_t this_offset = 0;
+  double this_multi_offset = 0.0,new_last_offset = 0.0;
+  ssize_t nbytes = 0;
+  int i = 0;
   mode_t mode;
   mode_t perm;
   char filename[256];
-  int file_id;
+  int file_id = 0;
   double wtime;
  
   wtime = taucs_wtime();
@@ -294,14 +292,13 @@ int taucs_io_append(taucs_io_handle* f,
    
     if (index >= f->nmatrices){    
       ((taucs_io_handle_singlefile*)f->type_specific)->matrices = 
-	(taucs_io_matrix_singlefile*) taucs_realloc(h->matrices,
-					      (index + 1) * 
-					      sizeof(taucs_io_matrix_singlefile));
+					(taucs_io_matrix_singlefile*) taucs_realloc(h->matrices,
+						(index + 1) * sizeof(taucs_io_matrix_singlefile));
       for(i=f->nmatrices;i<index;i++){
-	h->matrices[i].m = -1;
-	h->matrices[i].n = -1;
-	h->matrices[i].flags = -1;
-	h->matrices[i].offset = -1;
+				h->matrices[i].m = -1;
+				h->matrices[i].n = -1;
+				h->matrices[i].flags = -1;
+				h->matrices[i].offset = -1;
       }
       f->nmatrices = index+1;
     }
@@ -348,22 +345,20 @@ int taucs_io_append(taucs_io_handle* f,
    
     if (index >= f->nmatrices){    
       ((taucs_io_handle_multifile*)f->type_specific)->matrices = 
-	(taucs_io_matrix_multifile*) taucs_realloc(h->matrices,
-					      (index + 1) * 
-					      sizeof(taucs_io_matrix_multifile));
+				(taucs_io_matrix_multifile*) taucs_realloc(h->matrices,
+				  (index + 1) * sizeof(taucs_io_matrix_multifile));
       for(i=f->nmatrices;i<index;i++){
-	h->matrices[i].m = -1;
-	h->matrices[i].n = -1;
-	h->matrices[i].flags = -1;
-	h->matrices[i].offset = -1.0;
+				h->matrices[i].m = -1;
+				h->matrices[i].n = -1;
+				h->matrices[i].flags = -1;
+				h->matrices[i].offset = -1.0;
       }
       f->nmatrices = index+1;
     }
-    else
-      if(h->matrices[index].m!=-1||h->matrices[index].n!=-1){
-	taucs_printf("taucs_append: try append more than once for index=%d \n",index);
-	return -1;
-      }
+    else if(h->matrices[index].m!=-1||h->matrices[index].n!=-1){
+			taucs_printf("taucs_append: try append more than once for index=%d \n",index);
+			return -1;
+    }
     
     if (!((taucs_io_handle_multifile*)f->type_specific)->matrices) {
       taucs_printf("taucs_append: out of memory \n");
@@ -383,71 +378,71 @@ int taucs_io_append(taucs_io_handle* f,
     if(new_last_offset < ((h->last_created_file+1)*IO_FILE_RESTRICTION*1024.0*1024.0)){    
       this_multi_offset = h->last_offset - ((h->last_created_file)*IO_FILE_RESTRICTION*1024.0*1024.0);   
       if (lseek(h->f[h->last_created_file],(off_t)this_multi_offset, SEEK_SET) == -1) {
-	taucs_printf("taucs_append: lseek failed\n");
-	return -1;
+				taucs_printf("taucs_append: lseek failed\n");
+				return -1;
       }
 					    
       nbytes = write(h->f[h->last_created_file], data, this_size);
       /*if (nbytes != this_size) { omer*/
 			if ((int)nbytes != this_size) { 
-	taucs_printf("taucs_append: Error writing data (%s:%d).\n",__FILE__,__LINE__);
-	taucs_printf("taucs_append: index %d n %d m %d\n",index,n,m);
-	taucs_printf("taucs_append: trying to write %d bytes from %08x, wrote %d\n",
-		     this_size,data,nbytes);
-	if (nbytes==-1) perror("taucs_append");
-	return -1;
+				taucs_printf("taucs_append: Error writing data (%s:%d).\n",__FILE__,__LINE__);
+				taucs_printf("taucs_append: index %d n %d m %d\n",index,n,m);
+				taucs_printf("taucs_append: trying to write %d bytes from %08x, wrote %d\n",
+					 this_size,data,nbytes);
+				if (nbytes==-1) perror("taucs_append");
+				return -1;
       }
     }
     else{
       if(h->last_offset < ((h->last_created_file+1)*IO_FILE_RESTRICTION*1024.0*1024.0)){
-	this_multi_offset = h->last_offset - 
-	  ((h->last_created_file)*IO_FILE_RESTRICTION*1024.0*1024.0);
-	if (lseek(h->f[h->last_created_file],(off_t)this_multi_offset, SEEK_SET) == -1) {
-	  taucs_printf("taucs_append: lseek failed\n");
-	  return -1;
-	}
-	first_size = (int)((IO_FILE_RESTRICTION*1024.0*1024.0) - this_multi_offset);
-	nbytes = write(h->f[h->last_created_file], data, first_size);
-	/*if (nbytes != first_size) { omer*/
-	if ((int)nbytes != first_size) { 
-	  taucs_printf("taucs_append: Error writing data (%s:%d).\n",__FILE__,__LINE__);
-	  return -1;
-	}
+				this_multi_offset = h->last_offset - 
+					((h->last_created_file)*IO_FILE_RESTRICTION*1024.0*1024.0);
+				if (lseek(h->f[h->last_created_file],(off_t)this_multi_offset, SEEK_SET) == -1) {
+					taucs_printf("taucs_append: lseek failed\n");
+					return -1;
+				}
+				first_size = (int)((IO_FILE_RESTRICTION*1024.0*1024.0) - this_multi_offset);
+				nbytes = write(h->f[h->last_created_file], data, first_size);
+				/*if (nbytes != first_size) { omer*/
+				if ((int)nbytes != first_size) { 
+					taucs_printf("taucs_append: Error writing data (%s:%d).\n",__FILE__,__LINE__);
+					return -1;
+				}
       }
 
       this_multi_offset = 0.0;
       next_size = this_size - first_size;
       written_bytes = first_size;
       while(next_size>0){
-	if(next_size>IO_FILE_RESTRICTION*1024*1024)
-	  next_size = IO_FILE_RESTRICTION*1024*1024;
-	sprintf(filename,"%s.%d",h->basename,(h->last_created_file+1));
+				if(next_size>IO_FILE_RESTRICTION*1024*1024)
+					next_size = IO_FILE_RESTRICTION*1024*1024;
+				sprintf(filename,"%s.%d",h->basename,(h->last_created_file+1));
 
 #ifdef OSTYPE_win32
-	mode = _O_RDWR | _O_CREAT | _O_BINARY;
-	perm = _S_IREAD | _S_IWRITE | _S_IEXEC;
+				mode = _O_RDWR | _O_CREAT | _O_BINARY;
+				perm = _S_IREAD | _S_IWRITE | _S_IEXEC;
 #else
-	mode = O_RDWR | O_CREAT;
-	perm = 0644;
+				mode = O_RDWR | O_CREAT;
+				perm = 0644;
 #endif
 
-	file_id = open(filename,mode,perm);
+				file_id = open(filename,mode,perm);
       
-	if (file_id == -1) {
-	  taucs_printf("taucs_append: Could not create metadata file %s\n",filename);
-	  return -1;
-	}
-	added_files++;
-	h->last_created_file++;
-	h->f[h->last_created_file] = file_id;
-	nbytes = write(h->f[h->last_created_file],((char*)data)+written_bytes,next_size);
-	/*if (nbytes != next_size) { omer*/
-	if ((int)nbytes != next_size) { 
-	  taucs_printf("taucs_append: Error writing data (%s:%d).\n",__FILE__,__LINE__);
-	  return -1;
-	}
-	written_bytes += next_size;
-	next_size = this_size - written_bytes;
+				if (file_id == -1) {
+					taucs_printf("taucs_append: Could not create metadata file %s\n",filename);
+					return -1;
+				}
+				added_files++;
+				h->last_created_file++;
+				h->f[h->last_created_file] = file_id;
+				nbytes = write(h->f[h->last_created_file],((char*)data)+written_bytes,next_size);
+				/*if (nbytes != next_size) { omer*/
+				if ((int)nbytes != next_size) { 
+					taucs_printf("taucs_append: Error writing data (%s:%d).\n",__FILE__,__LINE__);
+					return -1;
+				}
+				written_bytes += next_size;
+				next_size = this_size - written_bytes;
       }
     }
     h->last_offset = new_last_offset; 
@@ -552,21 +547,22 @@ if (f->type == IO_TYPE_MULTIFILE) {
   return 0;
 }
 
-int   taucs_io_read(taucs_io_handle* f,
+int   taucs_io_read_message(taucs_io_handle* f,
 		    int    index,
 		    int    m,int n,
 		    int    flags,
-		    void* data
+		    void* data,
+				int show_message
 		    )
 {
-  int this_size = 0; /* warning */
-  off_t this_offset;
-  ssize_t nbytes;
-  double curr_file_offset;
-  int first_size;
-  int next_size,start_file_index;
-  int read_bytes;
-  double wtime;
+  int this_size = 0;
+  off_t this_offset = 0;
+  ssize_t nbytes = 0;
+  double curr_file_offset = 0.0;
+  int first_size = 0;
+  int next_size = 0,start_file_index = 0;
+  int read_bytes = 0;
+  double wtime = 0.0;
 
   wtime = taucs_wtime();
 
@@ -581,7 +577,7 @@ int   taucs_io_read(taucs_io_handle* f,
     this_offset = matrices[index].offset;
         
     if (lseek(h->f, this_offset, SEEK_SET) == -1) {
-      taucs_printf("taucs_read: lseek failed\n");
+      if (show_message) taucs_printf("taucs_read: lseek failed\n");
       return -1;
     }
     nbytes = read(h->f, data, this_size);
@@ -607,7 +603,7 @@ int   taucs_io_read(taucs_io_handle* f,
     assert(curr_file_offset < IO_FILE_RESTRICTION*1024.0*1024.0);
 
     if (lseek(h->f[start_file_index],(off_t) curr_file_offset, SEEK_SET) == -1) {
-      taucs_printf("taucs_read: lseek failed\n");
+      if (show_message) taucs_printf("taucs_read: lseek failed\n");
       return -1;
     }
     first_size = (int)(IO_FILE_RESTRICTION*1024.0*1024.0 - curr_file_offset);
@@ -652,6 +648,26 @@ int   taucs_io_read(taucs_io_handle* f,
   /*time_read += wtime;*/
   
   return 0;
+}
+
+int   taucs_io_read(taucs_io_handle* f,
+		    int    index,
+		    int    m,int n,
+		    int    flags,
+		    void* data
+		    )
+{
+	return taucs_io_read_message(f,index,m,n,flags,data,1);
+}
+
+int   taucs_io_read_try(taucs_io_handle* f,
+		    int    index,
+		    int    m,int n,
+		    int    flags,
+		    void* data
+		    )
+{
+	return taucs_io_read_message(f,index,m,n,flags,data,0);
 }
 
 int   taucs_io_close(taucs_io_handle* f)
@@ -1097,8 +1113,11 @@ taucs_io_handle* taucs_io_open_multifile(char* basename)
     return NULL;
   }
 
-  hs->matrices = 
+  if (h->nmatrices) 
+    hs->matrices = 
       (taucs_io_matrix_multifile*) taucs_malloc((h->nmatrices)* sizeof(taucs_io_matrix_multifile));
+  else 
+    hs->matrices = NULL;
 
   /* open all files before including start */
   start_file_index = (int)floor(((hs->last_offset)/(IO_FILE_RESTRICTION*1024*1024)));
