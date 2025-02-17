@@ -9,6 +9,9 @@ makefile
 
 testscript.log
 
+.lastconf
+.project
+
 # Prerequisites
 *.d
 
