@@ -39,6 +39,44 @@ The current version of the library (1.0) includes the following functionality:
 
 ### Copyright and License
 
+Copyright 2001-2025 Sivan Toledo.
+ 
+ TAUCS is free software; you can redistribute it and/or modify it under the terms of either:
+
+- the GNU Lesser General Public License as published by the Free
+        Software Foundation; either version 3 of the License, or (at your
+        option) any later version.
+
+or
+
+- the GNU General Public License as published by the Free Software
+        Foundation; either version 3 of the License, or (at your option) any
+        later version.
+
+or both in parallel, as here, or
+    
+- the Apache License as published by the Apache Software
+        Foundation; either version 2.0 of the License, or (at your option) any
+        later version.
+    
+     
+IN ALL CASES, WITH THE ADDITIONAL REQUIREMENT 
+    that if you use this software or derivatives of it, directly or indirectly, to produce
+    research that is described in a research paper, you need to cite the most
+    up-to-date version of the article that describes the algorithm that you use in your paper.
+    
+TAUCS is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+    or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+You should have received copies of the GNU General Public License and the
+    GNU Lesser General Public License along with this software.  If not, see [https://www.gnu.org/licenses/](https://www.gnu.org/licenses/).
+
+You should have received copies of the Apache License. If not, see [https://www.apache.org/licenses/](https://www.apache.org/licenses/).
+
+**Versions 2.2 and earlier were distributed under a different license:**
+
 TAUCS Version 2.0, November 29, 2001. Copyright (c) 2001, 2002, 2003 by Sivan Toledo, Tel-Aviv Univesity, stoledo@tau.ac.il. All Rights Reserved.
 
 TAUCS License:
