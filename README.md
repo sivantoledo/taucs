@@ -1,6 +1,8 @@
 # TAUCS: a Library of Sparse Linear Solvers
 ### Sivan Toledo, with Doron Chen and Vladimir Rotkin
 
+**February 17, 2025****: Version 2.2.1** Brought version 2.2 to a state where it compiles and runs successfully under Windows and Linux (in Widnows without METIS).
+
 **September 4, 2003****: Version 2.2!** Multithreading using [Cilk](http://supertech.lcs.mit.edu/cilk/).
 
 **August 21, 2003****: Version 2.1!** Still somewhat preliminary. Main changes are a much better build and configuration system, with (supposedly) perfect out-of-the-box support for Windows and MacOS X, as well as for Linux and Several Unix variants, a unified linear solver interface, preliminary Cilk-parallel support, and some performance improvements.
