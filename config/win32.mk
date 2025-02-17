@@ -11,7 +11,8 @@ DEFFLG=/D
 
 CC        = cl
 CFLAGS    = /nologo /O2 /W3 /D "WIN32" /MT
-CFLAGS    = /nologo /Op /GZ /Ow /Z7 /Od /Oy- /W4 /D "WIN32" /MT
+# CFLAGS    = /nologo /Op /GZ /Ow /Z7 /Od /Oy- /W4 /D "WIN32" /MT
+CFLAGS    = /nologo /fp:precise /RTC1 /Z7 /Od /Oy- /W4 /D "WIN32" /MT
 COUTFLG   =/Fo
 
 FC        = $(CC)
@@ -38,7 +39,8 @@ LIBBLAS   = external\\lib\\win32\\libf77blas.lib external\\lib\\win32\\libcblas.
 LIBLAPACK = external\\lib\\win32\\liblapack.lib
 
 LIBMETIS  = external\\lib\\win32\\libmetis.lib
-LIBF77    = external\\lib\\win32\\vcf2c.lib /link /debug /debugtype:cv /pdb:none
+# LIBF77    = external\\lib\\win32\\vcf2c.lib /link /debug /debugtype:cv /pdb:none
+LIBF77    = external\\lib\\win32\\libf2c.lib
 LIBC      =
 
 

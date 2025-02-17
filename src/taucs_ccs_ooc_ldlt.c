@@ -3863,12 +3863,12 @@ int taucs_ooc_solve_ldlt_many(void *L,int n,void* X, int ld_X,void* B, int ld_B)
     return taucs_sooc_solve_ldlt_many(L,n,X,ld_X,B,ld_B);
 #endif
 
-#if TAUCS_DCOMPLEX_IN_BUILD
+#ifdef TAUCS_DCOMPLEX_IN_BUILD
   if (flags & TAUCS_DCOMPLEX)
     return taucs_zooc_solve_ldlt_many(L,n,X,ld_X,B,ld_B);
 #endif
 
-#if TAUCS_SCOMPLEX_IN_BUILD
+#ifdef TAUCS_SCOMPLEX_IN_BUILD
   if (flags & TAUCS_SCOMPLEX)
     return taucs_cooc_solve_ldlt_many(L,n,X,ld_X,B,ld_B);
 #endif

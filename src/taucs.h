@@ -901,8 +901,11 @@ extern int zreadhb_(char*, int*, int*, int*, int*, int*, taucs_dcomplex*);
 #elif defined(OSTYPE_win32)
 
 #include <float.h>
+/* Sivan Feb 2025, these macros are no longer needed, defined automatically */
+/*
 #define isnan(x)  (_isnan(x))
 #define isinf(x)  (!(_finite(x)) && !(_isnan(x)))
+*/
 #define finite(x) (_finite(x))
 
 #endif
