@@ -830,10 +830,25 @@ taucs_ccs_treeorder(taucs_ccs_matrix* m,
 /* Interface to METIS                                    */
 /*********************************************************/
 
+#ifdef TAUCS_CONFIG_METIS
+#ifdef OSTYPE_linux
+#include <metis.h>
+#ifdef METIS_VER_MAJOR  // METIS 5.x
+    #if METIS_VER_MAJOR >= 5
+        #define USING_METIS_5
+        /* METIS_NodeND(idx_t *nvtxs, idx_t *xadj, idx_t *adjncy, idx_t *vwgt, idx_t *options, idx_t *perm, idx_t *iperm); */
+    #endif
+#else
+    #define USING_METIS_LEGACY
+#endif
+#else
+#define USING_METIS_LEGACY
 /* from stuct.h in metis */
 typedef int idxtype; 
 /* from metis.h */
 void METIS_NodeND(int *, idxtype *, idxtype *, int *, int *, idxtype *, idxtype *);
+#endif
+#endif
 
 static void 
 taucs_ccs_metis(taucs_ccs_matrix* m, 
@@ -846,13 +861,27 @@ taucs_ccs_metis(taucs_ccs_matrix* m,
   *invperm = NULL;
   return;
 #else
+
   int  n,nnz,i,j,ip;
+
+#ifdef USING_METIS_5
+  idx_t  nvtxs;
+  idx_t  options[METIS_NOPTIONS];
+  idx_t* xadj;
+  idx_t* adj;
+  // XXX TODO: idx_t might be different from int, need to copy permutation back to TAUCS int* arrays
+  //idx_t* metis_perm;
+  //idx_t* metis_iperm;
+  int* len;
+  int* ptr;
+#else
   int* xadj;
   int* adj;
   int  num_flag     = 0;
   int  options_flag = 0;
   int* len;
   int* ptr;
+#endif
 
   /* taucs_printf("taucs_ccs_metis: starting (%s)\n",which); */
 
@@ -873,6 +902,16 @@ taucs_ccs_metis(taucs_ccs_matrix* m,
   n   = m->n;
   nnz = (m->colptr)[n];
   
+#ifdef USING_METIS_5
+  *perm    = (int*) taucs_malloc(n * sizeof(idx_t));
+  *invperm = (int*) taucs_malloc(n * sizeof(idx_t));
+
+  xadj = (int*) taucs_malloc((n+1) * sizeof(idx_t));
+  /* Change suggested by Yifan Hu for diagonal matrices */
+  /* and for matrices with no diagonal */
+  /* adj  = (int*) taucs_malloc(2*(nnz-n) * sizeof(int));*/
+  adj  = (int*) taucs_malloc(2* nnz * sizeof(idx_t));
+#else
   *perm    = (int*) taucs_malloc(n * sizeof(int));
   *invperm = (int*) taucs_malloc(n * sizeof(int));
 
@@ -881,7 +920,7 @@ taucs_ccs_metis(taucs_ccs_matrix* m,
   /* and for matrices with no diagonal */
   /* adj  = (int*) taucs_malloc(2*(nnz-n) * sizeof(int));*/
   adj  = (int*) taucs_malloc(2* nnz * sizeof(int));
-
+#endif
   if (!(*perm) || !(*invperm) || !xadj || !adj) {
     taucs_free(*perm);
     taucs_free(*invperm);
@@ -929,11 +968,20 @@ taucs_ccs_metis(taucs_ccs_matrix* m,
   /* taucs_printf("taucs_ccs_metis: calling metis matrix is %dx%d, nnz=%d\n", */
 	     /* n,n,nnz); */
 
+#ifdef USING_METIS_5
+  METIS_SetDefaultOptions(options);
+  nvtxs = n;
+  METIS_NodeND(&nvtxs,
+	       xadj,adj,
+	       NULL,
+	       options,
+	       *perm,*invperm);
+#else
   METIS_NodeND(&n,
 	       xadj,adj,
 	       &num_flag, &options_flag,
 	       *perm,*invperm);
-
+#endif
   /* taucs_printf("taucs_ccs_metis: metis returned\n"); */
 
   /*
