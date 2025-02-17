@@ -182,17 +182,17 @@ struct module {
     "libtaucs", { 0 }
   },
 
+  /*
   { "AMD" , include, 0, { "ORDERING", 0 },
     { 0 },
     "libtaucs", { 0 }
   },
+  */
 
-  /*
   { "AMD" , include, 0, { "ORDERING", 0 },
     { "amdatr","amdbar","amdexa","amdhaf","amdhat","amdpre","amdtru", 0 },
     "libtaucs", { 0 }
   },
-  */
 
   { "COLAMD" , include, 0,  { "ORDERING", 0 },
     { "colamd", 0 },
