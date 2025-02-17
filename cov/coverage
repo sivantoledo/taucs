@@ -1,0 +1,20 @@
+#!/bin/tcsh
+if ( $#argv == 0 ) then
+    echo Need to specify what test to use and with which parameters
+else
+    cov01 -1
+    set name = $1
+    set dir = cov/$name
+    mkdir $dir
+    echo Executing bin/linux/$argv
+    bin/linux/$argv
+    mkdir $dir/src
+    echo creating coverage info for each file.
+    foreach i (src/taucs_*.c)
+	echo $i
+	covbr -q $i > $dir/$i.cov
+    end
+    echo creating coverage info for overall directory and functions.
+    covsrc -q src/ > $dir/src.cov
+    covfn -b -s -w120 -q src/ > $dir/fn.cov
+endif

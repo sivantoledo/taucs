@@ -1,0 +1,22 @@
+direct -mesh2d 100
+direct -ldlt -mesh2d 100
+direct -snll -mesh2d 100
+direct -snmf -mesh2d 100
+direct -symb -mesh2d 100
+direct -ooc -mesh2d 100
+direct -mesh3d 20 20 20
+direct -ldlt -mesh3d 20 20 20
+direct -snll -mesh3d 20 20 20
+direct -snmf -mesh3d 20 20 20
+direct -ooc -mesh3d 20 20 20
+iter -mesh2d 100
+iter -ldlt -mesh2d 100
+iter -snll -mesh2d 100
+iter -snmf -mesh2d 100
+iter -symb -mesh2d 100
+iter -ooc -mesh2d 100
+iter -mesh3d 20 20 20
+iter -ldlt -mesh3d 20 20 20
+iter -snll -mesh3d 20 20 20
+iter -snmf -mesh3d 20 20 20
+iter -ooc -mesh3d 20 20 20
