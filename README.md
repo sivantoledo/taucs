@@ -89,6 +89,8 @@ Permission is hereby granted to use or copy this program, provided that the Copy
 
 ### Availability
 
+**The code is now hosted on GitHub. The old availability section is preserved below but is now obsolete.**
+
 As of version 2.1, we distribute the code in 4 formats: zip and tarred-gzipped (tgz), with or without binaries for external libraries. The bundled external libraries should allow you to build the test programs on Linux, Windows, and MacOS X without installing additional software. We recommend that you download the full distributions, and then perhaps replace the bundled libraries by higher performance ones (e.g., with a BLAS library that is specifically optimized for your machine). If you want to conserve bandwidth and you want to install the required libraries yourself, download the lean distributions. The zip and tgz files are identical, except that on Linux, Unix, and MacOS, unpacking the tgz file ensures that the configure script is marked as executable (unpack with tar zxvpf), otherwise you will have to change its permissions manually.
 
 Click to accept the above license and download:
@@ -105,4 +107,4 @@ Click to accept the above license and download:
 
 ·       [Version 1.0](1.0/taucs.tar.gz) (obsolete)
 
-Last updated on September 4, 2003
+Last updated February 2025.
