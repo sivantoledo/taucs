@@ -12,6 +12,7 @@ DEFFLG=-D
 #FFLAGS    = -O3 -g -fno-second-underscore -Wall
 FC        = f77
 FFLAGS    = -O3 -g -fno-second-underscore -Wall -std=legacy -ffixed-form
+FFLAGS    = -O3 -g -Wall -std=legacy -ffixed-form
 FOUTFLG   =-o 
 
 COUTFLG   = -o
@@ -21,7 +22,7 @@ CFLAGS    = -O3 -g -D_POSIX_C_SOURCE=199506L -Wall -pedantic -ansi -fPIC -fexcep
 # (seems to be a gcc bug, gcc 3.3.1)
 CFLAGS    = -g -Wall -Werror -std=c99 
 CFLAGS    = -O3 -Wall -Werror -std=c99 
-CFLAGS    = -O3 -Wall -std=c99 
+CFLAGS    = -O3 -Wall -std=c99 -g
 # CFLAGS    = -g -Wall -Werror -std=c89 -pedantic 
 # CFLAGS    = -g -O3 -Wall -Werror -pedantic -ansi 
 

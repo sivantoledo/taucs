@@ -28,6 +28,9 @@ TAUCS_CONFIG_END
 #include <stdlib.h>
 #include "taucs.h"
 
+/* Sivan Feb 2025, not sure what gl_parameters is, but required in taucs_sn_ltlt.c */
+char* gl_parameters="";
+
 int rnorm(taucs_ccs_matrix* A, void* x, void* b, void* aux)
 {
   double relerr;
@@ -63,22 +66,32 @@ int test_spd_orderings(taucs_ccs_matrix* A,
   
   printf("TEST %d\n",test++);
 #ifdef TAUCS_CONFIG_METIS
+  fprintf(stderr,"111\n");
   rc = taucs_linsolve(A,NULL,1, y,b,metis,opt_arg);
+  fprintf(stderr,"222\n");
   if (rc != TAUCS_SUCCESS) return rc;
+  fprintf(stderr,"333\n");
   if (rnorm(A,y,b,z)) return TAUCS_ERROR;
 #else
   printf("WARNING: testing a build without the METIS ordering library\n");
 #endif
+  fprintf(stderr,"333.555\n");
 
   printf("TEST %d\n",test++);
+  fprintf(stderr,"444\n");
   rc = taucs_linsolve(A,NULL,1, y,b,genmmd,opt_arg);
+  fprintf(stderr,"444\n");
   if (rc != TAUCS_SUCCESS) return rc;
   if (rnorm(A,y,b,z)) return TAUCS_ERROR;
 
   printf("TEST %d\n",test++);
+#ifdef TAUCS_CONFIG_AMD
   rc = taucs_linsolve(A,NULL,1, y,b,amd,opt_arg);
   if (rc != TAUCS_SUCCESS) return rc;
   if (rnorm(A,y,b,z)) return TAUCS_ERROR;
+#else
+  printf("WARNING: testing a build without the AMD ordering library\n");
+#endif
 
   /* colamd should fail on symmetric matrices */
   printf("TEST %d\n",test++);
@@ -129,9 +142,11 @@ int test_spd_factorsolve(taucs_ccs_matrix* A,
 			 double* x, double* y, double* b, double* z)
 {
   int rc;
-  void* F = NULL;
-  char* factor[] = {"taucs.factor.LLT=true", NULL};
-  char* solve [] = {"taucs.factor=false", NULL};
+  void* F = NULL; 
+  char* factor[] = {"taucs.factor.LLT=true", "taucs.factor.ordering=metis",NULL};
+  char* solve [] = {"taucs.factor=false", "taucs.factor.ordering=metis", NULL};
+//char* factor[] = {"taucs.factor.LLT=true", NULL};
+  //char* solve [] = {"taucs.factor=false", NULL};
   void* opt_arg[] = { NULL };
   int   test = 100;
   
@@ -139,7 +154,9 @@ int test_spd_factorsolve(taucs_ccs_matrix* A,
 
   /* solve without a factorization should fail */
   printf("TEST %d\n",test++);
+  fprintf(stderr,"AAA\n");
   rc = taucs_linsolve(A,NULL,1, y,b,solve,opt_arg);
+  fprintf(stderr,"BBB rc=%d\n",rc);
   if (rc == TAUCS_SUCCESS) return TAUCS_ERROR;
 
   /* solve without a factorization should fail */

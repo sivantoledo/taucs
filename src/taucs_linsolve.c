@@ -626,6 +626,23 @@ int taucs_linsolve(taucs_ccs_matrix* A,
   }
   #endif
 
+  if (nrhs>0 && !f) { /* Sivan Feb 2025 bug fix */
+      if (!F || !(*F)) {
+	taucs_printf("taucs_linsolve: can't solve, no factorization\n");
+	retcode = TAUCS_ERROR;
+	goto release_and_return;
+      } else {
+	if (F && *F)
+	  f = (taucs_factorization*) *F;
+	else {
+	  taucs_printf("taucs_linsolve: can't solve, no factorization\n");
+	  retcode = TAUCS_ERROR;
+	  goto release_and_return;
+	} 
+      }
+    }
+
+
   /* Non LU solve */
   if (nrhs > 0 && (f->type != TAUCS_FACTORTYPE_LU) ) {
     

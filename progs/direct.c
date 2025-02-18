@@ -16,6 +16,9 @@
 
 #include <taucs.h>
 
+/* Sivan Feb 2025, not sure what gl_parameters is, but required in taucs_sn_ltlt.c */
+char* gl_parameters="";
+
 /* extern functions omer*/
 extern int zscal_(int*, taucs_dcomplex*, 
 	    double*, int*);
