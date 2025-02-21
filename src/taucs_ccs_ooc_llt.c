@@ -281,7 +281,7 @@ recursive_symbolic_elimination(int            j,
 			       int            do_order,
 			       int            ipostorder[],
 			       double         given_mem,
-			       void           (*sn_struct_handler)(),
+			       void           (*sn_struct_handler)(void* argument, int sn, int sn_up_size, int* sn_struct_ptr[]),
 			       void*          sn_struct_handler_arg
 			       )
 {
@@ -455,7 +455,7 @@ taucs_ccs_ooc_symbolic_elimination(taucs_ccs_matrix* A,
 				   int do_order,
 				   int do_column_to_sn_map,
 				   double given_mem,
-				   void           (*sn_struct_handler)(),
+				   void           (*sn_struct_handler)(void* argument, int sn, int sn_up_size, int* sn_struct_ptr[]),
 				   void*          sn_struct_handler_arg
 				   )
 {

@@ -27,8 +27,6 @@ TAUCS_CONFIG_END
 #define my_dnrm2 dnrm2
 #endif
 
-double my_dnrm2();
-
 int main()
 {
   int xyz = 30;
@@ -56,6 +54,7 @@ int main()
 
   Xd =(double*)malloc((A->n)*sizeof(double));
   for(i=0; i<A->n; i++) (Xd)[i]=(float)((double)random()/RAND_MAX);
+  Bd =(double*)malloc((A->n)*sizeof(double));
   taucs_ccs_times_vec(A,Xd,Bd);
 
   taucs_ccs_order(A,&perm,&invperm,"metis");
@@ -76,8 +75,11 @@ int main()
     return 1;
   }
 
+  PBd =(double*)malloc((A->n)*sizeof(double));
   taucs_vec_permute(A->n,A->flags,Bd,PBd,perm);
+  NXd =(double*)malloc((A->n)*sizeof(double));
   taucs_supernodal_solve_llt(L,PBd,NXd); /* direct solver */
+  PXd =(double*)malloc((A->n)*sizeof(double));
   taucs_vec_ipermute(A->n,A->flags,PXd,NXd,perm);
 
   {

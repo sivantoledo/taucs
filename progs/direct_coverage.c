@@ -729,7 +729,6 @@ int direct_main(int argc, char* argv[])
   /***********************************************************/
 
   if (A->flags & TAUCS_SINGLE) {
-    float snrm2_();
     int one = 1;
 
     NormErr = 0.0;
@@ -742,7 +741,6 @@ int direct_main(int argc, char* argv[])
   } 
 
   if (A->flags & TAUCS_DOUBLE) {
-    double dnrm2_();
     int one = 1;
 
     NormErr = 0.0;
@@ -755,7 +753,6 @@ int direct_main(int argc, char* argv[])
   }
 
   if (A->flags & TAUCS_DCOMPLEX) {
-    double dznrm2_();
     int one = 1;
     double* pX  = (double*) Xz;
     double* pNX = (double*) NXz;

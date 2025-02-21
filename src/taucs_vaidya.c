@@ -3046,7 +3046,7 @@ static int Av_Part_W(graph *mtxA,int *partition,int *new_partition,int *parts,gr
   int row, col;
   int *pi1 = 0; /* warning */
   double x, y, min, max, not;
-  byte bool=1;
+  byte Bool=1;
   edge *p,*dummy, *pe ,*max_pe;
   int count = 0;
  
@@ -3116,18 +3116,18 @@ static int Av_Part_W(graph *mtxA,int *partition,int *new_partition,int *parts,gr
 	  
 	  for(minrho=1;minrho<maxdist;minrho++)
 	    {
-	      bool = 1;
+	      Bool = 1;
 	      for(k=0;k<min(j,classes);k++)
 		{
 		  if ((double)(findrho[(minrho+1)*classes+k]-findrho[minrho*classes+k]) > (findrho[minrho*classes+k])/x)
-		    bool = 0;
+		    Bool = 0;
 		}
-	      if (bool)
+	      if (Bool)
 		goto afterr;
 	    }
 	
 	afterr:
-	  if (bool)
+	  if (Bool)
 	    {
 	      for(i=0;i<n;i++)
 		if ((d[i] <= minrho) && (d[i] != -1) )

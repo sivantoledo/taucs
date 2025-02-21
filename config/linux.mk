@@ -27,7 +27,7 @@ LD        = $(CC)
 LDFLAGS   = 
 LOUTFLG   = $(COUTFLG)
 
-AR        = ar cr
+ARFLAGS   = cr
 AOUTFLG   =
 
 RANLIB    = ranlib

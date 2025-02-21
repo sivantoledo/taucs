@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+extern int mkdir();
+
 #include "taucs_structure.h"
 
 #define INPUT_LEN 1024
@@ -558,7 +560,7 @@ void emit_makefile(char* configuration_name)
 
       fprintf(f, "%s: $(%s_content) $(STDDEPS)\n",get_full_name(i,0),base);
       fprintf(f,"\t- $(RM) %s\n",get_full_name(i,0));
-      fprintf(f,"\t$(AR) $(AOUTFLG)%s $(%s_content)\n",get_full_name(i,0),base);
+      fprintf(f,"\t$(AR) $(ARFLAGS) $(AOUTFLG)%s $(%s_content)\n",get_full_name(i,0),base);
       fprintf(f,"\t$(RANLIB) %s\n",get_full_name(i,0));
     }
 
