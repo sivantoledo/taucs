@@ -27,8 +27,6 @@ TAUCS_CONFIG_END
 #define my_dnrm2 dnrm2
 #endif
 
-double my_dnrm2();
-
 int main()
 {
   int xyz = 30;
