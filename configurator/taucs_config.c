@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+extern int mkdir();
+
 #include "taucs_structure.h"
 
 #define INPUT_LEN 1024
