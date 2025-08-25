@@ -1,0 +1,3393 @@
+
+% STUDENT PUBLICATIONS
+
+@mastersthesis{Chen01,
+  author="Doron Chen",
+  title="Analysis, Implementation, 
+         and Evaluation of {Vaidya}'s Preconditioners",
+  school="School of Computer Science, Tel-Aviv University",
+  year=2001
+}
+
+@mastersthesis{Irony00,
+  author="Dror Irony",
+  title="A {3D} Parallel Communication-Efficient Dense Linear Solver",
+  school="School of Computer Science, Tel-Aviv University",
+  year=2000
+}
+
+% END STUDENT PUBLICATIONS
+
+% LOCALITY
+
+@techreport{DongarraHaWa96,
+  author="J.~J. Dongarra and S. Hammarling and D.~W. Walker ",
+  title="Key Concepts For Parallel Out-Of-Core {LU} Factorization",
+  institution="University of Tennessee",
+  number="CS-96-324", 
+  note="LAPACK Working Note 110",
+  month=apr,
+  year=1996
+}
+
+@inproceedings{WombleGrWhRi93,
+  author="David Womble and David Greenberg and Stephen Wheat and Rolf Riesen",
+  title="Beyond core: Making parallel computer {I/O} practical",
+  booktitle="Proceedings of the 1993 DAGS/PC Symposium",
+  publisher="Dartmouth Institute for Advanced Graduate Studies",
+  address="Hanover, NH",
+  pages="56--63",
+  note="Also available online from 
+  {\tt http://www.cs.sandia.gov/$\tilde{\mbox{\ }}$dewombl}",
+  month=jun,
+  year=1993
+}
+@InProceedings{KlimkowskiVD95,
+  author = {Kenneth Klimkowski and Robert {van de Geijn}},
+  title = {Anatomy of an Out-of-core Dense Linear Solver},
+  booktitle = {Proceedings of the 1995 International Conference on Parallel
+  Processing},
+  year = {1995},
+  pages = {III:29--33},
+  URL = {http://www.cs.utexas.edu/users/rvdg/papers/pipsolver.ps}
+}
+@Article{Farhat95,
+  author="Charbel Farhat",
+  title="Large out-of-core calculation runs on the {IBM} {SP2}",
+  journal="NAS News",
+  volume=2,
+  number=11,
+  month=aug,
+  year=1995
+}
+
+@inproceedings{BrunetPeJo94,
+  author="Jean-Philippe Brunet and Palle Pedersen and S.~Lennart Johnsson",
+  title="Load-balanced {LU} and {QR} factor and solve routines for
+         scalable processors with scalable {I/O}",
+  booktitle="Proceedings of the 17th IMACS World Congress",
+  address="Atlanta, Georgia",
+  month=jul,
+  year=1994,
+  note="Also available as Harvard University Computer Science Technical
+        Report TR-20-94"
+}
+
+@InProceedings{scott:matrix,
+  author = {David S. Scott},
+  title = {Parallel {I/O} and Solving Out of Core Systems of Linear Equations},
+  booktitle = {Proceedings of the 1993 DAGS/PC Symposium},
+  year = {1993},
+  month = {June},
+  pages = {123--130},
+  organization = {Dartmouth Institute for Advanced Graduate Studies},
+  address = {Hanover, NH},
+  keyword = {parallel I/O, scientific computing, matrix factorization, Intel,
+  pario bib},
+  abstract = {Large systems of linear equations arise in a number of scientific
+  and engineering applications. In this paper we describe the implementation of
+  a family of disk based linear equation solvers and the required
+  characteristics of the I/O system needed to support them.},
+  comment = {Invited speaker. See also scott:solvers. This gives a very brief
+  overview of Intel's block solver and slab solver, both out-of-core
+  linear-systems solvers. He notes a few optimizations that had to be made to
+  CFS to make it work: data and metadata needed to have equal priority in the
+  cache, because often the (higher-priority) metadata was crowding out the
+  data; and they had to restrict some files to small subsets of disks to reduce
+  the contention for the cache at each I/O node caused by large groups of
+  processors all requesting at the same time (see nitzberg:cfs for the same
+  problem).}
+}
+ 
+@InProceedings{scott:solvers,
+  author = {David S. Scott},
+  title = {Out of Core Dense Solvers on {Intel} Parallel Supercomputers},
+  booktitle = {Proceedings of the Fourth Symposium on the Frontiers of
+  Massively Parallel Computation},
+  year = {1992},
+  pages = {484--487},
+  keyword = {parallel I/O, scientific computing, Intel, pario bib},
+  comment = {He discusses ProSolver-DES, which factors large matrices by
+  swapping square submatrices in and out of memory, and Intel's new solver,
+  which swaps column blocks in and out. The new solver is a little slower, but
+  allows full pivoting, which is needed for stability in some matrices. A short
+  paper with little detail. Some performance numbers. See scott:matrix.}
+}
+
+
+% OLD HISTORY
+
+
+
+@inproceedings{LaddSh52,
+  author = "D.~W. Ladd and J.~W. Sheldon",
+  title = "The numerical solution of a partial differential equation
+           on the {IBM} type 701 electronic data processing machines",
+  booktitle = "Proceedings of the Association for Computing Machinery,
+               {ACM} National Meeting",
+  address = "Toronto",
+  month = sep,
+  year = 1952,
+
+  note = "Reprinted in {\em Annals of the History of Computing},
+          5(2):142--145, 1983"
+}
+
+@article{Mandel94,
+  author="Jan Mandel",
+  title="An iterative solver for $p$-version finite elements in three
+         dimensions",
+  journal="Computer Methods in Applied Mechanics and Engineering",
+  volume=116,
+  pages = "175--183",
+  year=1994
+}
+
+% MISC
+
+@inproceedings{WolfDuSo88,
+  author = "Walter~L. Wolf and Alan~E. Duncan and Arthur~R. Solomon",
+  title = "Normal modes analysis of structures using an
+           out-of-core component mode synthesis technique",
+  booktitle = "Proceedings of the 3rd International Conference: {CAD/CAM}
+               Robotics and Factories of the Future, Volume 1",
+  editor="Birendra Prasad",
+  volume=1,
+  pages="255--259",
+  year=1988
+}
+
+% SPARSE DIRECT SOLVERS
+
+@inproceedings{SchenkGa2001,
+  author="Olaf Schenk and Klaus G{\"{a}}rtner",
+  title="Sparse Factorization with Two-Level scheduling in {PARADISO}",
+  booktitle="Proceedings of the 10th SIAM Conference on Parallel Processing for
+             Scientific Computing",
+  month=mar, year=2001, address="Portsmouth, Virginia",
+  pages="10 pages on CDROM",
+}
+
+@article{Riesel56,
+  author="Hans Riesel",
+  title="A note on large linear systems",
+  journal="Mathematical Tables and other Aids to Computation",
+  volume=10, pages="226--227",
+  year=1956
+}
+
+@article{Cantin71,
+  author="Gilles Cantin",
+  title="An equation solver of very large capacity",
+  journal="International Journal for Numerical Methods in Engineering",
+  volume=3,
+  pages="379--388",
+  year=1971
+}
+
+@article{George73,
+  author="J.~A. George",
+  title="Nested dissection of regular finite element mesh",
+  journal="{SIAM} Journal on Numerical Analysis",
+  volume=10,
+  pages="345--363",
+  year=1973
+}
+
+@article{BermanSc90,
+  author = "Piotr Berman and Georg Schnitger",
+  title = "On the performance of the minimum degree ordering
+           for {Gaussian} elimination",
+  journal = "{SIAM} Journal on Matrix Analysis and Appliactions",
+  year = 1990,
+  volume = 11,
+  pages = "83--88"
+}
+
+@article{WilsonBaDo74,
+  author="Edward~L. Wilson and 
+          Klaus-J{\"{u}}rgen Bathe and William~P. Doherty",
+  title="Direct solution of large systems of linear equations",
+  Journal="Computers and Structures",
+  volume=4,
+  pages="363--372",
+  year=1974
+}
+
+@article{MondkarPo74,
+  author="Digambar~P. Mondkar and Graham~H. Powell",
+  title="Large capacity equation solver for structural analysis",
+  Journal="Computers and Structures",
+  volume=4,
+  pages="699--728",
+  year=1974
+}
+
+@article{NoorVo75,
+  author="Ahmed~K. Noor and Susan~J. Voigt",
+  title="Hypermatrix scheme for finite element systems on {CDC} {STAR-100}
+         computer",
+  Journal="Computers and Structures",
+  volume=5,
+  pages="287--296",
+  year=1975
+}
+
+@phdthesis{Wimberly78,
+  author="Francis~C. Wimberly",
+  title="Memory management for solution of linear systems arising in finite
+         element substructuring",
+  school="University of Pittsburgh",
+  note="Also published as Institute for Computational Mathematics and
+        Applications Technical Report ICMA-78-03",
+  mon=dec,
+  year=1978
+}
+
+@article{GeorgeRa85,
+  author="Alan George and Hamza Rashwan",
+  title="Auxiliary storage methods for solving finite element systems",
+  journal="{SIAM} Journal on Scientific and Statistical Computing",
+  volume=6, number=4,
+  pages="882--910",
+  year=1985
+}
+
+@article{GeorgeHePl81,
+  author="J.~A. George and M.~T. Heath and R.~J. Plemmons",
+  title="Solution of large-scale sparse least squares problems
+         using auxiliary storage", 
+  journal="{SIAM} Journal on Scientific and Statistical Computing",
+  volume=2, number=4,
+  pages="416--429",
+  year=1981
+}
+
+@incollection{EisenstatScSh78,
+  author = "S.~C. Eisenstat and M.~H. Schultz and A.~H. Sherman",
+  title = "Software for sparse {Gaussian} elimination with limited
+           core memory",
+  booktitle="Sparse Matrix Proceedings",
+  pages="135--153",
+  editor="Ian.~S. Duff and C.~W. Stewart",
+  publisher="{SIAM}",
+  address="Philadelphia",
+  year=1978
+}
+
+@article{Bjorstad87,
+  author="Petter~E. Bj{\o}rstad",
+  title="A large scale, sparse, secondary storage,
+         direct linear equation solver for structural analysis and its
+         implementation on vector and parallel architectures",
+  journal="Parallel Computing",
+  volume=5, number=1,
+  pages="3--12",
+  year=1987
+}
+
+@article{Liu86,
+  author="Joseph~W.~H. Liu",
+  title="On the storage requirement in the out-of-core multifrontal method
+         for sparse factorization",
+  journal="{ACM} Transactions on Mathematical Software",
+  volume=12, number=3,
+  pages="249--264",
+  year=1986
+}
+
+@article{Liu89,
+  author="Joseph~W.~H. Liu",
+  title="The multifrontal method and paging in
+         sparse {Cholesky} factorization",
+  journal="{ACM} Transactions on Mathematical Software",
+  volume=15, number=4,
+  pages="310--325",
+  year=1989
+}
+
+@article{Liu87,
+  author="Joseph~W.~H. Liu",
+  title="An adaptive general sparse out-of-core 
+         {Cholesky} factorization scheme",
+  journal="{SIAM} Journal on Scientific and Statistical Computing",
+  volume=8, number=4,
+  pages="585--599",
+  year=1987
+}
+
+
+@article{Liu92,
+  author="Joseph~W.~H. Liu",
+  title="The multifrontal method for
+         sparse matrix solution: Theory and practice",
+  journal="{SIAM} Review",
+  volume=34, number=1,
+  pages="82--109",
+  year=1992
+}
+
+% DENSE 
+
+@unpublished{RutledgeRu51,
+  author="Joseph Rutledge and Harvey Rubinstein",
+  title="Matrix algebra programs for the {UNIVAC}",
+  note="Presented at the Wayne Conference on Automatic Computing
+        Machinery and Applications; Copies available from Sivan Toledo",
+  month=mar,
+  year=1951
+}
+ 
+@unpublished{RutledgeRu52,
+  author="J. Rutledge and H. Rubinstein",
+  title="High order matrix computation on the {UNIVAC}",
+  note="Presented at the meeting of the Association for Computing
+        Machinery; Copies available from Sivan Toledo",
+  month=may,
+  year=1952
+}
+
+@article{DongarraGuKa84,
+  author="J.~J. Dongarra and F.~G. Gustavson and A.~Karp",
+  title="Implementing linear algebra algorithms for dense matrices
+         on a vector pipelined machine",
+  journal="SIAM Review",
+  volume=26,
+  pages="91--112",
+  year=1984
+}
+ 
+@article{DuCruzNuReTa81,
+  author="J.~J. {Du Cruz} and S.~M. Nugent and J.~K. Reid and D.~B. Taylor ",
+  title="Solving large full sets of linear equations in a paged virtual store",
+  journal="{ACM} Transactions on Mathematical Software",
+  volume=7, number=4,
+  pages="527--536",
+  year=1981
+}
+
+@article{Crotty82,
+  author="J.~M. Crotty",
+  title="A block equation solver for large unsymmetric matrices arising in the
+         boundary integral equation method",
+  journal="International Journal for Numerical Methods in Engineering",
+  volume=18,
+  pages="997--1017",
+  year=1982
+}
+
+@article{Stabrowski87,
+  author="M.~M. Stabrowski",
+  title="A block equation solver for large unsymmetric linear equation
+         systems with dense coefficient matrices",
+  journal="International Journal for Numerical Methods in Engineering",
+  volume=24,
+  pages="289--300",
+  year=1982
+}
+
+@article{Dubrulle72,
+  author="A.~A. Dubrulle",
+  title="Solution of the complete symmetric eigenproblem in a virtual
+         memory environment",
+  journal="IBM Journal of Research and Development",
+  month=nov,
+  year=1972,
+  pages="612--616"
+}
+
+@article{GrimesSi88,
+  author="Roger~G. Grimes and Horst~D. Simon",
+  title="Solution of large, dense symmetric generalized eigenvalue problems
+         using secondary storage",
+  journal="{ACM} Transactions on Mathematical Software",
+  volume=14, number=3,
+  pages="241--256",
+  year=1988
+}
+
+@article{GeersKl93,
+  author="Nikolaus Geers and Roland Klee",
+  title="Out-of-core solver for large dense nonsymmetric linear systems",
+  journal="Manuscripta Geodetica",
+  volume=18, number=6,
+  pages="331--342",
+  year=1993
+}
+
+@article{Grimes88,
+  author="Roger~G. Grimes",
+  title="Solving systems of large dense linear equations",
+  journal="The Journal of Supercomputing",
+  volume=1, number=3, pages="291--299",
+  year=1988
+}
+
+
+% TRASPOSE
+
+@Article{Eklundh72,
+  author = "J.~O. Eklundh",
+  title =  "A fast computer method for matrix transposing",
+  journal = "IEEE Transactions on Computers",
+  year =    1972,
+  volume =  "C-21",
+  number =  7,
+  pages =   "801--803"
+}
+
+@Article{Schumann73,
+  author =     "Ulrich Schumann",
+  title =      "Comments on ``{A} fast computer method for matrix
+		 transposing'' and application to the solution of
+		 {Poisson}'s equation",
+  journal = 	"IEEE Transactions on Computers",
+  year =       1973,
+  volume =     "C-22",
+  number = 	5,
+  pages =   "542--544"
+}
+
+@Article{Benari79,
+  author =     "Mordechai Ben Ari",
+  title =      "On transposing large $2^n \times 2^n$ matrices",
+  journal =	"IEEE Transactions on Computers",
+  year =       1979,
+  volume = 	"C-28",
+  note  = "Due to a typo, the pages in that issue are marked as Vol. C-27",
+  number = 	1,
+  pages =       "72--75",
+}
+
+@Article{Twogood76,
+  author =     "R.~E. Twogood and M.~P. Ekstrom",
+  title =      "An extension of {Eklundh}'s matrix transposition
+		 algorithm and its application in digital image
+		 processing",
+  journal =	"IEEE Transactions on Computers",
+  year =       1976,
+  volume = 	"C-25",
+  number =	9,
+  pages =    "950--952",
+}
+
+% HISTORY
+
+@incollection{Cuthill64,
+  author="Elizabeth Cuthill",
+  title="Digital computers in nuclear reactor design",
+  booktitle="Advances in Computers",
+  editor="Franz~L. Alt and Morris Rubinoff",
+  volume=5,
+  publisher="Academic Press",
+  pages="289--348",
+  year=1964
+}
+
+@article{MacKenzie91,
+       AUTHOR=  "MacKenzie, Donald",
+        TITLE=  "The influence of the {Los} {Alamos} and {Livermore} {National}
+                 {Laboratories} on the development of supercomputing",
+       journal=  "Annals of the History of Computing",
+     volume=13, number=2, pages="179--201",
+         YEAR=  1991
+}
+
+@article{Rosen69,
+  author="Saul Rosen",
+  title="Electronic computers: a historical survey",
+  journal="Computing Reviews",
+  volume=1, number=1, pages="7--36",
+  year=1969
+}
+
+% FFT
+
+@inproceedings{GentlemanSa66,
+  author="W.~M. Gentleman and G. Sande",
+  title="Fast {Fourier} transforms for fun and profit",
+  booktitle="Proceedings of the AFIPS",
+  volume=29,
+  pages="563--578",
+  year=1966
+}
+
+@article{Bailey90,
+  author="David~H. Bailey",
+  title="{FFT}s in external or hierarchical memory",
+  journal="The Journal of Supercomputing",
+  volume=4, number=1, pages="23--35",
+  year=1990
+}
+
+@book{VanLoan92,
+  author="Charles {Van Loan}",
+  title="Computational Frameworks for the Fast Fourier Transform",
+  publisher="{SIAM}",
+  address="Philadelphia",
+  year=1992
+}
+
+@article{Singleton67,
+  author="R.~C. Singleton",
+  title="A method for computing the fast {Fourier} transform with auxiliary
+         memory and limited high-speed storage",
+  journal="{IEEE} Transactions on Audio and Electroacoustics",
+  volume="AU-15", pages="91--98",
+  year=1967
+}
+
+@article{Brenner69,
+  author="N.~M. Brenner",
+  title="Fast {Fourier} transform of externally stored data",
+  journal="{IEEE} Transactions on Audio and Electroacoustics",
+  volume="AU-17", pages="128--132",
+  year=1969
+}
+
+@article{CormenNi97,
+  author="Thomas H. Cormen and David M. Nicol",
+  title="Out-of-core {FFT}s with parallel disks",
+  journal="ACM SIGMETRICS Performance Evaluation Review",
+  volume="25",
+  number=3, 
+  month=dec,
+  year=1997, 
+  pages="3--12"
+}
+
+@inproceedings{Cormen98,
+  author="Thomas H. Cormen",
+  title="Determining an out-of-core {FFT} decomposition strategy for
+         parallel disks by dynamic programming",
+  editor="Michael T. Heath and Abhiram Ranade and Robert S. Schreiber",
+  booktitle="Algorithms for Parallel Processing, 
+             volume 105 of IMA Volumes in Mathematics and its Applications", 
+  pages="307--320",
+  publisher="Springer-Verlag",
+  year=1998
+}
+
+@inproceedings{CormenWeNi97,
+  author="Thomas H. Cormen and Jake Wegmann and and David M. Nicol",
+  title="Multiprocessor out-of-core {FFT}s with distributed memory 
+         and parallel disks",
+  booktitle="Proceedings of IOPADS '97",
+  address="San Jose, California",
+  month=nov,
+  year=1997,
+  pages="68--78"
+}
+
+
+% APPLICATIONS
+
+@article{Rohklin85,
+  author="V. Rohklin",
+  title="Rapid solution fo intergal equation of classical potential theory",
+  journal="Journal of Computational Physics",
+  volume=60,
+  pages="187--207",
+  year=1985
+}
+
+@incollection{Brandt88,
+  author="Achi Brandt",
+  title="Multilevel computations: review and recent development",
+  pages="35--62",
+  booktitle="Multigrid Methods",
+  editor="S.~F. McCormick",
+  publisher="Marcel Dekker",
+  year=1988
+}
+
+% LINEAR PROGRAMMING
+
+@book{OrchardHays68,
+  author="William Orchard-Hays",
+  title="Advanced Linear Programming Computing Techniques",
+  publisher="McGraw Hill",
+  year=1968
+}
+
+@incollection{Hoffman91,
+  author="Alan~J. Hoffman",
+  title="Linear programming at the {National} {Bureau} of {Standards}",
+  pages="62--64",
+  booktitle="History of Mathematical Programming",
+  editor="J.~K. Lenstra and A.~H.~G {Rinnoy Kan} and A. Schrijver",
+  publisher="{CWI} North-Holland",
+  year=1991
+}
+
+@incollection{Dantzig91,
+  author="George~B. Dantzig",
+  title="Linear Programming",
+  pages="19--31",
+  booktitle="History of Mathematical Programming",
+  editor="J.~K. Lenstra and A.~H.~G {Rinnoy Kan} and A. Schrijver",
+  publisher="{CWI} North-Holland",
+  year=1991
+}
+
+% 
+
+@article{AggarwalVi88,
+  author="Alok Aggarwal and Jeffrey~S. Vitter",
+  title="The input/output complexity of sorting and related problems",
+  journal="Communications of the ACM",
+  volume=31,
+  number=9,
+  month=aug,
+  year=1988,
+  pages="1116--1127"
+}
+
+@article{VitterSh94I,
+  author="Jeffry Scott Vitter and Elizabeth~A.~M. Shriver",
+  title="Algorithms for parallel memory {I}: Two-level memories",
+  journal="Algorithmica",
+  volume=12,
+  number="2--3",
+  year=1994,
+  pages="110--147"
+}
+
+@article{VitterSh94II,
+  author="Jeffry Scott Vitter and Elizabeth~A.~M. Shriver",
+  title="Algorithms for parallel memory {II}: 
+	 Hierarchical multilevel memories",
+  journal="Algorithmica",
+  volume=12,
+  number="2--3",
+  year=1994,
+  pages="148--169"
+}
+
+@article{VitterSh94,
+  author="Jeffry Scott Vitter and Elizabeth~A.~M. Shriver",
+  title="Algorithms for parallel memory (in two parts) {I}: 
+         Two-level memories, and {II}:
+	 Hierarchical multilevel memories",
+  journal="Algorithmica",
+  volume=12,
+  number="2--3",
+  year=1994,
+  pages="110--169"
+}
+
+
+@string{cacm = "Communications of the {ACM}"}
+
+
+@inproceedings{HongKu81,
+author="J.-W. Hong and H.~T. Kung",
+title ="{I/O} complexity: the red-blue pebble game.",
+booktitle="Proceedings of the 13th Annual {ACM} Symposium on Theory of Computing",
+pages={326--333},
+year=1981}
+ 
+@article{Pfeifer63,
+author="C.~J.~Pfeifer",
+title="Data flow and storage allocation for the {PDQ-5} program on
+       the {Philco-2000}",
+journal=cacm,
+volume=6,
+number=7,
+pages="365--366",
+year=1963}
+
+@inproceedings{FischerFr93,
+  title="An inner product-free conjugate gradient-like algorithm
+         for hermitian positive definite systems",
+  author="Bernd Fischer and Roland W. Freund",
+  booktitle="Proceedings of the Cornelius Lanczos 1993 International
+             Centenary Conference",
+  publisher="{SIAM}",
+  pages="288--290",
+  month=dec,
+  year=1993
+}
+ 
+@article{FischerFr94,
+  title="On adaptive weighted polynomial preconditioning for hermitian
+         positive definite matrices",
+  author="Bernd Fischer and Roland W. Freund",
+  journal="{SIAM} Journal on Scientific Computing",
+  volume=15,
+  number=2,
+  year=1994,
+  pages="408--426"
+}
+
+
+@techreport{Dubrulle79,
+  author="A.~A. Dubrulle",
+  title="The design of matrix algorithms for {Fortran} and virtual storage",
+  institution="IBM Palo Alto Scientific Center",
+  number="G320-3396",
+  month=nov,
+  year=1979
+}
+
+@techreport{Wang74,
+  author="H.~H. Wang",
+  title="An {ADI} procedure suitable for virtual storage systems",
+  institution="IBM Palo Alto Scientific Center",
+  number="G320-3322",
+  month=jan,
+  year=1974
+}
+
+@inproceedings{SalmonWa97,
+  author = "John Salmon and Michael~S. Warren",
+  title = "Parallel out-of-core methods for {N}-body simulation",
+  booktitle = "Proceedings of the 8th SIAM Conference 
+               on Parallel Processing for Scientific Computing, CD-ROM", 
+  address="Minneapolis", 
+  month=mar, 
+  year=1997
+}
+
+@article{Gustavson97,
+  author="F.~G. Gustavson",
+  title="Recursion leads to automatic variable blocking for
+         dense linear-algebra algorithms",
+  journal="IBM Journal of Research and Development",
+  volume=41,
+  month=nov,
+  year=1997,
+  pages="737--755"
+}
+
+@article{GustavsonJonsson2000,
+  author="F.~G. Gustavson and I. Jonsson",
+  title="Minimal-storage high-performance {Cholesky}
+         factorization via blocking and recursion",
+  journal="IBM Journal of Research and Development",
+  volume=44,
+  month=nov,
+  year=2000,
+  pages="823--850"
+}
+
+@article{AndersenWaGu2001,
+  author="Bjarne S. Andersen and Jerzy Wa\'{s}niewski and Fred~G. Gustavson",
+  title="A Recursive Formulation of Cholesky Factorization of a Matrix in
+         Packed Storage",
+  journal="ACM Transactions on Mathematical Software",
+  volume=27,
+  month=jun,
+  pages="214--244",
+  year=2001
+}
+
+@phdthesis{Cormen92PhD,
+  title="Virtual Memory for Data-Parallel Computing",
+  author="Thomas~H. Cormen",
+  school="Massachusetts Institute of Technology",
+  year=1992
+}
+
+% KRYLOV
+
+@article{ChronopoulosGe89,
+  title="$s$-step iterative methods for symmetric linear systems",
+  author="A.~T. Chronopoulos and C.~W. Gear",
+  journal="Journal of Computational and Applied Mathematics",
+  volume=25,
+  year=1989,
+  pages="153--168"
+}
+
+@book{Templates,
+author="R.~Barret and  M.~Berry and T.~Chan and  J.~Demmel and  
+	J.~Donato and  J.~Dongarra and 
+        V.~Eijkhout and  R.~Pozo and  C.~Romine and  H.~van der Vorst",
+title="Templates for the Solution of Linear Systems: Building Blocks
+       for Iterative Methods",
+publisher="SIAM",
+address= "Philadeplphia, PA",
+year=1993}
+
+@article{FreundGoNa92,
+  title="Itertive Solution of Linear Systems",
+  author={Roland W. Freund and Gene H. Golub and No\"{e}l M. Nachtigal},
+  journal="Acta Numerica",
+  year=1992,
+  note="An annual published by Cambridge University Press",
+  pages="1--44"
+}
+
+@inproceedings{BarkaiMoRe85,
+  title="A modified conjugate gradient solver for very large systems",
+  author="D. Barkai and K. J. M. Mortiarty and C. Rebbi",
+  booktitle="Proceedings of the 1985 International Conference on Parallel
+             Processing",
+  pages="284--290",
+  month=aug,
+  year=1985
+}
+
+@article{Meurant84,
+  title="The block preconditioned conjugate gradient method on 
+         vector computers",
+  author="G. Meurant",
+  journal="{BIT}",
+  volume=24,
+  number=4,
+  pages="623--633",
+  year=1984
+}
+
+@article{Saad85,
+  title="Practical use of polynomial preconditioning for the conjugate
+          gradient method",
+  author="Y. Saad",
+  journal="{SIAM} Journal on Scientific and Statistical Computing",
+  volume=6,
+  number=4,
+  pages="865--881",
+  year=1985
+}
+
+@article{HestenesSt52,
+  title="Methods of conjugate gradients for solving linear systems",
+  author="M. Hestenes and E. Stiefel",
+  journal="National Bureau of Standards Jounal of Research",
+  volume=49,
+  pages="409--436",
+  year=1952
+}
+
+@inproceedings{FischerFr93,
+  title="An inner product-free conjugate gradient-like algorithm
+         for hermitian positive definite systems",
+  author="Bernd Fischer and Roland W. Freund",
+  booktitle="Proceedings of the Cornelius Lanczos 1993 International
+  	     Centenary Conference",
+  publisher="{SIAM}",
+  pages="288--290",
+  month=dec,
+  year=1993
+}
+
+@article{FischerFr94,
+  title="On adaptive weighted polynomial preconditioning for hermitian
+         positive definite matrices",
+  author="Bernd Fischer and Roland W. Freund",
+  journal="{SIAM} Journal on Scientific Computing",
+  volume=15,
+  number=2,
+  year=1994,
+  pages="408--426"
+}
+
+@manual{matlab,
+  title="{\sc Matlab} Reference Guide",
+  organization="{The} {MathWorks}, {Inc}",
+  address="Natick, {MA}",
+  month=aug,
+  year=1992
+}
+
+@inproceedings{Kung86,
+  title="Memory requirements for balanced computer architectures",
+  author="H.~T. Kung",
+  booktitle="Proceedings of the 13th International Symposium on
+             Computer Architecture",
+  pages="49--54",
+  month=jun,
+  year=1986
+}
+
+% LU
+
+@manual{essl,
+  title="Engineering and Scientific Subroutine Library, Version 2
+                  Release 2: Guide and Reference",
+  edition="2nd",
+  organization="IBM Corporation",
+  note="Publication number SC23-0526-01",
+  year=1994
+}
+
+@article{KamathHoMa94,
+  author="Chandrika Kamath and Roy Ho and Dwight~P. Manley",
+  title="{DXML}: a high-performance scientific subroutine library",
+  journal="Digital Technical Journal",
+  volume=6, number=3,
+  pages="44--56",
+  year=1994
+}
+
+@article{HenryFaCoMa98,
+ title="The Performance of the {Intel} {TFLOPS} Supercomputer",
+ author="Greg Henry and Pat Fay and Ben Cole and Timothy~G. Mattson",
+ journal="Intel Technical Journal",
+ volume=98,
+ number="1",
+ note="available online at {\tt http://developer.intel.com/technology/itj/}.",
+ year=1998
+}
+
+@manual{lapack,
+  title="{LAPACK} User's Guide",
+  author="E. Anderson and
+	Z. Bai and
+	C. Bischof and 
+	J. Demmel and
+	J. Dongarra and
+	J. Du Croz and
+	A. Greenbaum and
+	S. Hammarling and
+	A. McKenney and
+	S. Ostrouchov and
+	D. Sorensen",
+  edition="2nd",
+  organization="SIAM",
+  address="Philadelphia, PA",
+  note="Also available online from {\tt http://www.netlib.org}",
+  year=1994
+}
+
+% TOPIC STRASSEN
+
+@article{Strassen69,
+  author="V. Strassen",
+  title="Gaussian elimination is not optimal",
+  journal="Numererische Mathematik",
+  volume=13,
+  pages="354--355",
+  year=1969
+}
+
+@article{Winograd68,
+  author="S. Winograd",
+  title="A new algorithm for inner product",
+  journal="IEEE Transactions on Computers",
+  volume="C-18",
+  pages="693--694",
+  year=1968
+}
+
+@inproceedings{FischerPr76,
+  author="Patrick~C. Fischer and Robert~L. Probert",
+  title="A note on matrix multiplication in a paging environment",
+  booktitle="ACM '76: Proceedings of the Annual Conference",
+  pages="17--21",
+  year=1976
+}
+
+@article{BaileyLeSi90,
+  author="David~H. Bailey and King Lee and Horst~D. Simon",
+  title="Using {Strassen's} algorithm to accelerate the solution of
+         linear systems",
+  journal="J. of Supercomputing",
+  volume=4,
+  pages="357--371",
+  year=1990
+}
+
+@article{DouglasHeSlSm94,
+  author="Craig~C. Douglas and Michael Heroux and Gordon Slishman and
+          Roger~M. Smith",
+  title="{GEMMW}: A portable level 3 {BLAS} {Winograd} variant of 
+         {Strassen's} matrix-matrix multiply algorithm",
+  journal="J. of Computational Physics",
+  volume=110,
+  pages="1--10",
+  year=1994
+}
+
+@article{GraysonVa96,
+  author="Brian Grayson and van de Geijn, Robert",
+  title="A High Performance Parallel Strassen Implementation",
+  journal="Parallel Processing Letters", 
+  volume=6,
+  pages="3--12",
+  year=1996
+}
+
+@inproceedings{LuoDr95,
+  author="Luo, Qingshan and Drake, John~B.",
+  title="A scalable parallel {Strassen}'s matrix multiplication 
+         algorithm for distributed-memory computers",
+  booktitle="Proceedings of the 1995 ACM 
+             Symposium on Applied Computing",
+  Pages="221--226",
+  address="Nashville, Tennessee",
+  month=feb,
+  year=1995
+}
+
+@inproceedings{ThottethodiChLe98,
+  author="Mithuna Thottethodi and Siddhartha Chatterjee and Alvin~R. Lebeck",
+  title="Tuning {Strassen}'s Matrix Multiplication for Memory Efficiency",
+  booktitle="Proceedings of SC98: High Performance Networking and Computing",
+  address="Orlando, Florida", 
+  month=nov,
+  year=1998
+}
+
+@article{ChouDeLiWa95,
+  author="C.-C. Chou and Y. Deng and G. Li and Y. Wang", 
+  title="Parallelizing {Strassen}'s method for matrix multiplication 
+         on distributed-memory {MIMD} architectures", 
+  journal="International Journal of
+           Computers and Mathematics with Applications", 
+  volume=30,
+  pages="49--69",
+  year=1995
+}
+
+@article{LadermanPaSh92,
+  author="Julian Laderman and Victor Pan and Xuan-He Sha",
+  title="On practical algorithms for accelerated matrix multiplication",
+  journal="Linear Algebra and Its Applications",
+  volume="162--164",
+  pages="557--588",
+  year=1992
+}
+
+@article{CoppersmithWi90,
+  author="Don Coppersmith and Shmuel Winograd",
+  title="Matrix multiplication via arithmetic progression",
+  journal="Journal of Symbolic Computation",
+  volume=9,
+  pages="251--280",
+  year=1990
+}
+
+@techreport{Brent70,
+  author="R.~P. Brent", 
+  title="Algorithms for matrix multiplication", 
+  number="STAN-CS-70-157", 
+  institution="Department of Computer Science, Stanford University",
+  note="Available online from 
+        {\tt http://web.comlab.ox.ac.uk/oucl/work/richard.brent/select.html}",
+  month=mar,
+  year=1970
+}
+
+% TOPIC FOUR RUSSIANS
+
+%Information Processing Letters, Volume 10, 1980
+%Nicola Santoro: Extending the Four Russians' Bound 
+%to General Matrix Multiplication. 87-88 
+
+%Information Processing Letters, Volume 29, 1988
+%M. D. Atkinson, Nicola Santoro: 
+%A Practical Algorithm for Boolean Matrix Multiplication. 37-38 
+
+% TOPIC DENSE 
+
+@article{BarronSw60,
+  author="Barron, D.~W. and Swinnerton-Dyerm, H.~P.~F.",
+  title="Solution of simultaneous linear equations using a magnetic tape
+         store",
+  journal="Computer Journal",
+  volume=3,
+  pages="28--33",
+  year=1960
+}
+
+@article{McKellerCo69,
+  author="A.~C. McKeller and Coffman, Jr., E.~G.",
+  title="Organizing matrices and matrix operations for paged memory systems",
+  journal="Communications of the {ACM}",
+  volume=12, number=3,
+  pages="153--165",
+  year=1969
+}
+
+@article{Moler72,
+  author="Cleve~B. Moler",
+  title="Matrix computations with {Fortran} and paging",
+  journal="Communications of the {ACM}",
+  volume=15, number=4, pages="268--270",
+  year=1972
+}
+
+@inproceedings{FischerPr76,
+  author="Patrick~C. Fischer and Robert~L. Probert",
+  title="A note on matrix multiplication in a paging environment",
+  booktitle="ACM `76: Proceedings of the Annual Conference",
+  address="Houston, Texas",
+  pages="17--21",
+  year=1976
+}
+ 
+@article{DuCruzNuReTa81,
+  author="J.~J. {Du Cruz} and S.~M. Nugent and J.~K. Reid and D.~B. Taylor ",
+  title="Solving large full sets of linear equations in a paged virtual store",
+  journal="{ACM} Transactions on Mathematical Software",
+  volume=7, number=4,
+  pages="527--536",
+  year=1981
+}
+
+@article{Crotty82,
+  author="J.~M. Crotty",
+  title="A block equation solver for large unsymmetric matrices arising in the
+         boundary integral equation method",
+  journal="International Journal for Numerical Methods in Engineering",
+  volume=18,
+  pages="997--1017",
+  year=1982
+}
+
+@article{Stabrowski87,
+  author="M.~M. Stabrowski",
+  title="A block equation solver for large unsymmetric linear equation
+         systems with dense coefficient matrices",
+  journal="International Journal for Numerical Methods in Engineering",
+  volume=24,
+  pages="289--300",
+  year=1982
+}
+
+@article{GrimesSi88,
+  author="Roger~G. Grimes and Horst~D. Simon",
+  title="Solution of large, dense symmetric generalized eigenvalue problems
+         using secondary storage",
+  journal="{ACM} Transactions on Mathematical Software",
+  volume=14, number=3,
+  pages="241--256",
+  year=1988
+}
+
+@article{GeersKl93,
+  author="Nikolaus Geers and Roland Klees",
+  title="Out-of-core solver for large dense nonsymmetric linear systems",
+  journal="Manuscripta Geodetica",
+  volume=18, number=6,
+  pages="331--342",
+  year=1993
+}
+
+@article{Grimes88,
+  author="Roger~G. Grimes",
+  title="Solving systems of large dense linear equations",
+  journal="J. of Supercomputing",
+  volume=1, number=3, pages="291--299",
+  year=1988
+}
+
+@inproceedings{WombleGrWhRi93,
+  author="David Womble and David Greenberg and Stephen Wheat and Rolf Riesen",
+  title="Beyond core: Making parallel computer {I/O} practical",
+  booktitle="Proceeings of the 1993 DAGS/PC Symposium",
+  publisher="Dartmouth Institute for Advanced Graduate Studies",
+  address="Hanover, NH",
+  pages="56--63",
+  note="Also available online from 
+  {\tt 
+http://www.cs.sandia.gov/$\tilde{\mbox{\ }}$%
+dewombl/parallel\_io\_dags93.html}
+        ",
+  month=jun,
+  year=1993
+}
+
+@article{WelbonCSH94,
+  title="The {POWER2} performance monitor",
+  author="Welbon, E.~H. and Chan-Nui,  C.~C. and Shippy, D.~J. and
+		  Hicks, D.~A.",
+  journal="{IBM} Journal of Research and Development",
+  volume=38,
+  number=5,
+  pages="545--554",
+  year=1994
+}
+
+@article{WhiteD94,
+  title="{POWER2}: Next generation of the {RISC} {System/6000} family",
+  author="S.~W. White and S. Dhawan",
+  journal="{IBM} Journal of Research and Development",
+  volume=38,
+  number=5,
+  year=1994
+}
+
+% SYTRD
+
+@article{Dubrulle72,
+  author="A.~A. Dubrulle",
+  title="Solution of the complete symmetric eigenproblem in a virtual
+         memory environment",
+  journal="IBM Journal of Research and Development",
+  month=nov,
+  year=1972,
+  pages="612--616"
+}
+
+@article{GrimesSi88,
+  author="Roger~G. Grimes and Horst~D. Simon",
+  title="Solution of large, dense symmetric generalized eigenvalue problems
+         using secondary storage",
+  journal="{ACM} Transactions on Mathematical Software",
+  volume=14, number=3,
+  pages="241--256",
+  year=1988
+}
+
+@techreport{Dubrulle79,
+  author="A.~A. Dubrulle",
+  title="The design of matrix algorithms for {Fortran} and virtual storage",
+  institution="IBM Palo Alto Scientific Center",
+  number="G320-3396",
+  month=nov,
+  year=1979
+}
+
+@article{Wilkinson62,
+  author="J.~H. Wilkinson",
+  title="Householder's method for symmetric matrices",
+  journal="Numerische Mathematik",
+  volume=4,
+  pages="354--361",
+  year=1962
+}
+
+@article{MartinReWi68,
+  author="R.~S. Martin and C. Reinsch and J.~H. wilkinson",
+  title="Householder's tridiagonalization of a symmetric matrix",
+  journal="Numerische Mathematik",
+  volume=11,
+  pages="181--195",
+  year=1968
+}
+
+@article{BischofSu96,
+  journal="SIAM Journal on Matrix Analysis and Applications",
+  volume=17,
+  pages="869--885",
+  title="On tridiagonalizing and diagonalizing symmetric 
+         matrices with repeated eigenvalues",
+  author="Christian H. Bischof and Xiaobai Sun",
+  year=1996
+}
+
+% ST
+
+@unpublished{Boman01RECURSIVE,
+  author="Erik G. Boman",
+  title="A Note on Recursive {Vaidya} Preconditioners",
+  note="Unpublished manuscript",
+  month=feb,
+  year=2001
+}
+
+@article{Reif98,
+  author = "J. H. Reif",
+  title = "Efficient Approximate Solution of Sparse Linear Systems",
+  journal = "Computers and Mathematics with Applications",
+  volume = 36,
+  number = 9,
+  pages = "37--58",
+  year = 1998
+}
+
+@techreport{Guattery97,
+  author="Stephen Guattery",
+  title="Graph embedding techniques for bounding 
+         condition numbers of incomplete factor preconditioners",
+  institution="NASA Langley Research Center",
+  number="ICASE Report 97-47",
+  year=1997
+}
+
+@unpublished{Vaidya91,
+  author="Pravin~M. Vaidya",
+  title="Solving linear equations with symmetric diagonally dominant matrices
+         by constructing good preconditioners",
+  note="Unpublished manuscript. A talk based on the manuscript was
+        presented at the IMA Workshop on Graph Theory and 
+        Sparse Matrix Computation, October 1991, Minneapolis."
+}
+
+@phdthesis{Gremban96,
+  author="Keith~D. Gremban",
+  title="Combinatorial Preconditioners for Sparse, Symmetric, 
+         Diagonally Dominant Linear Systems",
+  school="School of Computer Science, Carnegie Mellon University",
+  note="Technical Report CMU-CS-96-123",
+  month=oct,
+  year=1996
+}
+         
+
+@book{Axelsson94,
+  title="Iterative Solution Methods",
+  author="Owe Axelsson",
+  publisher="Cambridge University Press",
+  year=1994
+}
+
+% It was the IMA Workshop on Graph Theory and Sparse Matrix Computation,
+% in October 1991 in Minneapolis.  A book of selected papers was published
+% after the workshop but not a complete proceedings -- we tried without
+% success to get Vaidya's paper for it.
+
+@book{GeorgeGilbertLiu-IMA,
+  author = "Alan George and John R. Gilbert and Joseph W. H. Liu",
+  title = "Graph Theory and Sparse Matrix Computation",
+  publisher = "Springer-Verlag",
+  year = 1993,
+  }
+
+@inproceedings{GrembanMiZa95,
+     Author="K.D. Gremban and G.L. Miller and M. Zagha",
+     Title="Performance Evaluation of a Parallel Preconditioner",
+     Booktitle="9th International Parallel Processing Symposium",
+     Year="1995",
+     Pages="65--69",
+     Organization="IEEE",
+     Address="Santa Barbara",
+     Month="April"
+}
+
+% There was also two conference presentation
+% WOPA96
+% SIAM45
+
+@article{Gustafsson78,
+  author="I. Gustafsson",
+  title="A class of first-order factorization methods",
+  journal="BIT",
+  volume=18,
+  pages="142--156",
+  year=1978
+}
+
+@inproceedings{HowleVa98,
+  author="Victoria~E. Howle and Stephen~A. Vavasis",
+  title="Preconditioning complex-symmetric layered systems
+         arising in electrical power modeling",
+  booktitle="Proceedings of the Copper Mountain Conference on
+             Iterative Methods",
+  address="Copper Mountain, Colorado",
+  month=mar,
+  year=1998,
+  note="7 unnumbered pages"
+}
+
+@book{SmithBjGr96,
+  author="Barry F. Smith and Petter E. Bjorstad and William D. Gropp",
+  title ="Domain Decomposition: Parallel
+          Multilevel Methods for Elliptic Partial
+          Differential Equations",
+  publisher="Cambridge University Press",
+  year=1996
+}
+
+@article{Zhang92,
+  author="X. Zhang",
+  title="Multilevel {Schwartz} methods",
+  journal="Numerische Mathematik",
+  volume=63,
+  pages="521--539",
+  year=1992
+}
+
+@article{BPX,
+  author="J.~H. Bramble and J.~E. Pasciak and J. Xu",
+  title="Parallel multilevel preconditioners",
+  journal="Math. Comput.",
+  volume=55,
+  pages="1--22",
+  year=1990
+}
+  
+
+@techreport{Elsner97,
+  author="Ulrich Elsner",
+  title="Graph Partitioning: A Survey",
+  month=dec, year=1997,
+  number="SFB393/97-27",
+  institution="Technische Universit{\"{a}}t Chemnitz"
+}
+
+%  institution="Technischen Universität Chemnit"
+
+% FFTW
+@inproceedings{FrigoJohnson98,
+  author="M. Frigo and S.~G. Johnson",
+  title="{FFTW}: An Adaptive Software Architecture for the {FFT}",
+  booktitle="1998 ICASSP Conference Proceedings",
+  volume=3,
+  pages=1381,
+  year=1998
+}
+
+@inproceedings{Frigo99,
+  author="Matteo Frigo",
+  title="A Fast Fourier Transform Compiler",
+  booktitle="Proceedings of the 1999 ACM SIGPLAN Conference on
+        Programming Language Design and Implementation (PLDI '99)", 
+  address="Atlanta, Georgia", 
+  month=may,
+  year=1999
+}
+
+% SPARSE 
+
+
+% PARALLEL MAT MULT
+
+@phdthesis{Cannon69,
+  author="L.~E. Cannon",
+  title="A Cellular Computer to Implement the {Kalman} filter algorithm",
+  school="Montana State University",
+  year=1969
+}
+
+@article{Gentleman78,
+  author="W.~Morven Gentleman",
+  title="Some complexity results for matrix computatiosn on parallel
+         processors",
+  journal="Journal of the ACM",
+  volume=25, number=1,
+  pages="112--115",
+  year=1978
+}
+
+@article{AgarwalBaGuJoPa95,
+  author="R.~C. Agarwal and S.~M. Balle and F.~G. Gustavson and M. Joshi 
+          and P. Palkar",
+  title="A three-dimensional approach to parallel matrix multiplication",
+  journal="IBM Journal of Research and Development",
+  volume=39, number=5,
+  pages="575--582",
+  note="available online at http://www.research.ibm.com/journal/rd39-5.html",
+  year=1995
+}
+
+@article{vandeGeijnWa97,
+  author="Robert van de Geijn and Jerrell Watts",
+  title="{SUMMA}: Scalable Universal Matrix Multiplication Algorithm",
+  journal="Concurrency: Practice and Experience", 
+  Volume=9,
+  pages="255--274",
+  year=1997
+}
+
+@article{ChoiDoWa94,
+  author="Jaeyoung Choi and Jack~J. dongarra and David~W. Walker",
+  title="{PUMMA}: Parallel universal matrix multiplication algorithms
+         on distributed memory concurrent computers",
+  journal="Concurrency: Practice and Experience", 
+  Volume=6,
+  pages="543--570",
+  year=1994
+}
+
+@article{FoxOtHe87,
+  author="G.~C. Fox and S.~W. Otto and A.~J.~G. Hey",
+  title="Matrix algorithms on a hypercube. I: Matrix multiplication",
+  journal="Parallel Computing",
+  volume=4,
+  pages="17--31",
+  year=1987
+}
+
+@inproceedings{HoJoEd91,
+  title="Matrix multiplication on hypercubes using full bandwidth 
+         and constant storage",
+  author="Ching-Tien Ho and S.~Lennart Johnsson and Alan Edelman",
+  booktitle="Proceedings of The 6th Distributed Memory Computing Conference",
+  publisher="IEEE Computer Society Press",
+  note="Also published as TR-19-91, Center for Research in 
+        Computing Technology, Harvard University, and available online
+        from {\tt http://rodin.cs.uh.edu/~johnsson/rpt.html}",
+  pages="447--451",
+  year=1991
+}
+  
+@techreport{GuptaKu91,
+  author = {Anshul Gupta and Vipin Kumar},
+  title="The scalability of Matrix Multiplication Algorithms on Parallel
+         Computers",
+  institution="Department of Computer Science, 
+               University of Minnesota",
+  note="Available online from
+        {\tt ftp://ftp.cs.umn.edu/users/kumar/matrix.ps}.
+        A short version appeared in {\em Proceedings of 1993
+        International Conference on Parallel Processing}, 
+        pages III-115--III-119, 1993",
+  number="TR~91-54",
+  year=1991
+}
+
+@article{MathurJo94,
+  author="Kapil~K. Mathur and S.~Lennart Johnsson",
+  title="Multiplication of matrices of arbitrary shapes on a data-parallel
+         computer",
+  journal="Parallel Computing",
+  volume=20,
+  pages="919--951",
+  year=1994
+}
+
+@article{Johnsson93,
+  author="S.~Lennart Johnsson",
+  title="Minimizing the communication time for matrix multiplication
+         on multiprocessors",
+  journal="Parallel Computing",
+  volume=19,
+  pages="1235--1257",
+  year=1993
+}
+
+@article{Berntsen89,
+  author="Jarle Bernsten",
+  title="Communication efficient matrix multiplication on hypercubes",
+  journal="Parallel Computing",
+  volume=12,
+  pages="335--342",
+  year=1989
+}
+
+@article{AggarwalChSn90,
+  author="Alok Aggarwal and Ashok Chandra and Marc Snir",
+  title="Communication complexity of {PRAMs}",
+  journal="Theoretical Computer Science",
+  volume=71,
+  pages="3--28",
+  year=1990
+}
+
+
+% OTHER PARALLEL MATRIX ALGORITHMS
+
+@article{LichtensteinJo93,
+  author="Woody Lichtenstein and S.~Lennart Johnsson",
+  title="Block cyclic dense linear algebra",
+  journal="SIAM Journal on Scientific Computing",
+  volume=14,
+  pages="1257--1288",
+  year=1993
+}
+
+@article{Johnsson87,
+  author="S.~Lennart Johnsson",
+  title="Communication efficient basic linear algebra computations on
+         hypercube architectures",
+  journal="Journal of Parallel and Distributed Computing",
+  volume=2,
+  pages="133--172",
+  year=1987
+}
+
+@incollection{Johnsson88,
+  author="S. Lennart Johnsson",
+  title="Data parallel programming and basic linear algebra subroutines",
+  pages="183--196",
+  editor="J.~R. Rice",
+  booktitle="Mathematical Aspects of Scientific Software",
+  series="IMA Volumes in Mathematics and Its Applications",
+  volume=14,
+  publisher="Springer-Verlag",
+  year=1988
+}
+
+@article{DekelNaSa81,
+  author="Eliezer Dekel and David Nassimi and Sartaj Sahni",
+  title="Parallel matrix and graph algorithms",
+  journal="SIAM Journal on Computing",
+  volume=10,
+  pages="657--675",
+  year=1981
+}  
+
+% CACHE OBLIVIOUS
+
+@inproceedings{FrigoLePrRa99,
+  title="Cache-Oblivious Algorithms",
+  author="Matteo Frigo and Charles~E. Leiserson and Harald Prokop and Sridhar Ramachandran",
+  booktitle="Proceedings of the 40th Annual Symposium on Foundations of Computer Science (FOCS '99)",
+  address="New York",
+  month=oct,
+  year=1999
+}
+
+% SPARSE CHOLESKY
+
+@unpublished{RothbergSc97,
+  author="Edward Rothberg and Robert Schreiber",
+  title="Efficient, limited memory sparse {Cholesky} factorization",
+  month=may,
+  year=1997,
+  note="Unpublished manuscript"
+}
+
+@article{RothbergSc99,
+  author="Edward Rothberg and Robert Schreiber",
+  title="Efficient methods for out-of-core sparse Cholesky factorization",
+  journal="SIAM Journal on Scientific Computing",
+  volume=21,
+  pages="129--144",
+  year=1999,
+}
+
+@unpublished{RothbergSc96,
+  author="Edward Rothberg and Robert Schreiber",
+  title="An alternative approach to sparse out-of-core factorization",
+  note="presented at the 2nd SIAM Conference on Sparse Matrix, 
+        Coeur d'Alene, Idaho",
+  month=oct,
+  year=1996
+}
+  
+
+@article{RothbergGu91,
+  author="Edward Rothberg and Anoop Gupta",
+  title="Efficient sparse matrix factorization on high-performance 
+         workstations---exploiting the memory hierarchy",
+  journal="ACM Transactions on Mathematical Software",
+  volume=17, number=3,
+  pages="313--334",
+  year=1991
+}
+
+@article{NgPe93,
+  author="Esmond~G. Ng and Barry~W. Peyton",
+  title="Block sparse {Cholesky} algorithms on advanced uniprocessor computers",
+  journal="SIAM Journal on Scientific Computing",
+  volume=14, number=5, 
+  pages="1034--1056",
+  year=1993
+}
+
+@article{AshcraftGr89,
+  author="Cleve Ashcraft and Roger Grimes",
+  title="The influence of relaxed supernode partitions on the multifrontal method",
+  journal="ACM Transactions on Mathematical Software",
+  volume=15, number=4,
+  pages="291--309",
+  year=1989
+}
+
+% TEXTBOKS
+
+@book{GolubVa89,
+  author =  "Gene~H. Golub and Charles~F. Van~Loan",
+  title = "Matrix Computations",
+  edition="2nd",
+  publisher="Johns Hopkins University Press",
+  year=1989
+}
+
+% address= "Baltimore",
+
+@book{GolubVa96,
+  author =  "Gene~H. Golub and Charles~F. Van~Loan",
+  title = "Matrix Computations",
+  edition="3rd",
+  publisher="Johns Hopkins University Press",
+  year=1996
+}
+
+@book{HennessyPa96,
+  author="john~L. Hennessy and David~A. Patterson",
+  title="Computer Architecture: A Quantitative Approach",
+  edition="2nd",
+  publisher="Morgan Kaufmann",
+  year=1996
+}
+
+@book{CullerSi99,
+  author="David~E. Culler and Jaswinder Pal Singh",
+  title="Parallel Computer Architecture: A Hardware/Software Approach",
+  publisher="Morgan Kaufmann",
+  year=1999
+}
+  
+
+@book{Demmel97,
+  author="James~W. Demmel",
+  title="Applied Numerical Linear Algebra",
+  publisher="SIAM",
+  year=1997
+}
+
+@book{Stewart98,
+  title="Matrix Algorithms, Volume 1: Basic Decompositions",
+  author="G.~W. Stewart",
+  publisher="SIAM",
+  year=1998
+}
+
+@book{Higham96,
+  author="Nicholas~J. Higham",
+  title="Accuracy and Stability of Numerical Algorithms",
+  publisher="SIAM",
+  year=1996
+}
+
+@book{Bjorck96,
+  author="{\AA} Bj{\"{o}}rck",
+  title="Numerical Methods for Least Squares Problems",
+  publisher="SIAM",
+  year=1996
+}
+
+@book{CullumWi85,
+  author="J. Cullum and R.~A. Willoughby",
+  title="Lanczos Algorithms for Large Symmetric Eigenvalue Computations",
+  publisher="Birkha{\"{u}}ser",
+  note="2 Volumes",
+  year=1985
+}
+
+@book{Parlett80,
+  author="B.~Parlett",
+  title="The Symmetric Eigenvalue Problem",
+  publisher="Prentice-Hall",
+  year=1980
+}
+
+@book{DongarraDuSoVa98,
+  author="Jack~J. Dongarra and Iain~S. Duff and Danny~C. Sorensen
+          and Henk~A. van~der~Vorst",
+  title="Numerical Linear Algebra for High-Performace Computers",
+  publisher="SIAM",
+  year=1998
+}
+
+@book{DuffErRe86,
+  author="I.~S. Duff and A.~M. Erisman and J.~K. Reid",
+  title="Direct Methods for Sparse Matrices",
+  publisher="Oxford University Press",
+  year=1986
+}
+
+@book{KumarGrGuKa94,
+  title="Introduction to Parallel Computing: 
+         Design and Analysis of Algorithms",
+  author="Vipin Kumar and Ananth Grama and Anshul Gupta and George Karypis",
+  publisher="Benjamin/Cummings",
+  year=1994
+}
+
+
+% ORDERING
+
+@article{RoseTarjan1978,
+  author="D.~J. Rose and R.~E. Tarjan",
+  title="Algorithmic aspects of vertex elimination on directed graphs",
+  journal="SIAM Journal on Applied Mathematics",
+  volume=34,
+  pages="176--197",
+  year=1978
+}
+
+@article{Yannakakis1981,
+  author="M.~Yannakakis",
+  title="Computing the minimum fill-in is {NP}-complete",
+  journal="SIAM Journal on Algebraic and Discrete Methods",
+  volume=2,
+  pages="77-79",
+  year=1981
+}
+
+@article{TinneyWalker1967,
+  author="W.~F. Tinney and J.~W. Walker",
+  title="Direct solution of sparse network equations by optimally
+         ordered triangular factorization",
+  journal="Proceedings of the IEEE",
+  volume=55,
+  pages="1801--1809",
+  year=1967
+}
+
+@article{GeorgeLiu1989,
+  author="A. George and J.~W.~H. Liu",
+  title="The evolution of the minimum-degree ordering algorithm",
+  journal="SIAM Review",
+  volume=31,
+  pages="1--19",
+  year=1989
+}
+
+
+@book{GeorgeLiu81,
+  author="A. George and J.~W.~H. Liu",
+  title="Computer Solution of Large Sparse Positive Definite Systems",
+  publisher="Prentice-Hall",
+  year=1981
+}
+
+
+% MPI
+
+@article{MPIStandardIJSC,
+  title="{MPI}: A Message-Passing Interface Standard",
+  author="Message Passing Interface Forum",
+  journal="International Journal of Supercomputing Applications",
+  volume=8, Number="3--4", 
+  year=1994
+}
+
+@book{SnirOtHuWaDo98,
+  title="{MPI}: The Complete Reference", 
+  author="Marc Snir and Steve Otto and Steven Huss-Lederman
+          and David Walker and Jack Dongarra",
+  volume="1: The MPI Core",
+  edition="2nd",
+  publisher="MIT Press",
+  year=1998
+}
+
+@book{GroppHuLuLuBiSaSn98,
+  title="{MPI}: The Complete Reference",
+  author="William Gropp and Steven Huss-Lederman and Andrew
+          Lumsdaine and Ewing Lusk and Bill Nitzberg and William Saphir
+          and Marc Snir", 
+  volume="2: The {MPI-2} Extensions",
+  publisher="MIT Press",
+  year=1998
+}
+
+@book{GroppLuSk99,
+  title="Using {MPI}: Portable Parallel Programming with the Message
+                      Passing Interfac",
+  author="William Gropp and Ewing Lusk and and Anthony Skjellum",
+  edition="2nd",
+  publisher="MIT Press",
+  year=1999
+}
+
+@book{GroppLuTh99,
+  title="Using {MPI-2}: Advanced Features of the Message Passing Interface",
+  author="William Gropp and Ewing Lusk and and Rajeev Thakur",
+  publisher="MIT Press",
+  year=1999
+}
+
+@book{Pacheco96,
+  title="Parallel Programming With {MPI}", 
+  author="Peter~S. Pacheco", 
+  publisher="Morgan Kaufmann",
+  year=1996
+}
+
+% BLAS
+
+@article{blas1,
+  title="Basic linear algebra subprograms for {Fortran} usage",
+  author="C.~L. Lawson and R.~J. Hanson and D.~R. Kincaid and T.~F. Krogh",
+  journal="{ACM} Transactions on Mathematical Software",
+  volume=5,
+  pages="308--323",
+  year=1979}
+
+@article{blas1algs,
+  title="Algorithm 539: Basic linear algebra subprograms for {Fortran} usage",
+  author="C.~L. Lawson and R.~J. Hanson and D.~R. Kincaid and T.~F. Krogh",
+  journal="{ACM} Transactions on Mathematical Software",
+  volume=5,
+  pages="324--325",
+  year=1979}
+
+@article{blas2,
+  title="An extended set of {Fortran} basic linear algebra subprograms",
+  author="Jack~J. Dongarra and Jeremy Du~Cruz and Sven Hammarling
+          and Ian Duff",
+  journal="{ACM} Transactions on Mathematical Software",
+  volume=14,
+  pages="1--17",
+  year=1988
+}
+
+@article{blas2algs,
+  title="Algorithm 656: 
+         An extended set of {Fortran} basic linear algebra subprograms",
+  author="Jack~J. Dongarra and Jeremy Du~Cruz and Sven Hammarling
+          and Ian Duff",
+  journal="{ACM} Transactions on Mathematical Software",
+  volume=14,
+  pages="18--32",
+  year=1988
+}
+
+@article{blas3,
+  title="A set of level~3 basic linear algebra subprograms",
+  author="Jack~J. Dongarra and Jeremy Du~Cruz and Sven Hammarling
+          and Ian Duff",
+  journal="{ACM} Transactions on Mathematical Software",
+  volume=16,
+  number=1,
+  pages="1--17",
+  year=1990}
+
+@article{blas3algs,
+  title="Algorithm 679: A set of level~3 basic linear algebra subprograms",
+  author="Jack~J. Dongarra and Jeremy Du~Cruz and Sven Hammarling
+          and Ian Duff",
+  journal="{ACM} Transactions on Mathematical Software",
+  volume=16,
+  number=1,
+  pages="18--28",
+  year=1990}
+
+@techreport{pblas,
+  author="J. Choi and J. Dongarra and S. Ostrouchov and A. Petitet and 
+          D. Walker and R.~C. Whaley",
+  title="A Proposal for a Set of Parallel Basic Linear Algebra Subprograms",
+  institution="University of Tennessee",
+  number="CS-95-292",
+  month=may,
+  year=1995
+}
+
+@techreport{DaydeDu96,
+  author="M.~J. Dayde and I.~S. Duff",
+  title="A blocked implementation of level 3 {BLAS} for {RISC} processors",
+  institution="ENSEEIHT-IRIT",
+  address="France",
+  Number="RT/APO/96/1",
+  year="1996"
+}
+
+@techreport{KagstromVa89,
+  author="B. K{\aa}gstr{\"{o}}m and C. Van Loan",
+  title="{GEMM}-Based Level-3 {BLAS}", 
+  number="CTC-91-TR47", 
+  institution="Department of Computer Science, Cornell University",
+  year=1989
+}
+
+@inproceedings{KagstromLiVa91,
+  author="B. K{\aa}gstr{\"{o}}m and P. Ling and C. Van~Loan",
+  title="High Performance {GEMM}-Based Level-3 {BLAS}: 
+         Sample Routines for Double Precision Real Data",
+  pages="269--281",
+  booktitle="High Performance Computing II",
+  editor="M. Durand and F. El~Dabaghi",
+  publisher="North-Holland",
+  address="Amsterdam", 
+  year=1991
+}
+
+@inproceedings{KagstromLiVa93,
+  author="B. K{\aa}gstr{\"{o}}m and P. Ling and C. Van~Loan",
+  title="Portable High Performance
+        {GEMM}-Based Level 3 {BLAS}", 
+  pages="339--346",
+  booktitle="Proceedings of the 6th SIAM Conference on Parallel Processing for 
+	Scientific Computing",
+  address="Philadelphia",
+  year=1993
+}
+
+@inproceedings{BilmesAsChDe97,
+  author="J. Bilmes and K. Asanovic and C.~W. Chin and J.~Demmel",
+  title="Optimizing matrix multiply using {PHIPAC}: 
+         a portable, high-performance, {ANSI~C} coding methodology",
+  booktitle="Proceedings of the International Conference on Supercomputing", 
+  address="Vienna, Austria",
+  year=1997
+}
+
+@article{AgarwalGuZu94MM,
+author="R.~C. Agarwal and F.~G. Gustavson and M. Zubair",
+title="A high-performance matrix-multiplication algorithm on 
+       a distributed-memory parallel computer using overlapped communication",
+journal="IBM Journal of Research and Development",
+volume=38, number=6,
+pages="673--681",
+note="available online at http://www.research.ibm.com/journal/rd38-6.html",
+year=1994
+}
+
+@article{AgarwalGuZu94POWER,
+author="R.~C. Agarwal and F.~G. Gustavson and M. Zubair",
+title="Improving performance of linear algebra algorithms
+for dense matrices using algorithmic prefetch",
+journal="IBM Journal of Research and Development",
+volume=38, number=3,
+pages="265--275",
+year=1994
+}
+
+@article{AgarwalGuZu94,
+author="R.~C. Agarwal and F.~G. Gustavson and M. Zubair",
+title="Exploiting functional parallelism of {POWER2} to design
+high-performance numerical algorithms",
+journal="IBM Journal of Research and Development",
+volume=38, number=5,
+pages="563--576",
+year=1994
+}
+
+@article{KramerJoHu96,
+  author="David Kramer and S.~Lennart Johnsson and Yu Hu",
+  title="Local basic linear algebra subroutines ({LBLAS}) 
+         for the {CM-5/5E}",
+  journal="International Journal of Supercomputing Applications",
+  volume=10, 
+  pages="300-335",
+  year=1996
+}
+
+@article{JohnssonOr93,
+  author="S.~Lennart Johnsson and Luis~F. Ortiz",
+  title="Local basic linear algebra subroutines ({LBLAS}) 
+         for the {Connection} {Machine} System {CM-200}",
+  journal="International Journal of Supercomputing Applications",
+  volume=7, 
+  pages="322-350",
+  year=1993
+}
+
+@inproceedings{GustavsonHeJoKaLi98,
+  author="F. Gustavson and A. Henriksson and I. Jonsson
+          and B. K{\aa}gstr{\"{o}}m and P. Ling",
+  title="Recursive Blocked Data Formats and {BLAS}'s for Dense 
+         Linear Algebra Algorithms", 
+  booktitle="Proceedings of the 4th International Workshop on Applied
+             Parallel Computing and
+             Large Scale Scientific and Industrial Problems (PARA '98)",
+  editor="B. K{\aa}gstr{\"{o}}m and J. Dongarra and E. Elmroth and J. Wa\'{s}niewski",
+  address="Umeå, Sweden", 
+  month=jun,
+  year=1998, 
+  series="Lecture Notes in Computer Science Number",
+  number="1541", 
+  pages="574--578",
+  publisher="Springer"
+}
+
+@misc{SGI-SCSL,
+  author="{SGI}",
+  title="Scientific Computing Software Library ({SCSL})",
+  howpublished="Software and documentation 
+                available online from 
+                from \url{http://www.sgi.com/software/scsl.html}",
+  year="1993--2002"
+}
+
+@misc{IBM-ESSL,
+  author="{IBM}",
+  title="Engineering and Scientific Subroutine Library ({SCSL})",
+  howpublished="Software and documuntation 
+                available online from 
+                \url{http://www-1.ibm.com/servers/eservers/pseries/software/sp/essl.html}",
+  year="2001"
+}
+
+@misc{Intel-MKL,
+  author="Intel",
+  title="Math Kernel Library ({MKL})",
+  howpublished="Software and documuntation 
+                available online from 
+                \url{http://www.intel.com/software/products/mkl/}",
+  year="2001"
+}  
+
+@misc{Compaq-CXML,
+  author="Compaq",
+  title="Compaq Extended Math Library ({CXML})",
+  howpublished="Software and documuntation 
+                available online from 
+                \url{http://www.compaq.com/math/}",
+  year="2001"
+}
+
+% ATLAS
+
+
+@TECHREPORT{WhaleyDo98,
+   author = "R.~Clint Whaley and Jack~J. Dongarra",
+   title = "Automatically Tuned Linear Algebra Software",
+   institution = "Computer Science Department, University Of Tennessee",
+   note="available online at www.netlib.org/atlas",
+   year = 1998,
+}
+
+@TECHREPORT{WhaleyPeDo2000,
+   author = "R.~Clint Whaley and Antoine Petitet and Jack~J. Dongarra",
+   title = "Automated Empirical Optimization of Software and the {ATLAS} Project",
+   institution = "Computer Science Department, University Of Tennessee",
+   note="available online at \url{http://math-atlas.sourceforge.net}",
+   year = 2000,
+}
+
+% from BAND PAPER
+
+@InProceedings{PanRe85,
+title={Efficient Parallel Solution of Linear Systems},
+author={Pan, Victor and Reif, John},
+pages={143--152},
+booktitle={Proceedings of the 17th Annual ACM Symposium on
+Theory of Computing},
+month=may,
+year=1985,
+address={Providence, Rhode Island}
+}
+
+@article{Brent74,
+author="Richard~P. Brent",
+title="The parallel evaluation of general arithmetic expressions",
+journal="Journal of the ACM",
+volume=21,
+number=2,
+pages="201--206",
+year=1974
+}
+
+@inproceedings{AgarwalGuJoZu95,
+author="Ramesh Agarwal and Fred Gustavson and Mahesh Joshi and Mohammad Zubair",
+title="A scalable parallel block algorithm for band {Cholesky} factorization",
+booktitle="Proceedings of the 7th {SIAM} Conference on Parallel Processing for
+Scientific Computing",
+pages="430--435",
+address="San Francisco",
+month=feb,
+year=1995
+}
+
+@incollection{DemmelHeVa93,
+author="James~W. Demmel and Micheal~T. Heath and Henk~A. {van der Vorst}",
+title="Parallel Numerical Linear Algebra",
+booktitle="Acta Numerica",
+volume=2,
+pages="111--197",
+editor="Arieh Iserles",
+publisher="Cambridge University Press",
+year="1993"
+}
+
+
+% LAPACK
+
+@book{GolubVa89,
+author =  "G.H. Golub and C.F. Van~Loan",
+title = "Matrix Computations, 2nd Edition",
+publisher="The Johns Hopkins University Press",
+address= " Baltimore",
+year=1989}
+
+@manual{lapack,
+  title="{LAPACK} User's Guide",
+  author="E. Anderson and
+	Z. Bai and
+	C. Bischof and 
+	J. Demmel and
+	J. Dongarra and
+	J. Du Croz and
+	A. Greenbaum and
+	S. Hammarling and
+	A. McKenney and
+	S. Ostrouchov and
+	D. Sorensen",
+  edition="2nd",
+  organization="SIAM",
+  address="Philadelphia, PA",
+  note="Also available online from {\tt http://www.netlib.org}",
+  year=1994
+}
+
+@inproceedings{scalapack,
+  author="J. Choi and J. Dongarra and R. Pozo and D. Walker",
+  title="{ScaLAPACK}: A scalable linear algebra for distributed
+          memory concurrent computers",
+  booktitle="Proceedings of the 4th Symposium on the Frontiers of
+             Massively Parallel Computation",
+  pages="120--127",
+  note="Also available as University of Tennessee Technical Report CS-92-181",
+  year=1992
+}
+
+@book{scalapack-ug,
+  author="
+    L. S. Blackford
+and J. Choi
+and A. Cleary
+and E. D'Azevedo
+and J. Demmel
+and I. Dhillon
+and J. Dongarra
+and S. Hammarling
+and G. Henry
+and A. Petitet
+and K. Stanley
+and D. Walker
+and R. C. Whaley",
+  title="{ScaLAPACK} Users' Guide",
+  publisher="SIAM",
+  address="Philadelphia, PA",
+  note="Also available online from {\tt http://www.netlib.org}",
+  year=1997
+}
+
+@book{plapack-ug,
+  author="van de Geijn, Robert~A.",
+  title="Using {PLAPACK}",
+  publisher="MIT Press",
+  year=1997
+}
+
+@techreport{Cleary96,
+  author="Andrew J. Cleary",
+  title="Narrow banded solvers in {ScaLAPACK}: Algorithms, interfaces, and implementation",
+  institution="University of Tennessee",
+  note="In preparation",
+  year=1996
+}
+
+
+@article{sp2,
+  author="T. Agerwala and J.~L. Martin and J.~H. Mirza and 
+          D.~C. Sadler and D.~M. Dias and M.~Snir",
+  title="{SP2} system architecture",
+  journal="IBM Systems Journal",
+  volume=34,
+  number=2,
+  pages="152--184",
+  year=1995
+} 
+
+
+
+
+
+% from ILU PAPER
+
+@unpublished{sparsekit,
+ title="SPARSKIT: A basic tool-kit for sparse matrix computations, version~2",
+ author="Yousef Saad",
+ year=1994,
+ institution="",
+ note="Software and documentation available online from
+         http://www.cs.umn.edu/Research/arpa/SPARSKIT/sparskit.html,
+         University of Minnesota,
+         Department of Computer Science and Engineering"
+}
+
+@techreport{Shapira97,
+ title="A multi-level method for sparse linear systems",
+ author="Yair Shapira",
+ year=1997,
+ institution="Los Alamos National Laboratory",
+ number="Technical Report LA-UR-97-2551"
+}
+
+@book{Saad92,
+  author="Yousef Saad",
+  title="Numerical Methods for Large Eigenvalue Problems",
+  publisher="Manchester University Press",
+  year=1992
+}
+  
+
+@book{Saad96,
+  author="Yousef Saad",
+  title="Iterative Methods for Sparse Linear Systems",
+  publisher="PWS Publishing Company",
+  year=1996
+}
+
+@book{Greenbaum97,
+  author="A. Greenbaum",
+  title="Iterative Methods for Solving Linear Systems",
+  publisher="SIAM",
+  year=1997
+}
+
+@techreport{ChowSa97,
+  author="Edmond Chow and Yousef Saad",
+  title="Experimental study of {ILU} preconditioners for indefinite matrices",
+  institution="Supercomputer Institute, University of Minnesota",
+  number="UMSI 97/97",
+  month=jun,
+  year=1997
+}
+
+@article{GroteHu97,
+  author="Marcus~J. Grote and Thomas Huckle",
+  title="Parallel preconditioning with sparse approximate inverses",
+  journal="SIAM Journal on Scientific Computing",
+  volume=18, number=3, pages="838--853",
+  year=1997
+}
+
+@article{GilbertPe88,
+  author="J.~R. Gilbert and T.~Peierls",
+  title="Sparse partial pivoting in time proportional to arithmetic
+         operations",
+  journal="SIAM Journal on Scientific and Statistical Computing",
+  volume=9, pages="862--874",
+  year=1988
+}
+
+@article{superlu,
+  author="James~W. Demmel and Stanley~C. Eisenstat and John~R.
+          Gilbert and Xiaoye~S. Li and Joseph~W.~H. Liu",
+  title="A supernodal approach to sparse partial pivoting",
+  journal="SIAM Journal on Matrix Analysis and Applications",
+  volume=20, 
+  pages="720--755",
+  year=1999
+}
+
+@article{parallel-superlu,
+  author="James~W. Demmel and John~R. Gilbert and Xiaoye~S. Li",
+  title="An asynchronous parallel supernodal algorithm for sparse 
+         {Gaussian} elimination",
+  journal="SIAM Journal on Matrix Analysis and Applications",
+  volume=20, 
+  pages="915--952",
+  year=1999
+}
+
+@article{EisenstatLi93,
+  author="S~.C. Eisenstat and J.~W.~H. Liu",
+  title="Exploiting structural symmetry in a sparse partial pivoting code",
+  journal="SIAM Journal on Scientific and Statistical Computing",
+  volume=14, pages="253--257",
+  year=1993
+}
+  
+@article{PothenFa90,
+  author="Alex Pothen and Chin-Ju Fan",
+  title="Computing the block triangular form of a sparse matrix",
+  journal="ACM Transactions on Mathematical Software",
+  volume=16,
+  number=4,
+  month=dec,
+  year=1990,
+  pages="303--324"
+}
+
+@techreport{petsc,
+  author="Satish Balay and William Gropp and Lois Curfman McInnes
+          and Barry Smith",
+  title="{PETSc 2.0} Users Manual",
+  institution="Argonne National Laboratory",
+  number="ANL-95/11 --- Revision 2.0.15",
+  year=1996
+}
+
+@article{DuffMe89,
+  title="The effect of ordering on preconditioned conjugate gradient",
+  author="Iain S. Duff and G\'erard Meurant",
+  journal="{BIT}",
+  volume=29,
+  number=4,
+  year=1989,
+  pages="635--657"
+}
+
+@inproceedings{SenCh00,
+  author="Sandeep Sen and Siddhartha Chatterjee",
+  title="Towards a Theory of Cache-Efficient Algorithms",
+  booktitle="Proceedings of the 11th ACM-SIAM Symposium 
+             on Discrete Algorithms", 
+  address="San Francisco", 
+  month=jan,
+  year=2000
+}
+
+% FAST SOLVERS
+
+@article{Csanky76,
+  author="L. Csanky",
+  title="Fast parallel matrix inversion algorithm",
+  journal="SIAM Journal on Computing",
+  volume=5, number=4,
+  pages="618--623",
+  year=1976
+}
+
+@book{Leighton92,
+  author="F.~Thomson Leighton",
+  title="Introduction to Parallel Algorithms and Architectures: Arrays, Trees,
+         Hypercubes",
+  publisher="Morgan Kaufmann",
+  year=1992
+}
+
+@book{Schultz88,
+  editor="Martin Schultz",
+  title="Numerical Algorithms for Modern Parallel Computer Architectures",
+  series="IMA Volumes in Mathematics and Its Applications",
+  volume=13,
+  publisher="Springer-Verlag",
+  year=1988
+}
+
+@incollection{Schreiber88,
+  author="Robert Schreiber",
+  title="Block algorithms for parallel machines",
+  pages="197--207",
+  editor="Martin Schultz",
+  booktitle="Numerical Algorithms for Modern Parallel Computer Architectures",
+  series="IMA Volumes in Mathematics and Its Applications",
+  volume=13,
+  publisher="Springer-Verlag",
+  year=1988
+}
+
+@article{Schulz33,
+  author="G. Schulz",
+  title="Iterative {Berechnung} der reziproken {Matrix}",
+  journal="Z. Angew. Math. Mech.",
+  volume=13,
+  pages="57--59",
+  year=1933
+}
+
+@book{CLR,
+  author="Thomas~H. Cormen and Charles~E. Leiserson and Ronald~L. Rivest",
+  title="Introduction to Algorithms",
+  publisher="MIT Press and McGraw-Hill",
+  year=1990
+}
+
+@book{CLRS,
+  author="Thomas~H. Cormen and Charles~E. Leiserson and Ronald~L. Rivest
+          and Clifford Stein",
+  title="Introduction to Algorithms",
+  edition="2nd",
+  publisher="MIT Press and McGraw-Hill",
+  year=2001
+}
+
+@book{AHU74,
+  author="Alfred~V. Aho and John~E. Hopcroft and Jeffrey~D. Ullman",
+  title="The Design and Analysis of Computer Algorithms",
+  publisher="Addison-Wesley",
+  year=1974
+}
+
+% UMFPACK/MA38
+% V 2.2.1
+@article{DavisDu99,
+  author="T.~A. Davis and I.~S. Duff", 
+  title="A combined unifrontal/multifrontal method for 
+         unsymmetric sparse matrices", 
+  journal="ACM Transactions on Mathematical Software", 
+  volume=25,
+  pages="1--19", 
+  year=1999
+}
+
+% V 1.0
+@article{DavisDu97,
+  author="T.~A. Davis and I.~S. Duff", 
+  title="An unsymmetric-pattern multifrontal method for 
+         sparse {LU} factorization",
+  journal="SIAM Journal on Matrix Analysis and Applications",
+  volume=19,
+  pages="140--158", 
+  year=1997
+}
+
+% Sherry's thesis
+
+@phdthesis{Li96PhD,
+  author="Xiaoye~S. Li",
+  title="Sparse Gaussian Elimination on High Performance Computers",
+  school="Department of Computer Science, UC Berkeley",
+  year=1996
+}
+
+% structure of LU factors of PA
+
+@article{GeorgeNg88,
+  author="Alan George and Esmond Ng",
+  title="On the complexity of sparse {QR} and {LU} factorization on
+         finite-element matrices",
+  journal="SIAM Journal on Scientific and Statistical Computation",
+  volume=9,
+  pages="849--861",
+  year=1988
+}
+
+@article{Gilbert94,
+  author="John~R. Gilbert",
+  title="Predicting structure in sparse matrix computations",
+  journal="SIAM Journal on Matrix Analysis and Applications",
+  volume=15,
+  pages="62--79",
+  year=1994
+}
+
+@incollection{GilbertNg93,
+  Author = "John R. Gilbert and Esmond Ng",
+  Title = "Predicting structure in nonsymmetric sparse matrix
+           factorizations",
+  booktitle = "Graph Theory and Sparse Matrix Computation",
+  publisher = "Springer-Verlag",
+  year = 1993,
+  editor = "Alan George and John R. Gilbert and Joseph W. H. Liu"
+}
+
+
+% COLAMD by
+% Stefan I. Larimore and Timothy A. Davis, University of Florida, 
+% in collaboration with John Gilbert, Xerox PARC, 
+% and Esmong Ng, Lawrence Berkeley National Laboratory.
+
+@techreport{colamd00TR,
+  author="Timothy~A. Davis and John~R. Gilbert and 
+          Stefan~I. Larimore and Esmond~G. Ng",
+  title="A column approximate minimum degree ordering algorithm",
+  number="TR--00--005",
+  note="Submitted for publication",
+  institution="Department of Computer and Information Science and Engineering, 
+               University of Florida",
+  month=oct,
+  year=2000
+}
+
+@mastersthesis{colamd98TR,
+  title="An approximate minimum degree column ordering algorithm", 
+  author="S.~I. Larimore", 
+  school="Department of Computer and Information Science and Engineering, 
+          University of Florida",
+  address="Gainesville, Florida", 
+  note="Also available as CISE Tech Report TR-98-016 at 
+       ftp://ftp.cise.ufl.edu/cis/tech-reports/tr98/tr98-016.ps",
+  year=1998
+}
+
+@inproceedings{AshcraftGrimes99,
+  author="Cleve Ashcraft and Roger Grimes",
+  title="{SPOOLES}: An object-oriented sparse matrix library",
+  booktitle="Proceedings of the 9th SIAM Conference on Parallel 
+             Processing for Scientific Computing",
+  note="10 pages on CD-ROM",
+  address="San-Antonio, Texas",
+  year=1999
+}
+
+% Wide separators
+
+@phdthesis{Gilbert80PhD,
+  title="Graph Separator Theorems and Sparse Gaussian Elimination",
+  author="John~R. Gilbert",
+  school="Stanford University",
+  year=1980
+}
+
+@inproceedings{GilbertSc82,
+  author="John~R. Gilbert and Robert Schreiber",
+  title="Nested Dissection with Partial Pivoting",
+  booktitle="Sparse Matrix Symposium 1982: Program and Abstracts",
+  pages="61",
+  address="Fairfield Glade, Tennessee",
+  month=oct,
+  year=1982
+}
+
+
+% QR
+
+@article{ElmrothGu2001,
+  author="E. Elmroth and F.~G. Gustavson", 
+  pages="936--949",
+  title="A faster and simpler recursive algorithm for the {LAPACK}
+         routine {DGELS}",
+  journal="BIT",
+  volume=41,
+  year=2001
+}
+
+@inproceedings{ElmrothGu,
+  author="E. Elmroth and F. Gustavson",
+  title="High-Performance Library Software for {QR}
+  Factorization",
+  editor={P. Bj\"orstad and others}, 
+  booktitle="Applied Parallel Computing: 
+    New Paradigms for HPC in Industry and Academia",
+  series="Lecture Notes in Computer Science",
+  publisher="Springer-Verlag",
+  year="To appear"
+}
+
+@article{ElmrothGu2000,
+  author="E. Elmroth and F. Gustavson",
+  title="Applying Recursion to Serial and Parallel {QR} Factorization 
+  Leads to Better Performance",
+  journal="IBM Journal of Research and Development",
+  volume=44,
+  number=4,
+  year=2000,
+  pages="605--624"
+}
+
+@inproceedings{ElmrothGu98,
+  author="E. Elmroth and F. Gustavson",
+  title="New Serial and Parallel Recursive {QR} Factorization 
+         Algorithms for {SMP} Systems",
+  editor={B. K\aa gstr\"om and others}, 
+  booktitle="Applied Parallel Computing:
+          Large Scale Scientific and Industrial Problems",
+  series="Lecture Notes in Computer Science",
+  volume=1541,
+  publisher="Springer-Verlag",
+  pages="120--128",
+  year="1998"
+}
+
+The following is a reference that describes the method including the
+filter diagonalization step, the orthogonalization step, and the
+diagonalization of the Hamiltonian in the Krylov subspace.
+
+@article{RabaniHeBeBr99,
+  author="Eran Rabani and Balazs Hetenyi and Bruce~J. Berne and Louis~E. Brus",
+  title="Electronic Properties of CdSe Nanocrystals in the Absence and Presence of
+  a Dielectric Medium", 
+  journal="Journal of Chemical Physics",
+  volume="110",
+  number=11,
+  pages="5355--5369",
+  year=1999
+}
+
+The other reference describes the semiempirical Hamiltonian that we use:
+
+@article{WangZu95,
+  author="Lin-Wang Wang and Alex Zunger",
+  title="Local Density Derived Semiempirical Pseudopotentials", 
+  journal="Physical Reviews B",
+  volume=51,
+  number=24,
+  pages="17398--17416",
+  year=1995
+}
+
+============= RBF ===============
+
+@manual{Cilk532,
+  title="Cilk-5.3.2 Reference Manual",
+  organization="Supercomputing Technologies Group, MIT Laboratory
+  for Computer Science",
+  address="Cambridge, MA",
+  month=nov,
+  year=2001,
+  note="Available online at \url{http://supertech.lcs.mit.edu/cilk}"
+}
+
+@manual{Cilk53,
+  title="Cilk-5.3 Reference Manual",
+  organization="Supercomputing Technologies Group, MIT Laboratory
+  for Computer Science",
+  address="Cambridge, MA",
+  month=jun,
+  year=2000,
+  note="Available online at \url{http://supertech.lcs.mit.edu/cilk}"
+}
+
+Portable High-Performance Programs
+by Matteo Frigo.
+Ph. D. Thesis, MIT Department of Electrical Engineering and Computer Science.
+June 1999
+
+Cilk: Efficient Multithreaded Computing
+by Keith H. Randall.
+Ph. D. Thesis, MIT Department of Electrical Engineering and Computer Science.
+June 1998
+
+The Cilk System for Parallel Multithreaded Computing
+by Christopher F. Joerg.
+Ph. D. Thesis, MIT Department of Electrical Engineering and Computer Science.
+January 1996
+
+@phdthesis{Blumofe95,
+  title="Executing Multithreaded Programs Efficiently",
+  author="Robert~D. Blumofe",
+  school="MIT Department of Electrical Engineering and Computer Science",
+  month=sep,
+  year=1995
+}
+
+@inproceedings{BlumofeLe94,
+  author="Robert~D. Blumofe and Charles~E. Leiserson",
+  title="Scheduling multithreaded computations by work stealing",
+  booktitle="Proceedings of the 35th Annual Symposium on Foundations
+             of Computer Science",
+  publisher="IEEE Computer Society Press",
+  pages="356--368",
+  address="Santa Fe, New Mexico",
+  month=nov,
+  year=1994
+}
+
+@article{frigo98implementation,
+    author = "Matteo Frigo and Charles E. Leiserson and Keith H. Randall",
+    title = "The Implementation of the {Cilk-5} Multithreaded Language",
+    journal = "ACM SIG{\-}PLAN Notices",
+    volume = "33",
+    number = "5",
+    url = "http://www.cs.virginia.edu/pldi98/program.html",
+    isbn = "0-89791-987-4",
+    pages = "212--223",
+    year = "1998"
+}
+
+@article{StarTech,
+  title="The {StarTech} Massively Parallel Chess Program",
+  author="Bradley C. Kuszmaul",
+  journal="Journal of the International Computer Chess Association", 
+  volume=18,
+  number=1,
+  month=mar,
+  year=1995
+}
+
+@incollection{StarSocrates,
+  title="The {*Socrates} massively parallel chess program",
+  author="Christopher~F. Joerg and Bradley~C. Kuszmaul",
+  booktitle="Parallel Algorithms: Proceedings of The Third 
+             DIMACS Implementation Challenge",
+  pages="117--140",
+  series="DIMACS Series in
+  Discrete Mathematics and Theoretical Computer Science",
+  publisher="AMS",
+  number=30,
+  editor="Sandeep N. Bhatt",
+  year=1996,
+  private_note="cited as 'Massively Parallel Chess' in the cilk homepage"
+}
+
+@unpublished{VerhelstTREESEARCH,
+  author="Paul Verhelst",
+  title="Chess Tree Search",
+  month=nov,
+  year=1997,
+  note="Available online at
+        \url{http://www.xs4all.nl/~verhelst/chess/search.html}"
+}
+
+@article{Korf,
+	author="Richard~E. Korf and David Maxwell Chickering",
+  journal="Artificial Intelligence",
+	volume=84,
+	pages="299--337",
+	title="Best-First Minimax Search",
+	year=1996
+}
+
+
+
+@article{knuth75,
+  author = "D. Knuth and R. Moore",
+  title = "An analysis of alpha-beta pruning",
+  journal="Artifical Intelligence",
+  volume=6,
+	pages="293--326",
+	year=1975
+}
+
+@unpublished{RebelPage,
+  author="Ed Schroder",
+  title="Chess in 2010",
+  note="Available online at
+        \url{http://www.rebel.nl/ches2010.htm}"
+}
+
+@unpublished{LCT-II,
+  author="Frederic Louguet",
+  title="The {Louguet Chess Test II (LCT II) FAQ}",
+	year=1996,
+	month=apr,
+  note="Available online at
+        \url{http://www.icdchess.com/wccr/testing/LCTII/lct2faq.html}"
+}
+
+
+
+@techreport{fuller73analysis,
+    author = "S. Fuller and J. Gaschnig and J. Gillogly",
+    title = "Analysis of the alpha-beta pruning algorithm",
+    institution="Department of Computer Science, Carnegie-Mellon University",
+		month=jul,
+    year = 1973
+}
+
+@misc{Anatomy,
+	author="Tony Marsland",
+	title="Anatomy of a Chess Program",
+	howpublished="In the brochure of the 8th World Computer Chess Championship",
+	year=1995,
+	month=May,
+	note="Available online at
+		\url{http://www.dcs.qmw.ac.uk/~icca/anatomy.htm}"
+}
+
+
+@book{palay,
+    author = "A. J. Palay",
+    title = "Searching with Probabilities",
+    publisher = "Pitman Publishing",
+    year = 1985
+}
+
+@article{berliner,
+  author="Hans J. Berliner and Chris McConnell",
+  journal="Artificial Intelligence",
+  volume=86,
+  pages="97--156",
+  title="B* Probability Based Search",
+  year=1996
+}
+
+@article{Berliner79,
+  AUTHOR = {H. Berliner},
+  TITLE = {The B* Tree Search Algorithm: A Best-First Proof Procedure},
+  YEAR = 1979,
+  JOURNAL = {Artificial Intelligence},
+  VOLUME = {12},
+  PAGES = {23-40},
+}
+
+@article{MPIStandardIJSC,
+  title="{MPI}: A Message-Passing Interface Standard",
+  author="Message Passing Interface Forum",
+  journal="International Journal of Supercomputing Applications",
+  volume=8, Number="3--4", 
+  year=1994
+}
+
+@book{SnirOtHuWaDo98,
+  title="{MPI}: The Complete Reference", 
+  author="Marc Snir and Steve Otto and Steven Huss-Lederman
+          and David Walker and Jack Dongarra",
+  volume="1: The MPI Core",
+  edition="2nd",
+  publisher="MIT Press",
+  year=1998
+}
+
+@book{pearl84heuristics,
+    author = "J. Pearl",
+    title = "Heuristics: Intelligent Search Strategies for Computer Problem Solving",
+   	publisher="Addison-Wesley",
+    year=1984
+}
+
+@article {lee,
+    author = "K. Lee and S. Mahajan",
+    title = "The development of a World-class Othello program",
+    journal= "Artificial Intelligence",
+    volume={43}, 
+    pages={21--36},
+    year = 1990
+}
+
+@article{berliner79tree,
+    author = "H. Berliner",
+    title = "The {B*} tree search algorithm: A best-first proof procedure",
+    journal= "Articial Intelligence",
+    volume= 12,
+    pages={23-40},
+    year = 1979
+}
+
+@phdthesis{brockington,
+    author = "Mark Brockington",
+    title = "Asynchronous Parallel Game-Tree Search",
+    school="Department of Computing Science, University of Alberta, Edmonton, Canada",
+    year= 1994
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@article{AjizJe84,
+  author="M.~A. Ajiz and A. Jennings",
+  title="A robust incomplete {Choleski}-conjugate gradient algorithm",
+  journal="International Journal for Numerical Methods in Engineering",
+  volume=20,
+  pages="949--966",
+  year=1984
+}
+
+@article{Notay94,
+  author="Y. Notay",
+  title="{DRIC}: A dynamic version of the {RIC} method",
+  journal="Numerical Linear Algebra with Applications",
+  volume=1,
+  pages="511--532",
+  year=1994
+}
+
+@article{AxelssonLi86a,
+  author="O. Axelsson and G. Lindskog",
+  title="On the eigenvalue distribution of a class of 
+         preconditioning matrices",
+  journal="Numerische Mathematik",
+  volume=48,
+  pages="479--498",
+  year=1986
+}
+
+@article{AxelssonLi86b,
+  author="O. Axelsson and G. Lindskog",
+  title="On the rate of convergence of the preconditioned conjugate
+         gradient method",
+  journal="Numerische Mathematik",
+  volume=48,
+  pages="499--523",
+  year=1986
+}
+
+@article{AshcraftGr88,
+  author="C. Ashcraft and R. Grimes",
+  title="On vectorizing incomplete factorizations and {SSOR}
+         preconditioners",
+  journal="SIAM Journal on Scientific and Statistical Computation",
+  volume=9,
+  pages="122--151",
+  year=1988
+}
+
+@article{vanderVorst89,
+  author="H. van~der~Vorst",
+  title="High-performance preconditioning",
+  journal="SIAM Journal on Scientific and Statistical Computation",
+  volume=10,
+  pages="1174--1185",
+  year=1989
+}
+
+@article{DuffRe83,
+  author="I. Duff and J. Reid",
+  title="The multifrontal solution of indefinite sparse symmetric
+         linear equations",
+  journal="ACM Transactions on Mathematical Software",
+  volume=9,
+  pages="302--325",
+  year=1983
+}
+
+@article{Liu90,
+  author="J.~W.~H. Liu",
+  title="The role of elimination trees in sparse factorization",
+  journal="SIAM Journal on Matrix Analysis and Applications",
+  volume=11,
+  pages="134--172",
+  year=1990
+}
+
+@article{Liu92,
+  author="J.~W.~H. Liu",
+  title="The multifrontal method for sparse matrix solution: theory and 
+         practice",
+  journal="SIAM Review",
+  volume=34,
+  pages="82--109",
+  year=1992
+}
+
+@phdthesis{Joshi97,
+  author="Anil Joshi",
+  title="Topics in Optimization and Sparse Linear Systems",
+  school="Department of Computer Science, University of Illinois
+               at Urbana-Champaign",
+  year=1997
+}
+
+@article{PooleHeVaJo95,
+  author="E.~L. Poole and M. Heroux and P. Vaidya and A. Joshi",
+  title="Performance of iterative methods in {ANSYS} on {Cray}
+         parallel/vector supercomputers",
+  journal="Computer Systems in Engineering",
+  volume=3,
+  pages="251--259",
+  year=1995
+}
+
+@inproceedings{PooleLiMa01,
+  author="Gene Poole and Yong-Cheng Liu and Jan Mandel",
+  title="Advancing analysis capabilities in {ANSYS} through
+        solver technology",
+  booktitle="Proceedings of the 10th Copper Mountain Conference on
+             Multigrid Methods",
+  address="Copper Mountain, Colorado",
+  month=apr,
+  year=2001
+}
+
+@unpublished{TufoFischerJPDC,
+  author="H.~M. Tufo and P.~F. Fischer",
+  title="Fast Parallel Direct Solvers for Coarse Grid Problems",
+  note="To appear in the Journal of Parallel and Distributed Computing",
+}
+
+@article{BridsonTang99,
+  author="Robert Bridson and Wei-Pai Tang",
+  title="Ordering, unisotropy, and factored sparse approximate inverses",
+  journal="SIAM Journal on Scientific Computing",
+  volume=21,
+  number=3,
+  pages="867--882",
+  year=1999
+}
+
+@inproceedings{Ansys2001,
+  author="Gene Poole and Yong-Cheng Liu and Jan Mandel",
+  title="Advancing Analysis Capabilities in ANSYS through Solver Technology",
+  booktitle="Proceedings of the 10th Copper Mountain Coference on Multigrid
+             Methods",
+  month=apr,
+  year=2001,
+  address="Copper Mountain, Colorado"
+}
+  
+@article{LiuNgPeyton93,
+  author="Joseph W.~H. Liu and Esmond~G. Ng and Barry W. Peyton",
+  title="On finding supernodes for sparse matrix computations",
+  journal="SIAM Journal on Matrix Analysis and Applications",
+  volume=14,
+  pages="242--252",
+  year=1993
+}
+
+@inproceedings{DongarraRa2000SPCHOL,
+  author="J.~J. Dongarra and P. Raghavan",
+  title="A new recursive implementation of sparse {Cholesky} factorization",
+  booktitle="Proceedings of the 16th IMACS World Congress 2000 on Scientific
+  Computing, Applications, Mathematics, and Simulation",
+  address="Lausanne, Switzerland",
+  month=aug,
+  year=2000
+}
+
+@article{BunchKaufman77,
+  author="J.~R. Bunch and L.~Kaufman",
+  title="Some stable methods for calculating inertia and solving symmetric 
+         indefinite linear systems",
+  journal="Math. Comput.",
+  volume=31,
+  pages="163--179"
+}
+
+@incollection{AgrawalKlRa93,
+  title="Cutting down on fill during nested dissection: provably good elimination orderings",
+  author="Ajit Agrawal and Philip Klein and R.~Ravi",
+  pages="31--55",
+  booktitle="Graph Theory and Sparse Matrix Computations",
+  editor="Alan George and John~R. Gilbert and Joseph~W.H. Liu",
+  publisher="Springer-Verlag",
+  series="The IMA Volumes in Mathematics and its Applications",
+  volume=56,
+  year=1993
+}
+
+
+@techreport{BochevLehoucq2001,
+  year=2001,
+  title="On finite element solution of the pure {Neumann} problem",
+  author="P.~Bochev and R.~B. Lehoucq",
+  institution="Sandia National Laboratories",
+  number="SAND2001-0733J"
+}
+
+% for parallel SNMF in TAUCS
+
+@article{GuptaKaKu97,
+  author="Anshul Gupta and George Karypis and Vipin Kumar",
+  title="Highly Scalable Parallel Algorithms for Sparse Matrix Factorization",
+  journal="IEEE Transactions on Parallel and Distributed Systems",
+  volume=8, number=5,
+  pages="502--520",
+  year=1997
+}
+
+@unpublished{JoshKaKuGuGu99,
+  title="{PSPASES}: An Efficient and Scalable Parallel Sparse Direct Solver",
+  author="Mahesh Joshi and Anshul Gupta and Fred Gustavson and George Karypis and Vipin Kumar",
+  note="Unpublished article, presented at the International Workshop on Frontiers of Parallel Numerical Computations and Applications (Frontiers'99), Annapolis, Maryland, February 1999. 
+        Available online from \url{http://www-users.cs.umn.edu/~mjoshi}",
+  year=1999
+}
+
+@techreport{pspaces-1.0.3,
+  title="{PSPASES}: Scalable Parallel Direct Solver Library for 
+         Sparse Symmetric Positive Definite Linear Systems: User's Manual for Version 1.0.3",
+  author="Mahesh Joshi and Anshul Gupta and Fred Gustavson and George Karypis and Vipin Kumar",  number="TR 97-059",
+  institution="Department of Computer Science, University of Minnesota",
+  year="1997, revised 1999"
+}
+
+@article{DuffReid83,
+  author="I.~S. Duff and J.~K. Reid",
+  title="The multifrontal solution of indefinite
+         sparse symmetric linear systems",
+  journal="ACM Transactions on Mathematical Software",
+  volume=9, 
+  pages="302-325",
+  year=1983
+}
+
+@article{AmestoyDuLE2000,
+  author="P.~R. Amestoy and I.~S. Duff and  J.-Y. L'Excellent",
+  title="Multifrontal parallel distributed symmetric and unsymmetric solvers",
+  journal="Computer Methods in Applied Mechanics and Engineering",
+  volume=184, 
+  page="501--520",
+  year=2000,
+}
+
+@article{AmestoyDuKoLE2001,
+  author="P.~R. Amestoy and I.~S. Duff 
+          and J. Koster and {J.-Y.} {L'Excellent}",
+  title="A fully asynchronous multifrontal solver using distributed dynamic scheduling",
+  journal="SIAM Journal on Matrix Analysis and Applications",
+  volume=23, 
+  pages="15--41",
+  year=2001,
+}
+
+@unpublished{mumps-4.1,
+  author="P.~R. Amestoy and I.~S. Duff and {J.-Y.} {L'Excellent} and J. Koster and 
+          M. Tuma",
+  title="{MUltifrontal} {Massively} {Parallel} {Solver} ({MUMPS} Version 4.1), Specification
+         sheets",
+  note="Available online from \url{http://www.enseeiht.fr/lima/apo/MUMPS/doc.html}",
+  month=mar,
+  year=2000
+}
+
+@unpublished{mumps-4.3,
+  author="P.~R. Amestoy and I.~S. Duff and {J.-Y.} {L'Excellent} and J. Koster",
+  title="{MUltifrontal} {Massively} {Parallel} {Solver} ({MUMPS} Version 4.3), 
+         User's Guide",
+  note="Available online from \url{http://www.enseeiht.fr/lima/apo/MUMPS/doc.html}",
+  month=jul,
+  year=2003
+}
+
+
+%     [3]  A. Gupta, M. Joshi and V. Kumar.  WSSMP: Watson Symmetric Sparse
+%          Matrix Package. Users Manual: Version 2.0$\beta$.
+%          IBM Technical Report. RC 20923 (92669) 1997.
+
+%     [4]  J.W. Demmel, J.R.Gilbert and X.S. Li.  An asynchronous parallel
+%          supernodal algorithm for sparse Gaussian elimination.
+%          SIMAX 20, 915-952.  1999.
+
+     [5]  P.R. Amestoy, I.S. Duff, J-Y L'Excellent, and X. S. Li.  Analysis and
+          comparison of two general sparse solvers for distributed memory 
+          computers.  TOMS 27, 388--421. 2001.
+
+@article{GilbertMoSc92,
+    author = "John~R. Gilbert and Cleve Moler and Robert Schreiber",
+    title = "Sparse Matrices in {MATLAB}: Design and Implementation",
+    journal = "SIAM Journal on Matrix Analysis and Applications",
+    volume = "13",
+    number = "1",
+    pages = "333--356",
+    year = "1992"
+}
+
+@article{Duff86,
+  author="I.~S. Duff",
+  title="Parallel implementation of multifrontal schemes",
+  journal="Parallel Computing",
+  volume=3,
+  pags="193--204",
+  year=1986
+}
+
+@article{HenonRaRo2002,
+  author="P.~H{\'{e}}non and P.~Ramet and J.~Roman",
+  title="{PaStiX}: A high-performance parallel direct solver for sparse symmetric
+         definite systems",
+  journal="Parallel Computing",
+  volume=28,
+  pages="301--321",
+  year=2002
+}
+
+@techreport{blacs-ug,
+  author = "J. Dongarra and R. Whaley",
+  title = "A User's Guide to the BLACS v1.0",
+  number="UT CS-95-281, LAPACK Working Note 94",
+  institution="University of Tennessee",
+  note="Available online from \url{http://www.netlib.org/blacs/}.",
+  year = "1995"
+}
+
+@techreport{BomanHe2001,
+  author="Erik~G. Boman and Bruce Hendrickson",
+  title="Support theory for preconditioning",
+  institution="Sandia National Labs",
+  number="SAND-01-1794J",
+  note="Submitted for publication. A preliminary version was
+        presented at Preconditioning 2001, Tahoe, Californa in 
+        April 29--May 1, 2001.",
+  month=mar,
+  year=2001
+}         
+
+@article{MeijerinkVa77,
+  author="J.~A. Meijerink and H.~A. {van der Vorst}",
+  title="An iterative solution method for linear systems of which
+         the coefficient matrix is a symmetric {M}-matrix",
+  journal="Mathemathics of Computation",
+  volume=31,
+  pages="148--162",
+  year=1977
+}
+
+@article{Gustafsson78,
+  author="I. Gustafsson",
+  title="A class of first-order factorization methods",
+  journal="BIT",
+  volume=18,
+  pages="142--156",
+  year=1978
+}
+
+@book{Axelsson94,
+  title="Iterative Solution Methods",
+  author="Owe Axelsson",
+  publisher="Cambridge University Press",
+  year=1994
+}
+
+@article{KarypisKu1998metis,
+  author="George Karypis and Vipin Kumar",
+  title="A Fast and High Quality Multilevel Scheme for partitioning irregular
+         graphs",
+  journal="SIAM Journal on Scientific Computing",
+  volume=20,
+  pages="359--392",
+  year=1998
+}
+
+@article{Schreiber82,
+  author="Robert Schreiber",
+  title="A New Implementation of Sparse Gaussian Elimination",
+  journal="ACM Transactions on Mathematical Software",
+  volume=8,
+  pages="256--276",
+  year=1982
+}
+
+@article{AMD1996,
+  title="An Approximate Minimum Degree Ordering Algorithm",
+  author="Patrick~R. Amestoy and Timothy~A. Davis and Iain~S. Duff",
+  journal="SIAM Journal on Matrix Analysis and Applications",
+  volume=17,
+  pages="886--905",
+  year=1996
+}
+
+@article{SenChatterjeeDumir2000,
+ author = {Sandeep Sen and Siddhartha Chatterjee and Neeraj Dumir},
+ title = {Towards a theory of cache-efficient algorithms},
+ journal = {Journal of the ACM (JACM)},
+ volume = {49},
+ number = {6},
+ year = {2002},
+ issn = {0004-5411},
+ pages = {828--858},
+ doi = {http://doi.acm.org/10.1145/602220.602225},
+ publisher = {ACM Press},
+}
+
+@article{HoffmanMaRo1973,
+  author="Alan~J. Hoffman and Michael~S. Martin and Donald~J. Rose",
+  title="Complexity bounds for regular finite difference and finite
+         element grids",
+  journal="SIAM Journal on Numerical Analysis",
+  volume=10,
+  pages="364--369",
+  year=1973
+}
+
+@article{LiptonRoTa1979,
+  author="Richard~J. Lipton and Donald~J. Rose and Robert Endre Tarjan",
+  title="Generalized nested dissection",
+  journal="SIAM Journal on Numerical Analysis",
+  volume=16,
+  pages="346--348",
+  year=1979
+}
+
+@unpublished{BomanChHeTo01,
+  author="Erik~G. Boman and Doron Chen and Bruce Hendrickson and
+          Sivan Toledo",
+  title="Maximum-weight-basis Preconditioners",
+  note="To appear in {\em Numerical
+        Linear Algebra with Applications}, 29 pages",
+  month=jun,
+  year=2001,
+  url="Pubs/mwb.pdf"
+}
+
+@article{Reif1998,
+  author = "J. H. Reif",
+  title = "Efficient Approximate Solution of Sparse Linear Systems",
+  journal = "Computers and Mathematics with Applications",
+  volume = 36,
+  number = 9,
+  pages = "37--58",
+  year = 1998,
+  note="See also an errata in volume 38, page 141, 1999"
+}
+
+@unpublished{MaggsMillerParekhRaviWoo2002,
+  author="Bruce~M. Maggs and Gary~L. Miller and Ojas Parekh and
+          R.~Ravi and Shan Leung Maverick Woo",
+  title="Solving symmetric diagonally-dominant systems by preconditioning",
+  note="Unpublished manuscript available online at
+        \verb+http://www.cs.cmu.edu/~bmm+",
+  year=2002
+}
+
+@techreport{BomanHe2001,
+  author="Erik~G. Boman and Bruce Hendrickson",
+  title="Support theory for preconditioning",
+  institution="Sandia National Labs",
+  number="SAND-01-1794J",
+  note="To apprear in {\em SIAM Journal of Matrix Analsysi and Applications}",
+  month=mar,
+  year=2001
+}         
+@inproceedings{SpielmanTeng2003,
+  title="Solving Sparse, Symmetric, Diagonally-Dominant Linear Systems in 
+         Time $O(m^{1.31})$",
+  author="Dan Spielman and Shang-Hua Teng",
+  booktitle="Proceedings of the 44th Annual IEEE Symposium on Foundations of 
+             Computer Science",
+  address="Cambridge, MA",
+  month=oct,
+  year=2003
+}
+
+@article{superlu-dist,
+  author="Xiaoye~S. Li and James~W. Demmel",
+  title="{SuperLU\_DIST}: A scalable distributed memory sparse direct
+         solver for unsymmetric linear systems",
+  journal="ACM Transactions on Mathematical Software",
+  volume=29,
+  pages="110--140",
+  year=2003
+}
+
+@article{GilbertPeierls88,
+  author="John~R. Gilbert and Tim Peierls",
+  title="Sparse partial pivoting in time proportional to arithmetic operations",
+  journal="SIAM Journal on Scientific and Statistical Computing",
+  volume=9,
+  pages="862--874",
+  year=1988
+}
+
+@article{LaMarcaLadner1999,
+  title="The Influence of Caches on the Performance Sorting",
+  author="Anthony LaMarca and Richard~E. Ladner",
+  journal="Journal of Algorithms",
+  volume=31,
+  pages="66--104",
+  year=1999
+}
+
