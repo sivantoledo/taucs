@@ -76,7 +76,7 @@ void usage(int argc, char* argv[])
   printf("        this help\n");
   printf("  MATRIX OPTIONS:\n");
   printf("        -hb  filename    (matrix from Harwell-Boeing file)\n");
-  printf("        -ijv ijvfilename (matrix from file)\n");
+  rintf("        -ijv ijvfilename (matrix from file)\n");
   printf("        -mtx mtxfilename (matrix from file)\n");
   printf("        -ccs ccsfilename (matrix from file)\n");
   printf("        -discont     X Y Z jump (X-by-Y-by-Z poisson with discontinuous coeff.)\n");
@@ -375,8 +375,9 @@ int main(int argc, char* argv[])
 
     if (!strcmp(argv[i],"-mtx") && i <= argc-1) {
       i++;
+      // assume TAUCS_DOUBLE type. mtx loading doesn't automatically get this and it is not a user input.
       taucs_printf("main: reading mtx matrix %s\n",argv[i]);
-      A = taucs_ccs_read_mtx (argv[i],TAUCS_SYMMETRIC);
+      A = taucs_ccs_read_mtx (argv[i],TAUCS_SYMMETRIC | TAUCS_DOUBLE);
       taucs_printf("main: done reading\n");
     }
 
