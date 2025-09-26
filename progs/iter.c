@@ -76,7 +76,7 @@ void usage(int argc, char* argv[])
   printf("        this help\n");
   printf("  MATRIX OPTIONS:\n");
   printf("        -hb  filename    (matrix from Harwell-Boeing file)\n");
-  rintf("        -ijv ijvfilename (matrix from file)\n");
+  printf("        -ijv ijvfilename (matrix from file)\n");
   printf("        -mtx mtxfilename (matrix from file)\n");
   printf("        -ccs ccsfilename (matrix from file)\n");
   printf("        -discont     X Y Z jump (X-by-Y-by-Z poisson with discontinuous coeff.)\n");

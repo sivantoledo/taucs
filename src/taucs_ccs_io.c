@@ -642,6 +642,7 @@ taucs_dtl(ccs_read_mtx)(char* filename,int flags)
 
   if (fscanf(f, "%d %d %d", &nrows, &ncols, &nnz) != 3) {
     taucs_printf("taucs_ccs_read_mtx: wrong header\n");
+    printf("tauc_ccs_read_mtx: taucs excepts first line to be:\n<num_rows> <num_cols> <nnz>\n");
     return NULL;
   }
 
