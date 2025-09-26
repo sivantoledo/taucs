@@ -6,7 +6,7 @@
 #include <stdio.h> 
 #include <stdlib.h> 
 
-#ifdef TAUCS_NO_CILK
+#ifndef TAUCS_WITH_CILK
 int main(void){
   printf("\n\n No Cilk in build, skipping test.\n");
   return 0;
