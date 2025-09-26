@@ -3,6 +3,37 @@
 /* Author: Sivan Toledo                                  */
 /*********************************************************/
 
+#include <unistd.h>
+/* ---- Disable Cilk everywhere ---- */
+#ifndef TAUCS_WITH_CILK
+/* don’t include any Cilk headers */
+#undef TAUCS_C99_COMPLEX /* old comment said cilk2c can’t process complex.h */
+
+/* turn Cilk keywords into no-ops */
+#ifndef cilk
+#define cilk
+#endif
+#ifndef spawn
+#define spawn
+#endif
+#ifndef sync
+#define sync
+#endif
+
+/* map all taucs_cilk* tokens to plain versions */
+#ifndef taucs_cilk
+#define taucs_cilk
+#endif
+
+/* some files refer to cilk-lib; make those harmless */
+#ifndef __CILKRTS_ABI_VERSION
+#define __CILKRTS_ABI_VERSION 0
+#endif
+#else
+#include <cilk-lib.h>
+#include <cilk.h>
+#endif
+/* ---- end Cilk disable ---- */
 #include <taucs_config_tests.h>
 #include <taucs_config_build.h>
 

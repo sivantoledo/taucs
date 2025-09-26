@@ -375,8 +375,9 @@ int main(int argc, char* argv[])
 
     if (!strcmp(argv[i],"-mtx") && i <= argc-1) {
       i++;
+      // assume TAUCS_DOUBLE type. mtx loading doesn't automatically get this and it is not a user input.
       taucs_printf("main: reading mtx matrix %s\n",argv[i]);
-      A = taucs_ccs_read_mtx (argv[i],TAUCS_SYMMETRIC);
+      A = taucs_ccs_read_mtx (argv[i],TAUCS_SYMMETRIC | TAUCS_DOUBLE);
       taucs_printf("main: done reading\n");
     }
 

@@ -5,6 +5,14 @@
 
 #include <stdio.h> 
 #include <stdlib.h> 
+
+#ifndef TAUCS_WITH_CILK
+int main(void){
+  printf("\n\n No Cilk in build, skipping test.\n");
+  return 0;
+}
+#else
+
 #include <cilk.h> 
 
 #pragma lang -C
@@ -39,3 +47,4 @@ cilk int main(int argc, char* argv[])
 
   return 0;
 }
+#endif
